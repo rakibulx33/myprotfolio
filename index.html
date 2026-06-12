@@ -5,459 +5,368 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description"
-        content="O.F.M. Rakibul Hasan - Backend Developer | CSE Student at Daffodil International University. Building scalable, secure backend solutions.">
+        content="Rakibul Hasan — Full-Stack Developer from Bangladesh. Building scalable backends, polished web apps and creative software solutions.">
     <meta name="keywords"
-        content="Backend Developer, Software Engineer, CSE, Daffodil International University, Web Development">
-    <meta name="author" content="O.F.M. Rakibul Hasan">
+        content="Rakibul Hasan, Full-Stack Developer, Backend Developer, Software Engineer, Bangladesh, Portfolio">
+    <meta name="author" content="Rakibul Hasan">
 
-    <title>O.F.M. Rakibul Hasan - Backend Developer | CSE Student</title>
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Rakibul Hasan — Full-Stack Developer">
+    <meta property="og:description"
+        content="Full-Stack Developer building scalable backends, polished web apps and creative software solutions.">
+    <meta property="og:image" content="https://avatars.githubusercontent.com/u/161882381?v=4">
+
+    <title>Rakibul Hasan — Full-Stack Developer | Portfolio</title>
+
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap"
         rel="stylesheet">
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-    <!-- Stylesheet -->
     <link rel="stylesheet" href="style.css">
+
+    <!-- Three.js (ES module) -->
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
+        }
+    }
+    </script>
 </head>
 
 <body>
-    <!-- Animated Background -->
-    <div class="background-animation">
-        <div class="floating-shape shape-1"></div>
-        <div class="floating-shape shape-2"></div>
-        <div class="floating-shape shape-3"></div>
-        <div class="floating-shape shape-4"></div>
-    </div>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <!-- Background grid overlay -->
+    <div class="bg-grid" aria-hidden="true"></div>
 
     <!-- Navigation -->
-    <nav class="navbar" id="navbar">
+    <nav class="navbar" id="navbar" aria-label="Main navigation">
         <div class="nav-container">
-            <div class="nav-logo">
-                <span class="logo-text">Rakibul Hasan</span>
-            </div>
+            <a href="#home" class="nav-logo" aria-label="Home">
+                <span class="logo-bracket">&lt;</span>rakibul<span class="logo-accent">x33</span><span
+                    class="logo-bracket">/&gt;</span>
+            </a>
             <ul class="nav-menu" id="navMenu">
-                <li><a href="#home" class="nav-link">Home</a></li>
+                <li><a href="#home" class="nav-link active">Home</a></li>
                 <li><a href="#about" class="nav-link">About</a></li>
-                <li><a href="#services" class="nav-link">Services</a></li>
-                <li><a href="#tech" class="nav-link">Tech Stack</a></li>
+                <li><a href="#github" class="nav-link">GitHub</a></li>
                 <li><a href="#projects" class="nav-link">Projects</a></li>
-                <li><a href="#contact" class="nav-link contact-btn">Let's Connect</a></li>
+                <li><a href="#tech" class="nav-link">Tech</a></li>
+                <li><a href="#contact" class="nav-link nav-cta">Let's Connect</a></li>
             </ul>
-            <div class="hamburger" id="hamburger">
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
+            <button class="hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false"
+                aria-controls="navMenu">
+                <span></span><span></span><span></span>
+            </button>
         </div>
     </nav>
 
-    <!-- Hero Section -->
-    <section class="hero" id="home">
-        <div class="container">
-            <div class="hero-content">
-                <div class="hero-badge">
-                    <i class="fas fa-code"></i>
-                    <span>Backend Developer</span>
+    <main id="main">
+        <!-- ============ HERO ============ -->
+        <section class="hero" id="home">
+            <canvas id="hero-canvas" aria-hidden="true"></canvas>
+            <div class="hero-glow" aria-hidden="true"></div>
+
+            <div class="container hero-content">
+                <div class="hero-badge reveal">
+                    <span class="badge-dot" aria-hidden="true"></span>
+                    Open to new projects
                 </div>
-                <h1 class="hero-title">
-                    <span class="title-line">O.F.M.</span>
-                    <span class="title-line gradient-text">Rakibul Hasan</span>
+
+                <h1 class="hero-title reveal">
+                    <span class="hero-greeting">Hi, I'm</span>
+                    <span class="hero-name gradient-text">Rakibul Hasan</span>
                 </h1>
-                <p class="hero-subtitle">
-                    I architect <span class="highlight">scalable backend systems</span>, design <span
-                        class="highlight">secure APIs</span>, and build <span class="highlight">enterprise-grade
-                        solutions</span> that power modern applications.
+
+                <p class="hero-role reveal" aria-live="polite">
+                    <span class="mono-prefix" aria-hidden="true">~$</span>
+                    <span id="typewriter">Full-Stack Developer</span><span class="cursor" aria-hidden="true">|</span>
                 </p>
-                <div class="hero-stats">
-                    <div class="stat-item">
-                        <div class="stat-icon">
-                            <i class="fas fa-graduation-cap"></i>
-                        </div>
-                        <div class="stat-content">
-                            <h3>CSE Student</h3>
-                            <p>Daffodil International University</p>
-                        </div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-icon">
-                            <i class="fas fa-server"></i>
-                        </div>
-                        <div class="stat-content">
-                            <h3>Backend Expert</h3>
-                            <p>Building Robust Systems</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="hero-cta">
-                    <a href="#contact" class="btn btn-primary">
-                        <span>Start a Project</span>
-                        <i class="fas fa-arrow-right"></i>
+
+                <p class="hero-subtitle reveal">
+                    A developer from Bangladesh crafting
+                    <span class="highlight">scalable backends</span>,
+                    <span class="highlight">polished web apps</span> and
+                    <span class="highlight">creative tools</span> — from AI-powered job platforms to
+                    queue management systems.
+                </p>
+
+                <div class="hero-cta reveal">
+                    <a href="#projects" class="btn btn-primary">
+                        <i class="fas fa-rocket" aria-hidden="true"></i>
+                        <span>View My Work</span>
                     </a>
-                    <a href="#projects" class="btn btn-secondary">
-                        <span>View Work</span>
-                        <i class="fas fa-briefcase"></i>
+                    <a href="#contact" class="btn btn-secondary">
+                        <i class="fas fa-paper-plane" aria-hidden="true"></i>
+                        <span>Get In Touch</span>
                     </a>
                 </div>
-            </div>
-        </div>
-    </section>
 
-    <!-- About Section -->
-    <section class="about" id="about">
-        <div class="container">
-            <div class="section-header">
-                <span class="section-badge">Who I Am</span>
-                <h2 class="section-title">About Me</h2>
-                <p class="section-subtitle">Passionate about building the backbone of modern applications</p>
-            </div>
-            <div class="about-content">
-                <div class="about-card glass-card">
-                    <div class="about-text">
-                        <h3>Backend Developer & CSE Student</h3>
-                        <p>
-                            Currently pursuing my <strong>Bachelor of Science in Computer Science and
-                                Engineering</strong> at
-                            <strong>Daffodil International University</strong>, I specialize in backend development,
-                            creating
-                            robust server-side applications, RESTful APIs, and scalable database architectures.
-                        </p>
-                        <p>
-                            My expertise lies in building secure, high-performance backend systems that handle complex
-                            business
-                            logic, data processing, and seamless integration with modern frontend frameworks. I'm
-                            passionate
-                            about clean code, system architecture, and solving challenging technical problems.
-                        </p>
-                        <div class="about-highlights">
-                            <div class="highlight-item">
-                                <i class="fas fa-check-circle"></i>
-                                <span>RESTful API Development</span>
-                            </div>
-                            <div class="highlight-item">
-                                <i class="fas fa-check-circle"></i>
-                                <span>Database Design & Optimization</span>
-                            </div>
-                            <div class="highlight-item">
-                                <i class="fas fa-check-circle"></i>
-                                <span>Server-Side Architecture</span>
-                            </div>
-                            <div class="highlight-item">
-                                <i class="fas fa-check-circle"></i>
-                                <span>Security & Authentication</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Services Section -->
-    <section class="services" id="services">
-        <div class="container">
-            <div class="section-header">
-                <span class="section-badge">What I Do</span>
-                <h2 class="section-title">Backend Development Services</h2>
-                <p class="section-subtitle">Comprehensive backend solutions for modern applications</p>
-            </div>
-            <div class="services-grid">
-                <div class="service-card glass-card">
-                    <div class="service-icon">
-                        <i class="fas fa-server"></i>
-                    </div>
-                    <h3>API Development</h3>
-                    <p>Building robust RESTful and GraphQL APIs with proper authentication, rate limiting, and
-                        comprehensive documentation.</p>
-                    <ul class="service-features">
-                        <li><i class="fas fa-check"></i> RESTful Architecture</li>
-                        <li><i class="fas fa-check"></i> JWT Authentication</li>
-                        <li><i class="fas fa-check"></i> API Documentation</li>
-                    </ul>
-                </div>
-
-                <div class="service-card glass-card">
-                    <div class="service-icon">
-                        <i class="fas fa-database"></i>
-                    </div>
-                    <h3>Database Design</h3>
-                    <p>Designing and optimizing database schemas for SQL and NoSQL databases with focus on performance
-                        and scalability.</p>
-                    <ul class="service-features">
-                        <li><i class="fas fa-check"></i> Schema Design</li>
-                        <li><i class="fas fa-check"></i> Query Optimization</li>
-                        <li><i class="fas fa-check"></i> Data Migration</li>
-                    </ul>
-                </div>
-
-                <div class="service-card glass-card">
-                    <div class="service-icon">
-                        <i class="fas fa-shield-alt"></i>
-                    </div>
-                    <h3>Security & Auth</h3>
-                    <p>Implementing enterprise-grade security measures, authentication systems, and data protection
-                        protocols.</p>
-                    <ul class="service-features">
-                        <li><i class="fas fa-check"></i> OAuth Integration</li>
-                        <li><i class="fas fa-check"></i> Data Encryption</li>
-                        <li><i class="fas fa-check"></i> Security Audits</li>
-                    </ul>
-                </div>
-
-                <div class="service-card glass-card">
-                    <div class="service-icon">
-                        <i class="fas fa-cloud"></i>
-                    </div>
-                    <h3>Cloud Integration</h3>
-                    <p>Deploying and managing backend services on cloud platforms with automated CI/CD pipelines and
-                        monitoring.</p>
-                    <ul class="service-features">
-                        <li><i class="fas fa-check"></i> Cloud Deployment</li>
-                        <li><i class="fas fa-check"></i> CI/CD Pipelines</li>
-                        <li><i class="fas fa-check"></i> Performance Monitoring</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Tech Stack Section -->
-    <section class="tech-stack" id="tech">
-        <div class="container">
-            <div class="section-header">
-                <span class="section-badge">Technology Arsenal</span>
-                <h2 class="section-title">Tech Stack</h2>
-                <p class="section-subtitle">Battle-tested tools powering enterprise solutions</p>
-            </div>
-            <div class="tech-categories">
-                <div class="tech-category">
-                    <h3 class="category-title">Backend & Frameworks</h3>
-                    <div class="tech-grid">
-                        <div class="tech-badge">
-                            <i class="fab fa-node-js"></i>
-                            <span>Node.js</span>
-                        </div>
-                        <div class="tech-badge">
-                            <i class="fab fa-python"></i>
-                            <span>Python</span>
-                        </div>
-                        <div class="tech-badge">
-                            <i class="fab fa-php"></i>
-                            <span>PHP</span>
-                        </div>
-                        <div class="tech-badge">
-                            <i class="fas fa-leaf"></i>
-                            <span>Express.js</span>
-                        </div>
-                        <div class="tech-badge">
-                            <i class="fas fa-fire"></i>
-                            <span>Django</span>
-                        </div>
-                        <div class="tech-badge">
-                            <i class="fas fa-gem"></i>
-                            <span>Laravel</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="tech-category">
-                    <h3 class="category-title">Databases</h3>
-                    <div class="tech-grid">
-                        <div class="tech-badge">
-                            <i class="fas fa-database"></i>
-                            <span>MySQL</span>
-                        </div>
-                        <div class="tech-badge">
-                            <i class="fas fa-database"></i>
-                            <span>PostgreSQL</span>
-                        </div>
-                        <div class="tech-badge">
-                            <i class="fas fa-leaf"></i>
-                            <span>MongoDB</span>
-                        </div>
-                        <div class="tech-badge">
-                            <i class="fas fa-fire"></i>
-                            <span>Redis</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="tech-category">
-                    <h3 class="category-title">Tools & DevOps</h3>
-                    <div class="tech-grid">
-                        <div class="tech-badge">
-                            <i class="fab fa-docker"></i>
-                            <span>Docker</span>
-                        </div>
-                        <div class="tech-badge">
-                            <i class="fab fa-git-alt"></i>
-                            <span>Git</span>
-                        </div>
-                        <div class="tech-badge">
-                            <i class="fab fa-github"></i>
-                            <span>GitHub</span>
-                        </div>
-                        <div class="tech-badge">
-                            <i class="fab fa-aws"></i>
-                            <span>AWS</span>
-                        </div>
-                        <div class="tech-badge">
-                            <i class="fas fa-terminal"></i>
-                            <span>Linux</span>
-                        </div>
-                        <div class="tech-badge">
-                            <i class="fas fa-code-branch"></i>
-                            <span>CI/CD</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Projects Section -->
-    <section class="projects" id="projects">
-        <div class="container">
-            <div class="section-header">
-                <span class="section-badge">Portfolio</span>
-                <h2 class="section-title">Featured Projects</h2>
-                <p class="section-subtitle">Showcasing backend excellence and system architecture</p>
-            </div>
-            <div class="projects-grid">
-                <div class="project-card glass-card">
-                    <div class="project-header">
-                        <div class="project-icon">
-                            <i class="fas fa-shopping-cart"></i>
-                        </div>
-                        <span class="project-status">In Development</span>
-                    </div>
-                    <h3>E-Commerce Backend API</h3>
-                    <p>Scalable REST API for e-commerce platform with payment integration, inventory management, and
-                        order processing.</p>
-                    <div class="project-tech">
-                        <span class="tech-tag">Node.js</span>
-                        <span class="tech-tag">MongoDB</span>
-                        <span class="tech-tag">Redis</span>
-                    </div>
-                </div>
-
-                <div class="project-card glass-card">
-                    <div class="project-header">
-                        <div class="project-icon">
-                            <i class="fas fa-users"></i>
-                        </div>
-                        <span class="project-status">Completed</span>
-                    </div>
-                    <h3>Social Media API</h3>
-                    <p>RESTful API for social networking features including user authentication, posts, comments, and
-                        real-time notifications.</p>
-                    <div class="project-tech">
-                        <span class="tech-tag">Express</span>
-                        <span class="tech-tag">PostgreSQL</span>
-                        <span class="tech-tag">JWT</span>
-                    </div>
-                </div>
-
-                <div class="project-card glass-card">
-                    <div class="project-header">
-                        <div class="project-icon">
-                            <i class="fas fa-chart-line"></i>
-                        </div>
-                        <span class="project-status">In Development</span>
-                    </div>
-                    <h3>Analytics Dashboard Backend</h3>
-                    <p>High-performance backend system for processing and aggregating large-scale analytics data with
-                        real-time insights.</p>
-                    <div class="project-tech">
-                        <span class="tech-tag">Python</span>
-                        <span class="tech-tag">Django</span>
-                        <span class="tech-tag">MySQL</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Contact CTA Section -->
-    <section class="contact-cta" id="contact">
-        <div class="container">
-            <div class="cta-content glass-card">
-                <h2>Ready to Build Something Amazing?</h2>
-                <p>Let's collaborate to create robust backend solutions, scalable APIs, and secure systems that power
-                    your business forward.</p>
-                <div class="cta-buttons">
-                    <a href="mailto:rakibulhasan@gmail.com" class="btn btn-primary">
-                        <i class="fas fa-envelope"></i>
-                        <span>Send Email</span>
+                <div class="hero-socials reveal">
+                    <a href="https://github.com/rakibulx33" target="_blank" rel="noopener noreferrer"
+                        class="social-link" aria-label="GitHub profile">
+                        <i class="fab fa-github" aria-hidden="true"></i>
+                    </a>
+                    <a href="mailto:rakibulx33@gmail.com" class="social-link" aria-label="Send email">
+                        <i class="fas fa-envelope" aria-hidden="true"></i>
                     </a>
                     <a href="https://www.facebook.com/rakibulx33" target="_blank" rel="noopener noreferrer"
-                        class="btn btn-secondary">
-                        <i class="fab fa-facebook"></i>
-                        <span>Connect on Facebook</span>
+                        class="social-link" aria-label="Facebook profile">
+                        <i class="fab fa-facebook-f" aria-hidden="true"></i>
                     </a>
                 </div>
             </div>
-        </div>
-    </section>
 
-    <!-- Footer -->
+            <a href="#about" class="scroll-indicator" aria-label="Scroll to about section">
+                <span class="mouse" aria-hidden="true"><span class="wheel"></span></span>
+            </a>
+        </section>
+
+        <!-- ============ ABOUT ============ -->
+        <section class="about section" id="about">
+            <div class="container">
+                <div class="section-header reveal">
+                    <span class="section-badge mono">01. whoami</span>
+                    <h2 class="section-title">About Me</h2>
+                </div>
+
+                <div class="about-grid">
+                    <div class="about-photo-wrap reveal">
+                        <div class="about-photo tilt-card">
+                            <img src="assets/profile.jpg" alt="Portrait of Rakibul Hasan" width="320"
+                                height="320" loading="lazy">
+                            <div class="photo-ring" aria-hidden="true"></div>
+                        </div>
+                        <div class="about-chips">
+                            <span class="chip"><i class="fas fa-location-dot" aria-hidden="true"></i> Bangladesh</span>
+                            <span class="chip"><i class="fas fa-laptop-code" aria-hidden="true"></i> Full-Stack
+                                Developer</span>
+                            <span class="chip"><i class="fas fa-circle-check" aria-hidden="true"></i> Open to
+                                work</span>
+                        </div>
+                    </div>
+
+                    <div class="about-text glass-card reveal">
+                        <h3>Developer · Builder · Problem Solver</h3>
+                        <p>
+                            I'm a <strong>full-stack developer</strong> who lives at the intersection of
+                            <strong>technology and entrepreneurship</strong> — designing systems, automating workflows
+                            and shipping products people actually use. End to end: from database schema to deployed
+                            product.
+                        </p>
+                        <p>
+                            From <strong>AI-powered job matching platforms</strong> and <strong>queue management
+                                systems</strong> to <strong>embedded projects on ESP8266</strong>, I enjoy taking ideas
+                            from sketch to production. Currently sharpening my craft with a B.Sc. in CSE — but I let
+                            the shipped work speak first.
+                        </p>
+                        <ul class="about-highlights">
+                            <li><i class="fas fa-check" aria-hidden="true"></i> Full-stack &amp; backend development
+                            </li>
+                            <li><i class="fas fa-check" aria-hidden="true"></i> Data structures &amp; algorithms (CP)
+                            </li>
+                            <li><i class="fas fa-check" aria-hidden="true"></i> AI / ML &amp; system design</li>
+                            <li><i class="fas fa-check" aria-hidden="true"></i> Embedded systems &amp; IoT</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============ GITHUB STATS ============ -->
+        <section class="github section" id="github">
+            <div class="container">
+                <div class="section-header reveal">
+                    <span class="section-badge mono">02. git log --stat</span>
+                    <h2 class="section-title">GitHub Activity</h2>
+                    <p class="section-subtitle">Live data, straight from the API</p>
+                </div>
+
+                <div class="stats-grid reveal">
+                    <div class="stat-card glass-card">
+                        <i class="fas fa-folder-open stat-icon" aria-hidden="true"></i>
+                        <span class="stat-number" id="stat-repos" data-count="14">0</span>
+                        <span class="stat-label">Public Repos</span>
+                    </div>
+                    <div class="stat-card glass-card">
+                        <i class="fas fa-star stat-icon" aria-hidden="true"></i>
+                        <span class="stat-number" id="stat-stars" data-count="3">0</span>
+                        <span class="stat-label">Stars Earned</span>
+                    </div>
+                    <div class="stat-card glass-card">
+                        <i class="fas fa-code-commit stat-icon" aria-hidden="true"></i>
+                        <span class="stat-number" id="stat-contribs" data-count="680">0</span>
+                        <span class="stat-label">Contributions (1y)</span>
+                    </div>
+                    <div class="stat-card glass-card">
+                        <i class="fas fa-users stat-icon" aria-hidden="true"></i>
+                        <span class="stat-number" id="stat-followers" data-count="2">0</span>
+                        <span class="stat-label">Followers</span>
+                    </div>
+                </div>
+
+                <div class="github-charts">
+                    <div class="chart-card glass-card reveal">
+                        <h3 class="chart-title"><i class="fas fa-calendar-days" aria-hidden="true"></i> Contribution
+                            Graph <span class="chart-sub" id="heatmap-total"></span></h3>
+                        <div class="heatmap-scroll">
+                            <div id="heatmap" class="heatmap" role="img"
+                                aria-label="GitHub contribution heatmap for the last year"></div>
+                        </div>
+                        <div class="heatmap-legend" aria-hidden="true">
+                            <span>Less</span>
+                            <span class="hm-cell" data-level="0"></span>
+                            <span class="hm-cell" data-level="1"></span>
+                            <span class="hm-cell" data-level="2"></span>
+                            <span class="hm-cell" data-level="3"></span>
+                            <span class="hm-cell" data-level="4"></span>
+                            <span>More</span>
+                        </div>
+                    </div>
+
+                    <div class="chart-card glass-card reveal">
+                        <h3 class="chart-title"><i class="fas fa-chart-pie" aria-hidden="true"></i> Languages</h3>
+                        <div class="lang-chart-wrap">
+                            <svg id="lang-donut" viewBox="0 0 120 120" width="170" height="170" role="img"
+                                aria-label="Programming languages used across repositories">
+                            </svg>
+                            <ul id="lang-legend" class="lang-legend"></ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============ PROJECTS ============ -->
+        <section class="projects section" id="projects">
+            <div class="container">
+                <div class="section-header reveal">
+                    <span class="section-badge mono">03. ls ./projects</span>
+                    <h2 class="section-title">Featured Projects</h2>
+                    <p class="section-subtitle">Real projects from my GitHub — built, shipped and maintained</p>
+                </div>
+
+                <div class="projects-grid" id="projects-grid">
+                    <!-- Cards injected by script.js -->
+                </div>
+
+                <div class="projects-more reveal">
+                    <a href="https://github.com/rakibulx33?tab=repositories" target="_blank" rel="noopener noreferrer"
+                        class="btn btn-secondary">
+                        <i class="fab fa-github" aria-hidden="true"></i>
+                        <span>See All Repositories</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============ TECH STACK ============ -->
+        <section class="tech section" id="tech">
+            <div class="container">
+                <div class="section-header reveal">
+                    <span class="section-badge mono">04. cat skills.json</span>
+                    <h2 class="section-title">Tech Stack</h2>
+                </div>
+
+                <div class="tech-groups">
+                    <div class="tech-group glass-card reveal">
+                        <h3><i class="fas fa-code" aria-hidden="true"></i> Languages</h3>
+                        <div class="tech-badges">
+                            <span class="tech-badge">C</span>
+                            <span class="tech-badge">C++</span>
+                            <span class="tech-badge">Python</span>
+                            <span class="tech-badge">JavaScript</span>
+                            <span class="tech-badge">TypeScript</span>
+                            <span class="tech-badge">Java</span>
+                            <span class="tech-badge">C#</span>
+                        </div>
+                    </div>
+                    <div class="tech-group glass-card reveal">
+                        <h3><i class="fas fa-layer-group" aria-hidden="true"></i> Web &amp; Backend</h3>
+                        <div class="tech-badges">
+                            <span class="tech-badge">Node.js</span>
+                            <span class="tech-badge">Express</span>
+                            <span class="tech-badge">Next.js</span>
+                            <span class="tech-badge">React</span>
+                            <span class="tech-badge">Tailwind CSS</span>
+                            <span class="tech-badge">REST APIs</span>
+                        </div>
+                    </div>
+                    <div class="tech-group glass-card reveal">
+                        <h3><i class="fas fa-database" aria-hidden="true"></i> Databases</h3>
+                        <div class="tech-badges">
+                            <span class="tech-badge">PostgreSQL</span>
+                            <span class="tech-badge">MySQL</span>
+                            <span class="tech-badge">MongoDB</span>
+                        </div>
+                    </div>
+                    <div class="tech-group glass-card reveal">
+                        <h3><i class="fas fa-screwdriver-wrench" aria-hidden="true"></i> Tools &amp; Platforms</h3>
+                        <div class="tech-badges">
+                            <span class="tech-badge">Git</span>
+                            <span class="tech-badge">Docker</span>
+                            <span class="tech-badge">Linux</span>
+                            <span class="tech-badge">Arduino / ESP8266</span>
+                            <span class="tech-badge">JavaFX</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============ CONTACT ============ -->
+        <section class="contact section" id="contact">
+            <div class="container">
+                <div class="contact-card glass-card reveal">
+                    <span class="section-badge mono">05. ping rakibul</span>
+                    <h2>Let's Build Something Amazing</h2>
+                    <p>Have an idea, a project or an opportunity? My inbox is always open —
+                        let's collaborate and make it real.</p>
+                    <div class="contact-buttons">
+                        <a href="mailto:rakibulx33@gmail.com" class="btn btn-primary">
+                            <i class="fas fa-envelope" aria-hidden="true"></i>
+                            <span>rakibulx33@gmail.com</span>
+                        </a>
+                        <a href="https://github.com/rakibulx33" target="_blank" rel="noopener noreferrer"
+                            class="btn btn-secondary">
+                            <i class="fab fa-github" aria-hidden="true"></i>
+                            <span>github.com/rakibulx33</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ============ FOOTER ============ -->
     <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h3>O.F.M. Rakibul Hasan</h3>
-                    <p>B.Sc. in Computer Science & Engineering</p>
-                    <p>Daffodil International University</p>
-                    <p class="footer-tagline">Building scalable backend solutions for the modern web</p>
-                </div>
-
-                <div class="footer-section">
-                    <h4>Quick Links</h4>
-                    <ul class="footer-links">
-                        <li><a href="#home">Home</a></li>
-                        <li><a href="#about">About</a></li>
-                        <li><a href="#services">Services</a></li>
-                        <li><a href="#tech">Tech Stack</a></li>
-                        <li><a href="#projects">Projects</a></li>
-                    </ul>
-                </div>
-
-                <div class="footer-section">
-                    <h4>Connect</h4>
-                    <div class="social-links">
-                        <a href="https://www.facebook.com/rakibulx33" target="_blank" rel="noopener noreferrer"
-                            class="social-link" aria-label="Facebook">
-                            <i class="fab fa-facebook"></i>
-                        </a>
-                        <a href="mailto:rakibulhasan@gmail.com" class="social-link" aria-label="Email">
-                            <i class="fas fa-envelope"></i>
-                        </a>
-                        <a href="#" class="social-link" aria-label="GitHub">
-                            <i class="fab fa-github"></i>
-                        </a>
-                        <a href="#" class="social-link" aria-label="LinkedIn">
-                            <i class="fab fa-linkedin"></i>
-                        </a>
-                    </div>
-                    <div class="footer-contact">
-                        <p><i class="fas fa-envelope"></i> rakibulx33@gmail.com</p>
-                    </div>
-                </div>
+        <div class="container footer-inner">
+            <p class="mono">&lt;rakibulx33/&gt; — Rakibul Hasan</p>
+            <div class="footer-socials">
+                <a href="https://github.com/rakibulx33" target="_blank" rel="noopener noreferrer"
+                    aria-label="GitHub"><i class="fab fa-github" aria-hidden="true"></i></a>
+                <a href="mailto:rakibulx33@gmail.com" aria-label="Email"><i class="fas fa-envelope"
+                        aria-hidden="true"></i></a>
+                <a href="https://www.facebook.com/rakibulx33" target="_blank" rel="noopener noreferrer"
+                    aria-label="Facebook"><i class="fab fa-facebook-f" aria-hidden="true"></i></a>
             </div>
-
-            <div class="footer-bottom">
-                <p>&copy; 2026 O.F.M. Rakibul Hasan. All rights reserved.</p>
-                <p>Crafted with <i class="fas fa-heart"></i> and <i class="fas fa-code"></i></p>
-            </div>
+            <p>&copy; 2026 · Crafted with <i class="fas fa-heart heart" aria-hidden="true"></i> in Bangladesh</p>
         </div>
     </footer>
 
-    <!-- JavaScript -->
-    <script src="script.js"></script>
+    <script src="script.js" defer></script>
+    <script src="hero3d.js" type="module"></script>
 </body>
 
 </html>
