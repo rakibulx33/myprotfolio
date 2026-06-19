@@ -3,7 +3,7 @@ import { motion, useScroll, useTransform, useSpring, AnimatePresence } from "fra
 import Lenis from "lenis";
 import { Github, Mail, Facebook, ArrowDown, ExternalLink, Code2, Database, Cpu, Wrench, Star, GitFork, Users, BookMarked, Menu, X } from "lucide-react";
 
-const portrait = { url: "/profile.jpg" };
+const portrait = { url: "/profile.jpg?v=4" };
 
 const Scene3D = lazy(() => import("./Scene3D"));
 
