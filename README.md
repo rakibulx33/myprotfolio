@@ -1,53 +1,51 @@
 # Rakibul Hasan — Portfolio
 
 Personal portfolio of **Rakibul Hasan**, full-stack developer from Bangladesh.
-A modern, dark "ember"-themed site with a real-time 3D hero and live GitHub data — built with pure HTML, CSS and JavaScript. No frameworks, no build step.
+A dark "ember"-themed single-page site with a real-time React Three Fiber background, smooth scrolling, scroll-driven motion and live GitHub data.
 
-**Live:** [rakibulx33.github.io](https://github.com/rakibulx33) · **GitHub:** [@rakibulx33](https://github.com/rakibulx33)
+**Live:** [rakibulx33.me](https://rakibulx33.me) · **GitHub:** [@rakibulx33](https://github.com/rakibulx33)
+
+## Tech Stack
+
+- **Vite** + **React 19** + **TypeScript** (static SPA, no SSR — deploys to GitHub Pages)
+- **Tailwind CSS v4** (`@tailwindcss/vite`) with custom `ember` design tokens
+- **React Three Fiber** + **drei** + **three** — particle wave field, floating embers, wireframe core
+- **Framer Motion** — scroll progress, reveal/parallax animations, animated counters
+- **Lenis** — smooth scrolling
+- **lucide-react** — icons
 
 ## Features
 
-### 3D Hero — "Ember Ocean"
-- GPU shader-driven particle wave field (Three.js) — thousands of points animated in the vertex shader at 60fps
-- Floating ember sparks with twinkle, mouse-parallax camera
-- Pauses when scrolled off-screen; skipped under `prefers-reduced-motion`; graceful fallback when WebGL is unavailable
-
-### Live GitHub Integration
-- Stat counters (repos, stars, contributions, followers) fetched from the GitHub API
-- Contribution heatmap rendered from real data, themed to match the site
-- Language donut chart computed from repository data
-- Project cards enriched with live language / star / fork info
-- Baked-in fallback snapshot when the API is rate-limited or offline
-
-### Design
-- Warm dark "ember" palette — amber → rose gradient on near-black
-- Glassmorphism cards with backdrop blur
-- Inter + JetBrains Mono typography, terminal-style section badges
-- 3D tilt on project cards, scroll-reveal animations, typewriter hero roles
-
-### Quality
-- Fully responsive (375px → 1440px+), mobile drawer navigation
-- Accessible: skip link, focus rings, aria labels, reduced-motion support
-- Zero dependencies beyond CDN fonts/icons/Three.js
+- 3D ember background scene (lazy-loaded `Scene3D` chunk)
+- Live GitHub integration — stats, contribution heatmap, language donut, project cards
+  (fetched client-side from the GitHub API with baked-in fallbacks)
+- Fully responsive with a mobile drawer nav
+- SEO: canonical URL, Open Graph + Twitter cards, Person/WebSite JSON-LD, sitemap, robots.txt
 
 ## Structure
 
 ```
-index.html    — markup (semantic sections, importmap for Three.js)
-style.css     — design tokens + all styling
-script.js     — UI interactions + GitHub data fetching/rendering
-hero3d.js     — Three.js wave-field scene (ES module, isolated)
-assets/       — images
+index.html         — Vite entry + SEO/meta + JSON-LD
+src/main.tsx       — React entry
+src/Portfolio.tsx  — the whole single-page portfolio
+src/Scene3D.tsx    — React Three Fiber scene (lazy-loaded)
+src/styles.css     — Tailwind v4 + design tokens + custom utilities
+public/            — profile.jpg, robots.txt, sitemap.xml, CNAME
 ```
 
 ## Run locally
 
-Any static server works:
-
 ```bash
-python -m http.server 8000
-# → http://localhost:8000
+npm install
+npm run dev      # http://localhost:5173
+npm run build    # → dist/
+npm run preview  # preview the production build
 ```
+
+## Deployment
+
+Pushing to `main` triggers `.github/workflows/static.yml`, which builds the Vite app
+and publishes `dist/` to GitHub Pages (served at the `rakibulx33.me` custom domain via `public/CNAME`).
 
 ---
 
