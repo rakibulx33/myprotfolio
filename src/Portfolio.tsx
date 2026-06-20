@@ -1,11 +1,9 @@
-import { lazy, Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { motion, useScroll, useTransform, useSpring, AnimatePresence } from "framer-motion";
 import Lenis from "lenis";
 import { Github, Mail, Facebook, ArrowDown, ExternalLink, Code2, Database, Cpu, Wrench, Star, GitFork, Users, BookMarked, Menu, X } from "lucide-react";
 
 const portrait = { url: "/profile.jpg?v=4" };
-
-const Scene3D = lazy(() => import("./Scene3D"));
 
 const sections = [
   { id: "about", label: "01. whoami" },
@@ -39,9 +37,7 @@ type GhUser = { public_repos: number; followers: number; following: number };
 type Contrib = { date: string; count: number; level: number };
 
 function Portfolio() {
-  const scrollRef = useRef(0);
   const heroImgRef = useRef<HTMLDivElement>(null);
-  const [mounted, setMounted] = useState(false);
   const [navOpen, setNavOpen] = useState(false);
   const [user, setUser] = useState<GhUser | null>(null);
   const [repos, setRepos] = useState<Repo[]>([]);
@@ -51,12 +47,9 @@ function Portfolio() {
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
-    setMounted(true);
     const lenis = new Lenis({ duration: 1.3, smoothWheel: true });
     function raf(time: number) {
       lenis.raf(time);
-      const max = document.documentElement.scrollHeight - window.innerHeight;
-      scrollRef.current = max > 0 ? window.scrollY / max : 0;
       requestAnimationFrame(raf);
     }
     requestAnimationFrame(raf);
@@ -125,12 +118,18 @@ function Portfolio() {
   }, [repos]);
 
   return (
-    <div className="relative min-h-screen text-foreground font-body">
-      {mounted && (
-        <Suspense fallback={null}>
-          <Scene3D scrollRef={scrollRef} />
-        </Suspense>
-      )}
+    <div className="relative min-h-screen text-foreground font-body overflow-x-hidden">
+      {/* Static ember background (replaces the old 3D animation) */}
+      <div
+        aria-hidden
+        className="fixed inset-0 -z-10 pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(80% 55% at 72% 8%, oklch(0.46 0.15 45 / 0.38), transparent 60%)," +
+            "radial-gradient(70% 50% at 12% 78%, oklch(0.42 0.18 20 / 0.30), transparent 65%)," +
+            "#0a0606",
+        }}
+      />
 
       <motion.div
         style={{ scaleX: progressBar }}
@@ -185,8 +184,8 @@ function Portfolio() {
       </AnimatePresence>
 
       {/* Hero */}
-      <section id="top" className="relative min-h-screen flex items-center px-6 lg:px-16">
-        <div className="grid lg:grid-cols-12 gap-10 items-center w-full max-w-7xl mx-auto">
+      <section id="top" className="relative min-h-screen flex items-center px-6 lg:px-16 pt-28 pb-16 lg:py-0">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center w-full max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
@@ -238,7 +237,7 @@ function Portfolio() {
             <motion.div
               animate={{ rotate: 360 }}
               transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
-              className="absolute -inset-10 rounded-full opacity-70 blur-3xl"
+              className="absolute -inset-10 rounded-full opacity-70 blur-3xl pointer-events-none"
               style={{ background: "conic-gradient(from 0deg, oklch(0.78 0.18 55 / 0.55), oklch(0.65 0.22 25 / 0.4), oklch(0.78 0.18 55 / 0.1), oklch(0.78 0.18 55 / 0.55))" }}
             />
             {/* floating ember orbs */}
@@ -350,7 +349,7 @@ function Portfolio() {
 
       {/* About */}
       <Section id="about" badge="01. whoami" title="About Me">
-        <div className="grid lg:grid-cols-5 gap-12 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-12 items-start">
           <div className="lg:col-span-3 space-y-6 text-lg text-muted-foreground leading-relaxed">
             <h3 className="text-3xl font-display font-semibold text-foreground">Developer · Builder · Problem Solver</h3>
             <p>
@@ -383,7 +382,7 @@ function Portfolio() {
 
       {/* Projects */}
       <Section id="work" badge="02. ls ./projects" title="Featured Projects">
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {featured.map((p, i) => (
             <motion.a
               key={p.name}
@@ -422,7 +421,7 @@ function Portfolio() {
 
       {/* Stack */}
       <Section id="stack" badge="03. cat skills.json" title="Tech Stack">
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {stack.map((s, i) => (
             <motion.div
               key={s.label}
@@ -446,7 +445,7 @@ function Portfolio() {
 
       {/* Activity / Languages */}
       <Section id="activity" badge="04. git log --graph" title="Live from GitHub">
-        <div className="grid lg:grid-cols-5 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
           <div className="lg:col-span-3 glass rounded-2xl p-7">
             <div className="flex items-center justify-between mb-5">
               <h4 className="font-display text-xl font-semibold">Contribution Pulse</h4>
@@ -561,7 +560,10 @@ function Heatmap({ repos, contribDays }: { repos: Repo[]; contribDays: Contrib[]
   }, [repos, contribDays]);
 
   return (
-    <div className="grid grid-flow-col grid-rows-7 gap-1">
+    <div
+      className="grid grid-flow-col grid-rows-7 gap-[3px] sm:gap-1"
+      style={{ gridTemplateColumns: "repeat(26, minmax(0, 1fr))" }}
+    >
       {cells.map((v, i) => (
         <motion.div
           key={i}
