@@ -1,31 +1,21 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { motion, useScroll, useTransform, useSpring, AnimatePresence } from "framer-motion";
 import Lenis from "lenis";
-import { Github, Mail, Facebook, ArrowDown, ExternalLink, Code2, Database, Cpu, Wrench, Star, GitFork, Users, BookMarked, Menu, X } from "lucide-react";
+import { Github, Mail, Facebook, ArrowDown, ArrowUpRight, Code2, Database, Cpu, Server, Bot, Layout, Lock, FlaskConical, Star, GitFork, Users, BookMarked, Menu, X } from "lucide-react";
+import { featuredProjects, moreProjects, research, skillGroups, type Project } from "./data";
 
-const portrait = { url: "/profile.jpg?v=4" };
+const portrait = { url: "/profile.jpg?v=5" };
 
 const sections = [
   { id: "about", label: "01. whoami" },
   { id: "work", label: "02. ./projects" },
-  { id: "stack", label: "03. skills.json" },
-  { id: "activity", label: "04. git.log" },
-  { id: "contact", label: "05. ping" },
+  { id: "research", label: "03. research" },
+  { id: "stack", label: "04. skills.json" },
+  { id: "activity", label: "05. git.log" },
+  { id: "contact", label: "06. ping" },
 ];
 
-const fallbackProjects = [
-  { name: "AI Job Match Platform", description: "AI-powered hiring engine matching candidates to roles using semantic search.", language: "TypeScript", stargazers_count: 0, forks_count: 0, html_url: "https://github.com/rakibulx33" },
-  { name: "Queue Management System", description: "Real-time multi-counter queueing with live dashboards and SMS notifications.", language: "JavaScript", stargazers_count: 0, forks_count: 0, html_url: "https://github.com/rakibulx33" },
-  { name: "ESP8266 IoT Suite", description: "Embedded firmware + dashboard for environment sensing and remote control.", language: "C++", stargazers_count: 0, forks_count: 0, html_url: "https://github.com/rakibulx33" },
-  { name: "myprotfolio", description: "Personal portfolio with Three.js hero + live GitHub data.", language: "HTML", stargazers_count: 0, forks_count: 0, html_url: "https://github.com/rakibulx33/myprotfolio" },
-];
-
-const stack = [
-  { icon: Code2, label: "Languages", items: ["C", "C++", "Python", "JavaScript", "TypeScript", "Java", "C#"] },
-  { icon: Database, label: "Web & Backend", items: ["Node.js", "Express", "Next.js", "React", "Tailwind", "REST"] },
-  { icon: Cpu, label: "Databases", items: ["PostgreSQL", "MySQL", "MongoDB"] },
-  { icon: Wrench, label: "Tools", items: ["Git", "Docker", "Linux", "ESP8266", "JavaFX"] },
-];
+const SKILL_ICONS = [Code2, Server, Layout, Database, Bot, Cpu];
 
 const LANG_COLORS: Record<string, string> = {
   TypeScript: "#3178c6", JavaScript: "#f1e05a", Python: "#3572A5", "C++": "#f34b7d",
@@ -102,11 +92,6 @@ function Portfolio() {
   const { scrollYProgress } = useScroll();
   const progressBar = useSpring(scrollYProgress, { stiffness: 120, damping: 30 });
 
-  const featured = useMemo(() => {
-    const src = repos.length ? [...repos].sort((a, b) => b.stargazers_count - a.stargazers_count || (b.updated_at || "").localeCompare(a.updated_at || "")).slice(0, 6) : fallbackProjects;
-    return src as Repo[];
-  }, [repos]);
-
   const languages = useMemo(() => {
     const counts: Record<string, number> = {};
     (repos.length ? repos : []).forEach((r) => { if (r.language) counts[r.language] = (counts[r.language] || 0) + 1; });
@@ -141,7 +126,7 @@ function Portfolio() {
         <a href="#top" className="font-mono text-sm tracking-tight mix-blend-difference text-white">
           rakibul<span className="text-ember">.</span>dev
         </a>
-        <div className="hidden md:flex gap-7 font-mono text-xs text-white/70 mix-blend-difference">
+        <div className="hidden lg:flex gap-6 font-mono text-xs text-white/70 mix-blend-difference">
           {sections.map((s) => (
             <a key={s.id} href={`#${s.id}`} className="hover:text-white transition-colors">
               {s.label}
@@ -151,7 +136,7 @@ function Portfolio() {
         <button
           aria-label="Menu"
           onClick={() => setNavOpen(true)}
-          className="md:hidden size-10 rounded-full glass flex items-center justify-center"
+          className="lg:hidden size-10 rounded-full glass flex items-center justify-center"
         >
           <Menu size={18} />
         </button>
@@ -162,7 +147,7 @@ function Portfolio() {
         {navOpen && (
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-background/95 backdrop-blur-xl md:hidden"
+            className="fixed inset-0 z-50 bg-background/95 backdrop-blur-xl lg:hidden"
           >
             <div className="flex justify-end p-6">
               <button aria-label="Close" onClick={() => setNavOpen(false)} className="size-10 rounded-full glass flex items-center justify-center">
@@ -201,10 +186,11 @@ function Portfolio() {
               <br />
               <span className="ember-text">Rakibul Hasan</span>
             </h1>
-            <p className="mt-8 font-mono text-sm text-ember">~$ full-stack-developer<span className="animate-pulse">|</span></p>
+            <p className="mt-8 font-mono text-sm text-ember">~$ backend · automation · iot<span className="animate-pulse">|</span></p>
             <p className="mt-6 max-w-2xl text-lg text-muted-foreground leading-relaxed">
-              A developer from Bangladesh crafting scalable backends, polished web apps and creative tools —
-              from AI-powered job platforms to queue management systems.
+              CSE student at Daffodil International University and freelance backend & automation developer
+              since 2022. I build e-commerce platforms, AI-powered SaaS and trading systems, and do IoT
+              research on the side.
             </p>
             <div className="mt-10 flex flex-wrap gap-4">
               <a href="#work" className="group relative px-7 py-3.5 rounded-full bg-gradient-to-r from-ember to-rose text-primary-foreground font-medium ember-glow hover:scale-[1.03] transition-transform">
@@ -326,7 +312,7 @@ function Portfolio() {
             { icon: BookMarked, label: "Repositories", value: user?.public_repos ?? 15 },
             { icon: Star, label: "Stars Earned", value: totalStars },
             { icon: Users, label: "Followers", value: user?.followers ?? 2 },
-            { icon: Code2, label: "Projects Shipped", value: Math.max(repos.length, 12) },
+            { icon: Code2, label: "Projects Built", value: featuredProjects.length + moreProjects.length },
           ].map((s, i) => (
             <motion.div
               key={s.label}
@@ -351,20 +337,20 @@ function Portfolio() {
       <Section id="about" badge="01. whoami" title="About Me">
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-12 items-start">
           <div className="lg:col-span-3 space-y-6 text-lg text-muted-foreground leading-relaxed">
-            <h3 className="text-3xl font-display font-semibold text-foreground">Developer · Builder · Problem Solver</h3>
+            <h3 className="text-3xl font-display font-semibold text-foreground">Developer · Builder · Researcher</h3>
             <p>
-              I'm a <span className="text-ember font-medium">full-stack developer</span> who lives at the intersection of
-              technology and entrepreneurship — designing systems, automating workflows
-              and shipping products people actually use. End to end: from database schema to deployed product.
+              I'm a <span className="text-ember font-medium">backend and automation developer</span> from Dhaka. I've been
+              freelancing since 2022, taking products from database schema to a deployed system: storefronts with
+              multi-tenant SaaS, AI agents and 24/7 trading engines.
             </p>
             <p>
-              From AI-powered job matching platforms and queue management systems to embedded projects on ESP8266,
-              I enjoy taking ideas from sketch to production. Currently sharpening my craft with a B.Sc. in CSE —
-              but I let the shipped work speak first.
+              I'm in my third year of a B.Sc. in CSE at Daffodil International University. On the research side,
+              I work on low-cost IoT for everyday problems in Bangladesh, including energy use at home and
+              post-harvest crop storage.
             </p>
           </div>
           <div className="lg:col-span-2 glass rounded-3xl p-8 space-y-4">
-            {["Full-stack & backend development", "Data structures & algorithms", "AI / ML & system design", "Embedded systems & IoT"].map((item, i) => (
+            {["Backend & full-stack web", "AI agents & automation", "Trading & data systems", "IoT & embedded research", "Mobile apps (Kotlin)"].map((item, i) => (
               <motion.div
                 key={item}
                 initial={{ opacity: 0, x: 20 }}
@@ -383,55 +369,101 @@ function Portfolio() {
       {/* Projects */}
       <Section id="work" badge="02. ls ./projects" title="Featured Projects">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {featured.map((p, i) => (
-            <motion.a
+          {featuredProjects.map((p, i) => (
+            <motion.article
               key={p.name}
-              href={p.html_url}
-              target="_blank"
-              rel="noreferrer"
               initial={{ opacity: 0, y: 50 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.7, delay: i * 0.06, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: 0.7, delay: (i % 2) * 0.08, ease: [0.16, 1, 0.3, 1] }}
               whileHover={{ y: -6 }}
-              className="group glass rounded-2xl p-7 block hover:border-ember/40 transition-colors"
+              className="group glass rounded-2xl p-7 flex flex-col hover:border-ember/40 transition-colors"
             >
-              <div className="flex items-start justify-between mb-4">
-                <span className="font-mono text-xs text-ember">/{String(i + 1).padStart(2, "0")}</span>
-                <ExternalLink size={16} className="opacity-40 group-hover:opacity-100 group-hover:text-ember transition-all" />
+              <div className="flex items-center justify-between gap-3 mb-4 font-mono text-xs">
+                <span className="text-ember">/{String(i + 1).padStart(2, "0")} · {p.kind}</span>
+                {p.private && <PrivateBadge />}
               </div>
-              <h3 className="font-display text-2xl font-semibold mb-3 group-hover:ember-text transition-all break-words">{p.name}</h3>
-              <p className="text-muted-foreground text-sm leading-relaxed mb-5 min-h-[3rem]">
-                {p.description || "A crafted project — open the repo for details."}
-              </p>
-              <div className="flex flex-wrap items-center gap-3 font-mono text-[11px] text-muted-foreground">
-                {p.language && (
-                  <span className="inline-flex items-center gap-1.5">
-                    <span className="size-2 rounded-full" style={{ background: LANG_COLORS[p.language] || "#ff6b1a" }} />
-                    {p.language}
-                  </span>
-                )}
-                <span className="inline-flex items-center gap-1"><Star size={12} /> {p.stargazers_count}</span>
-                <span className="inline-flex items-center gap-1"><GitFork size={12} /> {p.forks_count}</span>
+              <h3 className="font-display text-2xl sm:text-3xl font-semibold mb-3 group-hover:ember-text transition-all break-words">{p.name}</h3>
+              <p className="text-muted-foreground text-sm leading-relaxed mb-6">{p.description}</p>
+              <div className="mt-auto space-y-5">
+                <StackTags items={p.stack} />
+                <ProjectLinks p={p} />
               </div>
-            </motion.a>
+            </motion.article>
+          ))}
+        </div>
+
+        <h3 className="mt-24 mb-8 font-mono text-sm text-ember">~$ ls ./more</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {moreProjects.map((p, i) => (
+            <motion.article
+              key={p.name}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-40px" }}
+              transition={{ duration: 0.5, delay: (i % 3) * 0.06 }}
+              className="glass rounded-2xl p-6 flex flex-col hover:border-ember/40 transition-colors"
+            >
+              <div className="flex items-center justify-between gap-3 mb-3">
+                <span className="font-mono text-[11px] text-ember">{p.kind}</span>
+                {p.private && <PrivateBadge />}
+              </div>
+              <h4 className="font-display text-xl font-semibold mb-2">{p.name}</h4>
+              <p className="text-muted-foreground text-sm leading-relaxed mb-5">{p.description}</p>
+              <div className="mt-auto space-y-4">
+                <StackTags items={p.stack} />
+                <ProjectLinks p={p} />
+              </div>
+            </motion.article>
+          ))}
+        </div>
+      </Section>
+
+      {/* Research */}
+      <Section id="research" badge="03. cat research.bib" title="Research">
+        <p className="max-w-3xl -mt-6 mb-12 text-lg text-muted-foreground leading-relaxed">
+          Low-cost IoT for problems I see at home in Bangladesh, written up with classmates and faculty at DIU.
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {research.map((r, i) => (
+            <motion.article
+              key={r.title}
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.6, delay: (i % 2) * 0.08 }}
+              className="glass rounded-2xl p-7 flex flex-col"
+            >
+              <div className="flex items-center justify-between gap-3 mb-4">
+                <FlaskConical size={20} className="text-ember shrink-0" />
+                <span className="font-mono text-[10px] uppercase tracking-widest px-2 py-1 rounded-full border border-ember/30 text-ember">
+                  In preparation
+                </span>
+              </div>
+              <h3 className="font-display text-xl sm:text-2xl font-semibold mb-2">{r.title}</h3>
+              <p className="font-mono text-[11px] text-muted-foreground mb-4">{r.venue}</p>
+              <p className="text-muted-foreground text-sm leading-relaxed mb-6">{r.summary}</p>
+              <div className="mt-auto"><StackTags items={r.tags} /></div>
+            </motion.article>
           ))}
         </div>
       </Section>
 
       {/* Stack */}
-      <Section id="stack" badge="03. cat skills.json" title="Tech Stack">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {stack.map((s, i) => (
+      <Section id="stack" badge="04. cat skills.json" title="Tech Stack">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {skillGroups.map((s, i) => {
+            const Icon = SKILL_ICONS[i % SKILL_ICONS.length];
+            return (
             <motion.div
               key={s.label}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: i * 0.08 }}
+              transition={{ delay: (i % 3) * 0.08 }}
               className="glass rounded-2xl p-6"
             >
-              <s.icon className="text-ember mb-4" size={22} />
+              <Icon className="text-ember mb-4" size={22} />
               <h4 className="font-display font-semibold mb-4">{s.label}</h4>
               <div className="flex flex-wrap gap-2">
                 {s.items.map((it) => (
@@ -439,12 +471,13 @@ function Portfolio() {
                 ))}
               </div>
             </motion.div>
-          ))}
+            );
+          })}
         </div>
       </Section>
 
       {/* Activity / Languages */}
-      <Section id="activity" badge="04. git log --graph" title="Live from GitHub">
+      <Section id="activity" badge="05. git log --graph" title="Live from GitHub">
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
           <div className="lg:col-span-3 glass rounded-2xl p-7">
             <div className="flex items-center justify-between mb-5">
@@ -470,7 +503,7 @@ function Portfolio() {
       </Section>
 
       {/* Contact */}
-      <Section id="contact" badge="05. ping rakibul" title="Let's Build Something Amazing">
+      <Section id="contact" badge="06. ping rakibul" title="Let's Build Something Amazing">
         <div className="max-w-3xl">
           <p className="text-xl text-muted-foreground leading-relaxed mb-10">
             Have an idea, a project or an opportunity? My inbox is always open — let's collaborate and make it real.
@@ -532,6 +565,45 @@ function Section({ id, badge, title, children }: { id: string; badge: string; ti
         {children}
       </motion.div>
     </section>
+  );
+}
+
+function PrivateBadge() {
+  return (
+    <span className="inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground px-2 py-1 rounded-full bg-white/5 shrink-0">
+      <Lock size={10} /> Private
+    </span>
+  );
+}
+
+function StackTags({ items }: { items: string[] }) {
+  return (
+    <div className="flex flex-wrap gap-2">
+      {items.map((it) => (
+        <span key={it} className="font-mono text-[11px] px-2 py-1 rounded bg-white/5 text-muted-foreground">{it}</span>
+      ))}
+    </div>
+  );
+}
+
+function ProjectLinks({ p }: { p: Project }) {
+  if (!p.code && !p.live) {
+    return <p className="font-mono text-[11px] text-muted-foreground/70">Code is private · walkthrough on request</p>;
+  }
+  const cls = "inline-flex items-center gap-1.5 font-mono text-xs px-3 py-1.5 rounded-full glass hover:text-ember hover:border-ember/50 transition-colors";
+  return (
+    <div className="flex flex-wrap gap-3">
+      {p.live && (
+        <a href={p.live} target="_blank" rel="noreferrer" className={cls} aria-label={`${p.name} live site`}>
+          Live <ArrowUpRight size={13} />
+        </a>
+      )}
+      {p.code && (
+        <a href={p.code} target="_blank" rel="noreferrer" className={cls} aria-label={`${p.name} source code`}>
+          <Github size={13} /> Code
+        </a>
+      )}
+    </div>
   );
 }
 

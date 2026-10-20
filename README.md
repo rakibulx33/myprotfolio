@@ -1,6 +1,6 @@
 # Rakibul Hasan — Portfolio
 
-Personal portfolio of **Rakibul Hasan**, full-stack developer from Bangladesh.
+Personal portfolio of **Rakibul Hasan**, backend & automation developer and CSE student at DIU, Dhaka.
 A dark "ember"-themed single-page site with a real-time React Three Fiber background, smooth scrolling, scroll-driven motion and live GitHub data.
 
 **Live:** [rakibulx33.me](https://rakibulx33.me) · **GitHub:** [@rakibulx33](https://github.com/rakibulx33)
@@ -27,7 +27,8 @@ A dark "ember"-themed single-page site with a real-time React Three Fiber backgr
 ```
 index.html         — Vite entry + SEO/meta + JSON-LD
 src/main.tsx       — React entry
-src/Portfolio.tsx  — the whole single-page portfolio
+src/Portfolio.tsx  — the whole single-page portfolio (layout)
+src/data.ts        — curated projects, research and skills (edit this to change content)
 src/Scene3D.tsx    — React Three Fiber scene (lazy-loaded)
 src/styles.css     — Tailwind v4 + design tokens + custom utilities
 public/            — profile.jpg, robots.txt, sitemap.xml, CNAME
