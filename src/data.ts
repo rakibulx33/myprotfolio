@@ -1,6 +1,13 @@
 // Curated portfolio content. Edit this file to change what the site shows;
 // Portfolio.tsx only handles layout.
 
+export const LINKS = {
+  email: "rakibulx33@gmail.com",
+  github: "https://github.com/rakibulx33",
+  linkedin: "https://www.linkedin.com/in/rakibulx33",
+  facebook: "https://www.facebook.com/rakibulx33",
+};
+
 const GH = "https://github.com/rakibulx33";
 
 export type Project = {
@@ -57,7 +64,7 @@ export const featuredProjects: Project[] = [
   },
   {
     name: "Tender Package Builder",
-    kind: "AI DevFest 2026 · solo build",
+    kind: "Solo build for AI DevFest 2026",
     description:
       "Takes a tender's requirements.json and a set of PDFs and produces one checked, correctly ordered PDF package, with a cover page and a page footer on every page. Everything runs in the browser, in English and Bangla, and no file is ever uploaded.",
     stack: ["React", "Vite", "pdf-lib", "GitHub Actions"],
@@ -112,7 +119,7 @@ export const moreProjects: Project[] = [
   },
   {
     name: "BongoScript",
-    kind: "Compiler · team project",
+    kind: "Team compiler project",
     description: "A programming language with Bangla keywords, transpiled to C. Built for the compiler design course.",
     stack: ["Flex", "Bison", "C", "Node.js"],
     code: "https://github.com/toha129/bongoscript_project",
@@ -157,13 +164,13 @@ export type Research = {
 export const research: Research[] = [
   {
     title: "Smart energy monitoring for Bangladeshi homes",
-    venue: "Undergraduate thesis · DIU CSE",
+    venue: "Undergraduate thesis, DIU CSE",
     summary: "Low-cost IoT and machine learning to help households understand their electricity use and costs.",
     tags: ["IoT", "Machine learning", "Energy"],
   },
   {
     title: "IoT monitoring for potato storage",
-    venue: "IEEE conference paper · 2nd author",
+    venue: "IEEE conference paper, second author",
     summary: "Low-cost sensing to reduce post-harvest losses in stored potatoes.",
     tags: ["IoT", "Agritech"],
   },
