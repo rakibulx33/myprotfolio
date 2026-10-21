@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
-import { featuredProjects, moreProjects, research, skillGroups, LINKS } from "./data";
+import { useCallback, useEffect, useRef, useState, type CSSProperties, type KeyboardEvent, type ReactNode } from "react";
+import { featuredProjects, moreProjects, research, services, skillGroups, LINKS, PORTRAIT } from "./data";
 import { prefersReducedMotion } from "./hooks";
 
 type Line = { id: number; node: ReactNode };
@@ -13,16 +13,55 @@ const PROMPT = (
 
 const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 const ALL = [...featuredProjects, ...moreProjects];
-const COMMANDS = ["help", "whoami", "projects", "ls", "open", "research", "skills", "contact", "github", "linkedin", "email", "cd", "date", "clear", "sudo", "exit"];
-export const CHIPS = ["help", "whoami", "projects", "research", "skills", "contact"];
+const SECTIONS = ["services", "projects", "research", "skills", "github", "contact"];
+const COMMANDS = ["help", "whoami", "neofetch", "photo", "services", "projects", "ls", "open", "research", "skills", "contact", "github", "linkedin", "email", "cd", "date", "clear", "sudo", "exit"];
+const CHIPS = ["help", "whoami", "services", "projects", "research", "skills", "contact"];
+
+/* Boot timeline (ms after first paint). The transcript is static markup, so it is in the
+   prerendered HTML for crawlers; CSS reveals each line at its delay. */
+const T = { login: 80, mount: 200, backend: 310, automation: 420, iot: 530, decode: 650, prompt: 800, type: 840, who: 1260, hint: 1360, input: 1440 };
+const at = (ms: number) => ({ ["--d" as string]: `${ms}ms` }) as CSSProperties;
+export const PHOTO_AT = T.decode;
 
 const scrollTo = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth" });
 
-function Jump({ to, label }: { to: string; label: string }) {
+function Jump({ to }: { to: string }) {
   return (
     <button type="button" className="t-jump" onClick={() => scrollTo(to)}>
-      {label}
+      cd {to}
     </button>
+  );
+}
+
+const PALETTE = ["#0b0e1a", "#ff7b72", "#7ee787", "#f2cc60", "#7aa2ff", "#f778ba", "#5ce1e6", "#dce1f0"];
+
+function Neofetch() {
+  const [g, setG] = useState(0); // remount the image on hover to replay the glitch
+  const info: [string, string][] = [
+    ["Name", "Rakibul Hasan"],
+    ["Role", "Backend & automation developer"],
+    ["Location", "Dhaka, Bangladesh"],
+    ["Uptime", "freelancing since 2022"],
+    ["Study", "CSE, Daffodil International University"],
+    ["Stack", "Laravel, Node.js, FastAPI, Next.js"],
+    ["Research", "IoT, 4 papers in preparation"],
+    ["Status", "open to freelance projects"],
+  ];
+  return (
+    <div className="nf">
+      <div className="nf-photo gl glitch-in" key={g} style={{ ["--img" as string]: `url(${PORTRAIT})` }} onMouseEnter={() => setG((n) => n + 1)}>
+        <img src={PORTRAIT} alt="Rakibul Hasan" width={720} height={960} />
+        <span className="nf-scan" aria-hidden />
+      </div>
+      <div className="nf-info">
+        <div><span className="c-green t-strong">rakibul</span><span className="c-dim">@</span><span className="c-blue t-strong">dhaka</span></div>
+        <div className="c-dim" aria-hidden>-------------</div>
+        {info.map(([k, v]) => (
+          <div key={k}><span className="c-cyan">{k}</span><span className="c-dim">: </span>{v}</div>
+        ))}
+        <div className="nf-colors" aria-hidden>{PALETTE.map((c) => <span key={c} style={{ background: c }} />)}</div>
+      </div>
+    </div>
   );
 }
 
@@ -36,7 +75,8 @@ function run(raw: string, clear: () => void): ReactNode {
       return (
         <div className="t-grid">
           {[
-            ["whoami", "who I am"],
+            ["whoami", "who I am, with photo (also: neofetch)"],
+            ["services", "what I can build for you"],
             ["projects", "selected work (also: ls)"],
             ["open <name>", "links for a project"],
             ["research", "papers in preparation"],
@@ -50,11 +90,27 @@ function run(raw: string, clear: () => void): ReactNode {
         </div>
       );
     case "whoami":
+    case "neofetch":
+    case "fetch":
+    case "photo":
       return (
         <div>
-          <div className="t-name">Rakibul Hasan</div>
-          <div>Backend and automation developer in Dhaka, Bangladesh.</div>
-          <div className="c-dim">CSE student at Daffodil International University. Freelancing since 2022.</div>
+          <div className="c-dim"><span className="c-yellow">[ IMG ]</span> rendering profile.jpg</div>
+          <Neofetch />
+        </div>
+      );
+    case "cat":
+    case "display":
+      return /profile|photo|\.jpg|\.png|\.webp/i.test(arg)
+        ? <Neofetch />
+        : <span className="c-red">{cmd}: {arg || "?"}: try <span className="c-cyan">{cmd} profile.jpg</span></span>;
+    case "services":
+      return (
+        <div>
+          {services.map((s) => (
+            <div key={s.title} className="t-row"><span className="c-cyan">{s.title}</span><span className="c-dim">{s.text}</span></div>
+          ))}
+          <Jump to="services" />
         </div>
       );
     case "ls":
@@ -67,11 +123,12 @@ function run(raw: string, clear: () => void): ReactNode {
               <span>{p.kind}{p.private && <span className="c-yellow"> (private)</span>}</span>
             </div>
           ))}
-          <div className="c-dim">+ {moreProjects.length} more. Try <span className="c-cyan">open tradingspark</span> or <Jump to="projects" label="cd projects" /></div>
+          <div className="c-dim">+ {moreProjects.length} more. Try <span className="c-cyan">open tradingspark</span> or <Jump to="projects" /></div>
         </div>
       );
     case "open": {
-      const p = ALL.find((x) => slug(x.name).startsWith(slug(arg)) && arg);
+      if (/profile|photo|\.jpg/i.test(arg)) return <Neofetch />;
+      const p = arg ? ALL.find((x) => slug(x.name).startsWith(slug(arg))) : undefined;
       if (!p) return <span className="c-red">open: no project matching "{arg || "?"}". Try <span className="c-cyan">projects</span>.</span>;
       if (!p.code && !p.live) return <span><span className="c-cyan t-strong">{p.name}</span>: private repository. Ask me for a walkthrough: <a href={`mailto:${LINKS.email}`}>{LINKS.email}</a></span>;
       return (
@@ -89,7 +146,7 @@ function run(raw: string, clear: () => void): ReactNode {
           {research.map((r) => (
             <div key={r.title}><span className="c-yellow">[in preparation]</span> {r.title}</div>
           ))}
-          <Jump to="research" label="cd research" />
+          <Jump to="research" />
         </div>
       );
     case "skills":
@@ -115,8 +172,9 @@ function run(raw: string, clear: () => void): ReactNode {
     case "linkedin":
       return <a href={LINKS.linkedin} target="_blank" rel="noreferrer">linkedin.com/in/rakibulx33</a>;
     case "cd": {
-      const target = ["projects", "research", "skills", "github", "contact"].find((s) => s.startsWith(arg.replace(/^~?\/?/, "").toLowerCase()) && arg);
-      if (!target) return <span className="c-red">cd: no such section: {arg || "?"}. Sections: projects, research, skills, github, contact</span>;
+      const want = arg.replace(/^~?\/?/, "").toLowerCase();
+      const target = want ? SECTIONS.find((s) => s.startsWith(want)) : undefined;
+      if (!target) return <span className="c-red">cd: no such section: {arg || "?"}. Sections: {SECTIONS.join(", ")}</span>;
       setTimeout(() => scrollTo(target), 150);
       return <span className="c-dim">moving to ~/{target}</span>;
     }
@@ -128,26 +186,16 @@ function run(raw: string, clear: () => void): ReactNode {
     case "sudo":
       return <span className="c-red">rakibul is not in the sudoers file. This incident will be reported.</span>;
     case "exit":
-      setTimeout(() => scrollTo("projects"), 150);
+      setTimeout(() => scrollTo("services"), 150);
       return <span className="c-dim">logout. Scrolling to the work instead.</span>;
     default:
       return <span className="c-red">zsh: command not found: {cmd}. Type <span className="c-cyan">help</span>.</span>;
   }
 }
 
-const BOOT: { delay: number; node: ReactNode; photo?: boolean }[] = [
-  { delay: 120, node: <span className="c-dim">Last login: from rakibulx33.me</span> },
-  { delay: 260, node: <><span className="c-green">[  OK  ]</span> Mounted <span className="c-cyan">~/projects</span> ({ALL.length} entries)</> },
-  { delay: 160, node: <><span className="c-green">[  OK  ]</span> Started <span className="c-cyan">backend.service</span></> },
-  { delay: 160, node: <><span className="c-green">[  OK  ]</span> Started <span className="c-cyan">automation.service</span></> },
-  { delay: 160, node: <><span className="c-green">[  OK  ]</span> Reached target <span className="c-cyan">iot-research</span></> },
-  { delay: 220, node: <><span className="c-yellow">[ LOAD ]</span> Decoding profile.jpg</>, photo: true },
-];
-
-export default function Terminal({ onPhoto }: { onPhoto: () => void }) {
+export default function Terminal({ onPhoto, onCommand }: { onPhoto: () => void; onCommand?: () => void }) {
   const [lines, setLines] = useState<Line[]>([]);
-  const [ready, setReady] = useState(false);
-  const [typing, setTyping] = useState("");
+  const [cleared, setCleared] = useState(false);
   const [input, setInput] = useState("");
   const [history, setHistory] = useState<string[]>([]);
   const [hIdx, setHIdx] = useState(-1);
@@ -156,52 +204,25 @@ export default function Terminal({ onPhoto }: { onPhoto: () => void }) {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const push = useCallback((node: ReactNode) => setLines((l) => [...l, { id: idRef.current++, node }]), []);
-  const clear = useCallback(() => setLines([]), []);
+  const clear = useCallback(() => { setLines([]); setCleared(true); }, []);
 
-  const execute = useCallback((raw: string, echo = true) => {
-    if (echo) push(<>{PROMPT} {raw}</>);
+  const execute = useCallback((raw: string) => {
+    push(<>{PROMPT} {raw}</>);
     const out = run(raw, clear);
     if (out != null) push(out);
-  }, [push, clear]);
+    onCommand?.();
+  }, [push, clear, onCommand]);
 
-  // Boot sequence, then type `whoami`.
+  // The "[ LOAD ] Decoding profile.jpg" line starts the portrait decode.
   useEffect(() => {
-    const reduce = prefersReducedMotion();
-    if (reduce) {
-      BOOT.forEach((b) => push(b.node));
-      onPhoto();
-      execute("whoami");
-      push(<span className="c-dim">Type a command, or pick one below.</span>);
-      setReady(true);
-      return;
-    }
-    let cancelled = false;
-    const timers: number[] = [];
-    let t = 0;
-    BOOT.forEach((b) => {
-      t += b.delay;
-      timers.push(window.setTimeout(() => { if (!cancelled) { push(b.node); if (b.photo) onPhoto(); } }, t));
-    });
-    t += 500;
-    const word = "whoami";
-    for (let i = 1; i <= word.length; i++) {
-      timers.push(window.setTimeout(() => !cancelled && setTyping(word.slice(0, i)), t + i * 85));
-    }
-    t += word.length * 85 + 350;
-    timers.push(window.setTimeout(() => {
-      if (cancelled) return;
-      setTyping("");
-      execute(word);
-      push(<span className="c-dim">Type a command, or pick one below.</span>);
-      setReady(true);
-    }, t));
-    return () => { cancelled = true; timers.forEach(clearTimeout); };
-  }, [push, execute, onPhoto]);
+    const id = window.setTimeout(onPhoto, prefersReducedMotion() ? 0 : PHOTO_AT);
+    return () => window.clearTimeout(id);
+  }, [onPhoto]);
 
   useEffect(() => {
     const el = bodyRef.current;
-    if (el) el.scrollTop = el.scrollHeight;
-  }, [lines, typing]);
+    if (el && lines.length) el.scrollTop = el.scrollHeight;
+  }, [lines]);
 
   // Press "/" anywhere to jump into the terminal.
   useEffect(() => {
@@ -234,7 +255,7 @@ export default function Terminal({ onPhoto }: { onPhoto: () => void }) {
       setHIdx(Math.max(-1, i));
       setInput(i >= 0 ? history[i] : "");
     } else if (e.key === "Tab") {
-      const m = COMMANDS.filter((c) => c.startsWith(input.trim()) && input.trim());
+      const m = COMMANDS.filter((c) => input.trim() && c.startsWith(input.trim()));
       if (m.length === 1) { e.preventDefault(); setInput(m[0] + " "); }
     } else if (e.key === "l" && e.ctrlKey) {
       e.preventDefault();
@@ -243,40 +264,57 @@ export default function Terminal({ onPhoto }: { onPhoto: () => void }) {
   };
 
   return (
-    <div className="win term" onClick={() => ready && window.getSelection()?.isCollapsed && inputRef.current?.focus({ preventScroll: true })}>
+    <div className="win term" onClick={() => window.getSelection()?.isCollapsed && inputRef.current?.focus({ preventScroll: true })}>
       <div className="win-bar">
         <span className="dots" aria-hidden><i /><i /><i /></span>
         <span className="win-title">rakibul@dhaka: ~</span>
-        <span className="win-meta">zsh</span>
+        <span className="win-meta win-hint">press <kbd>/</kbd> to type</span>
       </div>
-      <div className="term-body" ref={bodyRef} aria-live="polite">
-        {lines.map((l) => <div key={l.id} className="t-line">{l.node}</div>)}
-        {!ready && typing && <div className="t-line">{PROMPT} {typing}<span className="caret" /></div>}
-        {ready && (
-          <label className="t-input">
-            {PROMPT}
-            <span className="sr-only">Terminal command</span>
-            <input
-              ref={inputRef}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={onKeyDown}
-              spellCheck={false}
-              autoCapitalize="off"
-              autoComplete="off"
-              aria-label="Type a command, for example help"
-            />
-          </label>
+      <div className="term-body" ref={bodyRef}>
+        {!cleared && (
+          <div className="boot">
+            <div className="t-line boot-line c-dim" style={at(T.login)}>Last login: from rakibulx33.me</div>
+            <div className="t-line boot-line" style={at(T.mount)}><span className="c-green">[  OK  ]</span> Mounted <span className="c-cyan">~/projects</span> ({ALL.length} entries)</div>
+            <div className="t-line boot-line" style={at(T.backend)}><span className="c-green">[  OK  ]</span> Started <span className="c-cyan">backend.service</span></div>
+            <div className="t-line boot-line" style={at(T.automation)}><span className="c-green">[  OK  ]</span> Started <span className="c-cyan">automation.service</span></div>
+            <div className="t-line boot-line" style={at(T.iot)}><span className="c-green">[  OK  ]</span> Reached target <span className="c-cyan">iot-research</span></div>
+            <div className="t-line boot-line" style={at(T.decode)}><span className="c-yellow">[ LOAD ]</span> Decoding profile.jpg</div>
+            <div className="t-line boot-line" style={at(T.prompt)}>{PROMPT} <span className="typed-cmd" style={at(T.type)}>whoami</span></div>
+            <div className="boot-line whoami" style={at(T.who)}>
+              <h1 className="t-h1">
+                <span className="t-name">Rakibul Hasan</span>
+                <span className="sr-only"> – </span>
+                <span className="t-role">Backend and automation developer in Dhaka, Bangladesh</span>
+              </h1>
+              <p className="t-sub c-dim">CSE student at Daffodil International University. Freelancing since 2022.</p>
+            </div>
+            <div className="t-line boot-line c-dim" style={at(T.hint)}>Type a command, or pick one below.</div>
+          </div>
         )}
-        {!ready && !typing && <span className="caret" />}
+        <div className="t-out" aria-live="polite">
+          {lines.map((l) => <div key={l.id} className="t-line">{l.node}</div>)}
+        </div>
+        <label className="t-input boot-line" style={at(T.input)}>
+          {PROMPT}
+          <span className="sr-only">Terminal command</span>
+          <input
+            ref={inputRef}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={onKeyDown}
+            spellCheck={false}
+            autoCapitalize="off"
+            autoComplete="off"
+            aria-label="Type a command, for example help"
+          />
+        </label>
       </div>
       <div className="chips" role="group" aria-label="Quick commands">
         {CHIPS.map((c) => (
-          <button key={c} type="button" disabled={!ready} onClick={(e) => { e.stopPropagation(); execute(c); }}>
+          <button key={c} type="button" onClick={(e) => { e.stopPropagation(); execute(c); }}>
             {c}
           </button>
         ))}
-        <span className="chips-hint">Press <kbd>/</kbd> to type</span>
       </div>
     </div>
   );

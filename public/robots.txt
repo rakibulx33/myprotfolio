@@ -1,3 +1,4 @@
+# Everyone, including search and AI assistants, is welcome to read this site.
 User-agent: *
 Allow: /
 

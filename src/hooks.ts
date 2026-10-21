@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 
+// Every hook here renders the same thing on the server and on the client's first
+// pass (the page is prerendered and then hydrated); motion only starts in effects.
+
 export const prefersReducedMotion = () =>
   typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -10,7 +13,7 @@ export function useInView<T extends Element>(margin = "0px 0px -15% 0px") {
   useEffect(() => {
     const el = ref.current;
     if (!el || seen) return;
-    if (prefersReducedMotion()) { setSeen(true); return; }
+    if (prefersReducedMotion() || typeof IntersectionObserver === "undefined") { setSeen(true); return; }
     const io = new IntersectionObserver(([e]) => {
       if (e.isIntersecting) { setSeen(true); io.disconnect(); }
     }, { rootMargin: margin });
@@ -39,16 +42,20 @@ export function useTyped(text: string, start: boolean, speed = 38) {
 
 const GLYPHS = "!<>-_\\/[]{}=+*^?#01ABCDEFX";
 
-/** Decrypts `text` from random glyphs, left to right, once `start` is true. */
+/**
+ * Decrypt effect for a heading. The real text always stays in the DOM (for search
+ * engines and screen readers); `fx` is a decorative overlay drawn on top until `done`.
+ */
 export function useScramble(text: string, start: boolean, duration = 900) {
-  const [out, setOut] = useState(() => text.replace(/\S/g, " "));
+  const [state, setState] = useState({ fx: "", done: false });
   useEffect(() => {
     if (!start) return;
-    if (prefersReducedMotion()) { setOut(text); return; }
+    if (prefersReducedMotion()) { setState({ fx: text, done: true }); return; }
     let raf = 0;
     const t0 = performance.now();
     const tick = (t: number) => {
-      const p = Math.min(1, (t - t0) / duration);
+      const p = Math.min(1, Math.max(0, (t - t0) / duration));
+      if (p >= 1) { setState({ fx: text, done: true }); return; }
       const fixed = Math.floor(p * text.length);
       let s = "";
       for (let i = 0; i < text.length; i++) {
@@ -57,23 +64,23 @@ export function useScramble(text: string, start: boolean, duration = 900) {
         else if (i < fixed + 6) s += GLYPHS[(Math.random() * GLYPHS.length) | 0];
         else s += " ";
       }
-      setOut(s);
-      if (p < 1) raf = requestAnimationFrame(tick);
+      setState({ fx: s, done: false });
+      raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
   }, [text, start, duration]);
-  return out;
+  return state;
 }
 
-/** Live clock for a given IANA zone, e.g. "Asia/Dhaka". */
+/** Live clock for an IANA zone. Starts as a placeholder so the prerendered HTML matches. */
 export function useClock(timeZone: string) {
-  const fmt = () => new Intl.DateTimeFormat("en-GB", { timeZone, hour: "2-digit", minute: "2-digit" }).format(new Date());
-  const [now, setNow] = useState(fmt);
+  const [now, setNow] = useState("--:--");
   useEffect(() => {
+    const fmt = () => new Intl.DateTimeFormat("en-GB", { timeZone, hour: "2-digit", minute: "2-digit" }).format(new Date());
+    setNow(fmt());
     const id = window.setInterval(() => setNow(fmt()), 15_000);
     return () => window.clearInterval(id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [timeZone]);
   return now;
 }

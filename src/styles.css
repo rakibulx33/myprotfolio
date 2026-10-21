@@ -134,23 +134,37 @@ kbd {
 }
 
 .term-body {
-  height: clamp(340px, 52vh, 470px); overflow-y: auto; padding: 18px 20px 14px;
+  min-height: clamp(340px, 52vh, 470px); max-height: min(74vh, 620px); overflow-y: auto; padding: 18px 20px 14px;
   font-family: var(--mono); font-size: 13.5px; font-stretch: 92%; line-height: 1.75;
   background-image: repeating-linear-gradient(0deg, rgba(255,255,255,.018) 0 1px, transparent 1px 3px);
   scrollbar-width: thin; scrollbar-color: var(--line) transparent;
 }
-@media (max-width: 640px) { .term-body { font-size: 12px; padding: 14px; height: 380px; } }
+@media (max-width: 640px) { .term-body { font-size: 12px; padding: 14px; min-height: 360px; } }
 .t-line { white-space: pre-wrap; overflow-wrap: anywhere; animation: line-in .18s ease-out; }
 @keyframes line-in { from { opacity: 0; transform: translateY(3px); } }
 @media (prefers-reduced-motion: reduce) { .t-line { animation: none; } }
 .t-line + .t-line { margin-top: 2px; }
 .t-prompt { white-space: nowrap; }
 .t-strong { font-weight: 700; }
+.t-h1 { margin: 0; font: inherit; }
 .t-name {
-  font-weight: 800; font-stretch: 112.5%; font-size: clamp(26px, 4.2vw, 48px); line-height: 1.1;
+  display: block; font-weight: 800; font-stretch: 112.5%; font-size: clamp(26px, 4.2vw, 48px); line-height: 1.1;
   letter-spacing: -0.03em; margin: 6px 0 8px; color: var(--fg);
   text-shadow: 0 0 28px color-mix(in oklab, var(--cyan) 35%, transparent);
 }
+.t-role { display: block; color: var(--fg); }
+.t-sub { margin: 0; }
+.whoami { margin: 2px 0 4px; }
+
+/* Boot transcript: static markup, revealed by CSS on a timeline (JS only adds the .js class). */
+.js .boot-line { opacity: 0; animation: boot-in .2s ease-out forwards; animation-delay: var(--d, 0ms); }
+@keyframes boot-in { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
+.js .typed-cmd { display: inline-block; vertical-align: top; clip-path: inset(0 100% 0 0); animation: type-in .38s steps(6, end) forwards; animation-delay: var(--d, 0ms); }
+@keyframes type-in { to { clip-path: inset(0 0 0 0); } }
+@media (prefers-reduced-motion: reduce) {
+  .js .boot-line, .js .typed-cmd { opacity: 1; transform: none; clip-path: none; animation: none; }
+}
+
 .t-row { display: grid; grid-template-columns: 24ch minmax(0, 1fr); gap: 12px; }
 @media (max-width: 640px) { .t-row { grid-template-columns: 1fr; gap: 0; margin-bottom: 4px; } }
 .t-line a { color: var(--blue); }
@@ -158,6 +172,16 @@ kbd {
 .t-input { display: flex; align-items: baseline; gap: 1ch; margin-top: 4px; }
 .t-input input { flex: 1; min-width: 0; background: transparent; border: 0; outline: 0; color: var(--fg); font: inherit; caret-color: var(--cyan); padding: 0; }
 .t-input:focus-within { background: color-mix(in oklab, var(--cyan) 5%, transparent); border-radius: 4px; }
+
+/* neofetch-style card printed by whoami / neofetch */
+.nf { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 20px; align-items: start; margin: 8px 0 10px; white-space: normal; }
+@media (max-width: 640px) { .nf { grid-template-columns: 1fr; gap: 12px; } .nf-photo { width: 140px; } }
+.nf-photo { position: relative; aspect-ratio: 3 / 4; border-radius: 6px; overflow: hidden; background: #000; border: 1px solid var(--line); cursor: crosshair; }
+.nf-photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 18%; display: block; }
+.nf-scan { position: absolute; inset: 0; z-index: 5; pointer-events: none; background: repeating-linear-gradient(0deg, rgba(0, 0, 0, .22) 0 1px, transparent 1px 3px); }
+.nf-info { line-height: 1.7; }
+.nf-colors { display: flex; margin-top: 10px; }
+.nf-colors span { width: 20px; height: 12px; }
 
 .chips { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--line); background: var(--bg-2); }
 .chips button {
@@ -167,21 +191,81 @@ kbd {
 }
 .chips button:hover:not(:disabled) { color: var(--cyan); border-color: var(--cyan); transform: translateY(-1px); }
 .chips button:disabled { opacity: .35; cursor: default; }
-.chips-hint { margin-left: auto; font-family: var(--mono); font-size: 11px; color: var(--dim); }
-@media (hover: none) { .chips-hint { display: none; } }
+.win-hint kbd { font-size: 10.5px; padding: 0 5px; }
+@media (hover: none) { .win-hint { display: none; } }
 
-.photo { position: relative; aspect-ratio: 3 / 4; background: var(--bg-2); }
-.photo canvas, .photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
-.photo canvas { opacity: 0; image-rendering: pixelated; }
-.photo.started canvas { opacity: 1; }
-.photo img { opacity: 0; transition: opacity .35s ease-out; }
-.photo.done img { opacity: 1; }
-.photo.done canvas { opacity: 0; transition: opacity .35s; }
-.photo::before { /* waiting state */
-  content: "waiting for decoder…"; position: absolute; inset: 0; display: grid; place-items: center;
+.photo { position: relative; aspect-ratio: 3 / 4; background: var(--bg-2); overflow: hidden; }
+.photo img, .photo canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.photo canvas { display: none; }
+.js .photo canvas { display: block; background: var(--bg-2); image-rendering: pixelated; transition: opacity .35s ease-out; }
+.js .photo.done canvas { opacity: 0; }
+.photo-wait { display: none; }
+.js .photo:not(.started) .photo-wait {
+  display: grid; place-items: center; position: absolute; inset: 0;
   font-family: var(--mono); font-size: 11px; color: var(--dim);
 }
-.photo.started::before { content: none; }
+/* Glitch: two tinted copies of the image (red / cyan) screen-blended over it, jumping
+   between horizontal slices with steps() for a digital tear. Used by the hero portrait
+   (on every command and on hover) and the neofetch card (as it renders). */
+.gl { isolation: isolate; }
+.gl::before, .gl::after { content: ""; position: absolute; inset: 0; z-index: 4; pointer-events: none; opacity: 0; }
+/* The tinted copies (and their blend modes) only exist while a glitch is running,
+   so the first paint stays cheap. */
+.gl.glitching::before, .gl.glitching::after, .nf-photo.glitch-in::before, .nf-photo.glitch-in::after {
+  background-image: linear-gradient(var(--tint), var(--tint)), var(--img);
+  background-size: cover; background-position: 50% 18%; background-repeat: no-repeat;
+  background-blend-mode: multiply; mix-blend-mode: screen;
+}
+.gl::before { --tint: #ff2a6d; }
+.gl::after { --tint: #19e6ff; }
+.gl.glitching::before { animation: glitch-a .46s steps(1, end) both; }
+.gl.glitching::after { animation: glitch-b .46s steps(1, end) both; }
+.gl.glitching img { animation: glitch-base .46s steps(1, end) both; }
+.nf-photo.glitch-in::before { animation: glitch-a 1s steps(1, end) both; }
+.nf-photo.glitch-in::after { animation: glitch-b 1s steps(1, end) both; }
+.nf-photo.glitch-in img { animation: glitch-in-img 1s steps(1, end) both; }
+
+@keyframes glitch-a {
+  0%   { opacity: 1; transform: translate(-11px, 0); clip-path: inset(6% 0 76% 0); }
+  14%  { transform: translate(10px, 0); clip-path: inset(38% 0 44% 0); }
+  28%  { transform: translate(-6px, 1px); clip-path: inset(68% 0 14% 0); }
+  42%  { transform: translate(13px, 0); clip-path: inset(18% 0 66% 0); }
+  56%  { transform: translate(-8px, 0); clip-path: inset(52% 0 30% 0); }
+  70%  { transform: translate(5px, -1px); clip-path: inset(84% 0 3% 0); }
+  84%  { transform: translate(-3px, 0); clip-path: inset(0 0 0 0); }
+  100% { opacity: 0; transform: none; clip-path: inset(0 0 0 0); }
+}
+@keyframes glitch-b {
+  0%   { opacity: 1; transform: translate(10px, 0); clip-path: inset(58% 0 22% 0); }
+  14%  { transform: translate(-11px, 0); clip-path: inset(12% 0 72% 0); }
+  28%  { transform: translate(8px, 0); clip-path: inset(44% 0 40% 0); }
+  42%  { transform: translate(-10px, 1px); clip-path: inset(76% 0 8% 0); }
+  56%  { transform: translate(6px, 0); clip-path: inset(26% 0 58% 0); }
+  70%  { transform: translate(-5px, 0); clip-path: inset(62% 0 20% 0); }
+  84%  { transform: translate(3px, 0); clip-path: inset(0 0 0 0); }
+  100% { opacity: 0; transform: none; clip-path: inset(0 0 0 0); }
+}
+@keyframes glitch-base {
+  0%   { transform: translate(2px, 0) skewX(-1.5deg); filter: contrast(1.25) saturate(1.3); }
+  25%  { transform: translate(-3px, 0); filter: hue-rotate(-18deg) contrast(1.2); }
+  50%  { transform: translate(1px, 0) skewX(1deg); filter: none; }
+  75%  { transform: translate(-1px, 0); filter: contrast(1.15); }
+  100% { transform: none; filter: none; }
+}
+@keyframes glitch-in-img {
+  0%   { opacity: 0; }
+  8%   { opacity: 1; transform: translate(-4px, 0) skewX(-3deg); filter: contrast(1.4) saturate(1.5); }
+  16%  { opacity: .25; }
+  24%  { opacity: 1; transform: translate(3px, 0); filter: hue-rotate(-25deg); }
+  36%  { opacity: .6; transform: translate(-2px, 0); }
+  48%  { opacity: 1; transform: none; filter: contrast(1.2); }
+  70%  { transform: translate(1px, 0); filter: none; }
+  100% { opacity: 1; transform: none; filter: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gl::before, .gl::after, .gl img { animation: none !important; }
+}
+
 .photo-sweep { position: absolute; left: 0; right: 0; top: -30%; height: 30%; pointer-events: none;
   background: linear-gradient(180deg, transparent, color-mix(in oklab, var(--cyan) 30%, transparent), transparent); opacity: 0; }
 .photo.done .photo-sweep { animation: sweep 1.1s ease-out .05s; }
@@ -207,11 +291,14 @@ kbd {
   font-size: clamp(34px, 6.2vw, 84px); line-height: 1.02; letter-spacing: -0.045em;
   white-space: pre-wrap; min-height: 1.02em;
 }
-.sec-lede { margin: 22px 0 0; max-width: 40em; font-size: 19px; color: var(--fg-2); opacity: 0; transform: translateY(10px); transition: opacity .7s .2s, transform .7s .2s; }
-.sec-lede.in { opacity: 1; transform: none; }
+.scramble { position: relative; }
+.js .scramble:not(.done) .scramble-real { color: transparent; }
+.scramble-fx { position: absolute; left: 0; top: 0; width: 100%; white-space: pre-wrap; pointer-events: none; color: var(--fg); }
+.sec-lede { margin: 22px 0 0; max-width: 40em; font-size: 19px; color: var(--fg-2); transition: opacity .7s .2s, transform .7s .2s; }
+.js .sec-lede:not(.in) { opacity: 0; transform: translateY(10px); }
 
-.reveal { opacity: 0; transform: translateY(18px); transition: opacity .7s cubic-bezier(.2,.7,.2,1), transform .7s cubic-bezier(.2,.7,.2,1); transition-delay: calc(var(--i, 0) * 70ms); }
-.reveal.in { opacity: 1; transform: none; }
+.reveal { transition: opacity .7s cubic-bezier(.2,.7,.2,1), transform .7s cubic-bezier(.2,.7,.2,1); transition-delay: calc(var(--i, 0) * 70ms); }
+.js .reveal:not(.in) { opacity: 0; transform: translateY(18px); }
 @media (prefers-reduced-motion: reduce) {
   .reveal, .sec-lede { opacity: 1; transform: none; transition: none; }
 }
@@ -219,6 +306,14 @@ kbd {
 .links { display: inline-flex; flex-wrap: wrap; gap: 4px 16px; font-family: var(--mono); font-size: 13px; font-stretch: 92%; }
 .links a { color: var(--cyan); text-decoration: none; }
 .links a:hover { text-decoration: underline; text-underline-offset: 4px; }
+
+/* Services */
+.svc { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 48px; }
+@media (max-width: 860px) { .svc { grid-template-columns: 1fr; } }
+.svc-item { padding: 26px 0 28px; border-top: 1px solid var(--line); }
+.svc-item h3 { margin: 0 0 10px; font-family: var(--mono); font-weight: 700; font-stretch: 104%; font-size: clamp(19px, 1.9vw, 23px); line-height: 1.25; letter-spacing: -0.025em; }
+.svc-item p { margin: 0; max-width: 34em; color: var(--fg-2); }
+.svc-cta { margin-top: 30px; font-size: 14px; }
 
 /* Project panes, with a cursor-following glow */
 .panes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
@@ -279,8 +374,8 @@ kbd {
 /* GitHub heatmap */
 .heat-wrap { overflow-x: auto; scrollbar-width: thin; scrollbar-color: var(--line) transparent; padding-bottom: 6px; }
 .heat { display: grid; grid-auto-flow: column; grid-template-rows: repeat(7, 1fr); gap: 3px; min-width: 760px; }
-.heat span { aspect-ratio: 1; border-radius: 2px; background: #19203a; transform: scale(0); transition: transform .4s cubic-bezier(.3,1.4,.5,1); transition-delay: var(--d, 0ms); }
-.heat-box.in .heat span { transform: none; }
+.heat span { aspect-ratio: 1; border-radius: 2px; background: #19203a; transition: transform .4s cubic-bezier(.3,1.4,.5,1); transition-delay: var(--d, 0ms); }
+.js .heat-box:not(.in) .heat span { transform: scale(0); }
 .heat span[data-l="1"] { background: #1e4d3a; }
 .heat span[data-l="2"] { background: #2e7a52; }
 .heat span[data-l="3"] { background: #4cae6b; }
@@ -291,8 +386,8 @@ kbd {
 /* Contact */
 .contact { padding-bottom: clamp(96px, 12vw, 140px); }
 .ping { font-family: var(--mono); font-size: 12.5px; font-stretch: 92%; line-height: 1.8; margin-bottom: 36px; color: var(--fg-2); }
-.ping-line { opacity: 0; transform: translateX(-6px); transition: opacity .35s, transform .35s; transition-delay: calc(var(--i) * 260ms); }
-.ping-line.in { opacity: 1; transform: none; }
+.ping-line { transition: opacity .35s, transform .35s; transition-delay: calc(var(--i) * 260ms); }
+.js .ping-line:not(.in) { opacity: 0; transform: translateX(-6px); }
 @media (prefers-reduced-motion: reduce) { .ping-line { opacity: 1; transform: none; transition: none; } }
 .mail {
   display: inline-block; margin-top: 40px; font-family: var(--mono); font-weight: 700; font-stretch: 106%;

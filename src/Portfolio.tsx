@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent, type ReactNode } from "react";
-import { featuredProjects, moreProjects, research, skillGroups, LINKS, type Project } from "./data";
+import { featuredProjects, moreProjects, research, services, skillGroups, LINKS, PORTRAIT, type Project } from "./data";
 import Terminal from "./Terminal";
 import { prefersReducedMotion, useClock, useInView, useScramble, useTyped } from "./hooks";
 
-const PORTRAIT = "/profile.jpg?v=5";
 const TABS = [
   { id: "top", label: "home" },
+  { id: "services", label: "services" },
   { id: "projects", label: "projects" },
   { id: "research", label: "research" },
   { id: "skills", label: "skills" },
@@ -17,30 +17,45 @@ type Contrib = { date: string; count: number; level: number };
 
 export default function Portfolio() {
   const [photoOn, setPhotoOn] = useState(false);
+  const [glitch, setGlitch] = useState(0);
   const onPhoto = useCallback(() => setPhotoOn(true), []);
+  const onCommand = useCallback(() => setGlitch((n) => n + 1), []);
 
   return (
     <>
-      <a className="skip" href="#projects">Skip to projects</a>
+      <a className="skip" href="#services">Skip to content</a>
       <TabBar />
 
       <header id="top" className="hero">
         <div className="hero-bg" aria-hidden />
         <div className="hero-stage wrap">
-          <Terminal onPhoto={onPhoto} />
+          <Terminal onPhoto={onPhoto} onCommand={onCommand} />
           <div className="win photo-win">
             <div className="win-bar">
               <span className="dots" aria-hidden><i /><i /><i /></span>
               <span className="win-title">profile.jpg</span>
               <span className="win-meta">1086×1448</span>
             </div>
-            <PixelPhoto start={photoOn} />
+            <PixelPhoto start={photoOn} glitch={glitch} />
           </div>
         </div>
-        <a className="scroll-hint" href="#projects">scroll or type <kbd>cd projects</kbd></a>
+        <a className="scroll-hint" href="#services">scroll or type <kbd>cd services</kbd></a>
       </header>
 
       <main>
+        <Section id="services" cmd="cat services.txt" title="What I build"
+          lede="I work as a freelance backend and automation developer for businesses and teams, remotely from Dhaka, Bangladesh.">
+          <ul className="svc">
+            {services.map((s, i) => (
+              <Reveal as="li" key={s.title} i={i} className="svc-item">
+                <h3><span className="c-cyan" aria-hidden>› </span>{s.title}</h3>
+                <p>{s.text}</p>
+              </Reveal>
+            ))}
+          </ul>
+          <p className="links svc-cta"><a href="#contact">[start a project]</a><a href="#projects">[see selected work]</a></p>
+        </Section>
+
         <Section id="projects" cmd="ls ~/projects --featured" title="Selected work"
           lede="Production systems for clients and my own products. Private repositories are described without code; I'm happy to walk through them on a call.">
           <div className="panes">
@@ -124,7 +139,7 @@ function StatusBar() {
       <span className="status-item">main</span>
       <span className="status-item grow">rakibulx33.me</span>
       <span className="status-item">utf-8</span>
-      <span className="status-item">© {new Date().getFullYear()} Rakibul Hasan</span>
+      <span className="status-item" suppressHydrationWarning>© {new Date().getFullYear()} Rakibul Hasan</span>
       <a className="status-item" href="#top">gg</a>
     </footer>
   );
@@ -132,9 +147,22 @@ function StatusBar() {
 
 /* ---------------------------------------------------------------- hero photo */
 
-function PixelPhoto({ start }: { start: boolean }) {
+/* The real <img> is always in the page (no-JS visitors, crawlers, LCP); with JS a canvas
+   sits on top, shows a "waiting" panel, pixel-decodes the portrait, then fades away. */
+function PixelPhoto({ start, glitch }: { start: boolean; glitch: number }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [done, setDone] = useState(false);
+  const [hover, setHover] = useState(0);
+  const [glitching, setGlitching] = useState(false);
+
+  // A short RGB-split glitch whenever a terminal command runs (or on hover), once decoded.
+  useEffect(() => {
+    if (!done || (!glitch && !hover) || prefersReducedMotion()) return;
+    setGlitching(false);
+    const r = requestAnimationFrame(() => setGlitching(true));
+    const t = window.setTimeout(() => setGlitching(false), 520);
+    return () => { cancelAnimationFrame(r); window.clearTimeout(t); };
+  }, [glitch, hover, done]);
 
   useEffect(() => {
     if (!start) return;
@@ -142,16 +170,18 @@ function PixelPhoto({ start }: { start: boolean }) {
     const img = new Image();
     img.src = PORTRAIT;
     let raf = 0;
+    let cancelled = false;
     img.onload = () => {
       const c = canvasRef.current;
-      if (!c) return;
-      const ctx = c.getContext("2d")!;
-      c.width = 543; c.height = 724;
+      if (!c || cancelled) return;
+      const ctx = c.getContext("2d");
+      if (!ctx) { setDone(true); return; }
+      c.width = 540; c.height = 720;
       const steps = [48, 32, 20, 12, 7, 4, 2];
-      const t0 = performance.now();
-      const per = 150;
+      const per = 110;
       const tiny = document.createElement("canvas");
       const tctx = tiny.getContext("2d")!;
+      const t0 = performance.now();
       const draw = (t: number) => {
         const k = Math.max(0, Math.floor((t - t0) / per));
         if (k >= steps.length) { setDone(true); return; }
@@ -164,13 +194,26 @@ function PixelPhoto({ start }: { start: boolean }) {
       };
       raf = requestAnimationFrame(draw);
     };
-    return () => cancelAnimationFrame(raf);
+    img.onerror = () => setDone(true);
+    return () => { cancelled = true; cancelAnimationFrame(raf); };
   }, [start]);
 
   return (
-    <div className={`photo ${done ? "done" : ""} ${start ? "started" : ""}`}>
+    <div
+      className={`photo gl${start ? " started" : ""}${done ? " done" : ""}${glitching ? " glitching" : ""}`}
+      style={{ ["--img" as string]: `url(${PORTRAIT})` }}
+      onMouseEnter={() => setHover((n) => n + 1)}
+    >
+      <img
+        src={PORTRAIT}
+        alt="Rakibul Hasan, backend and automation developer, in a grey waistcoat and red tie"
+        width={720}
+        height={960}
+        fetchPriority="high"
+        decoding="async"
+      />
       <canvas ref={canvasRef} aria-hidden />
-      <img src={PORTRAIT} alt="Rakibul Hasan in a grey waistcoat and red tie" width={1086} height={1448} />
+      <span className="photo-wait" aria-hidden>waiting for decoder…</span>
       <span className="photo-sweep" aria-hidden />
     </div>
   );
@@ -178,20 +221,35 @@ function PixelPhoto({ start }: { start: boolean }) {
 
 /* ---------------------------------------------------------------- section kit */
 
+function Prompt({ typed }: { typed: string }) {
+  return (
+    <p className="sec-cmd" aria-hidden>
+      <span className="c-green">rakibul</span><span className="c-dim">@</span><span className="c-blue">dhaka</span>
+      <span className="c-dim">:~$ </span>{typed}<span className="caret" />
+    </p>
+  );
+}
+
+function ScrambleHeading({ id, text, start }: { id?: string; text: string; start: boolean }) {
+  const { fx, done } = useScramble(text, start, 700);
+  return (
+    <h2 id={id} className={`scramble${done ? " done" : ""}`}>
+      <span className="scramble-real">{text}</span>
+      {!done && <span className="scramble-fx" aria-hidden>{fx}</span>}
+    </h2>
+  );
+}
+
 function Section({ id, cmd, title, lede, children }: { id: string; cmd: string; title: string; lede?: string; children: ReactNode }) {
   const [ref, seen] = useInView<HTMLDivElement>();
   const typed = useTyped(cmd, seen, 34);
-  const heading = useScramble(title, seen && typed.length === cmd.length, 700);
   return (
-    <section id={id} className="sec">
+    <section id={id} className="sec" aria-labelledby={`${id}-title`}>
       <div className="wrap">
         <div ref={ref} className="sec-head">
-          <p className="sec-cmd" aria-hidden>
-            <span className="c-green">rakibul</span><span className="c-dim">@</span><span className="c-blue">dhaka</span>
-            <span className="c-dim">:~$ </span>{typed}<span className="caret" />
-          </p>
-          <h2 aria-label={title}><span aria-hidden>{heading}</span></h2>
-          {lede && <p className={`sec-lede ${seen ? "in" : ""}`}>{lede}</p>}
+          <Prompt typed={typed} />
+          <ScrambleHeading id={`${id}-title`} text={title} start={seen && typed.length === cmd.length} />
+          {lede && <p className={`sec-lede${seen ? " in" : ""}`}>{lede}</p>}
         </div>
         {children}
       </div>
@@ -199,11 +257,11 @@ function Section({ id, cmd, title, lede, children }: { id: string; cmd: string; 
   );
 }
 
-function Reveal({ as: Tag = "div", i = 0, className = "", children, style }: { as?: "div" | "li" | "tr"; i?: number; className?: string; children: ReactNode; style?: CSSProperties }) {
+function Reveal({ as: Tag = "div", i = 0, className = "", children, style }: { as?: "div" | "li"; i?: number; className?: string; children: ReactNode; style?: CSSProperties }) {
   const [ref, seen] = useInView<HTMLElement>("0px 0px -8% 0px");
   const Comp = Tag as "div";
   return (
-    <Comp ref={ref as never} className={`reveal ${seen ? "in" : ""} ${className}`} style={{ ...style, ["--i" as string]: i }}>
+    <Comp ref={ref as never} className={`reveal${seen ? " in" : ""} ${className}`} style={{ ...style, ["--i" as string]: i }}>
       {children}
     </Comp>
   );
@@ -228,7 +286,7 @@ function Links({ p }: { p: Project }) {
 function ProjectPane({ p, i }: { p: Project; i: number }) {
   return (
     <Reveal i={i % 2} className="win pane">
-      <div className="pane-inner" onMouseMove={glow}>
+      <article className="pane-inner" onMouseMove={glow}>
         <div className="win-bar">
           <span className="win-title">~/projects/{slug(p.name)}</span>
           <span className={`badge ${p.private ? "b-private" : "b-public"}`}>{p.private ? "private" : "public"}</span>
@@ -246,7 +304,7 @@ function ProjectPane({ p, i }: { p: Project; i: number }) {
           </p>
           <Links p={p} />
         </div>
-      </div>
+      </article>
     </Reveal>
   );
 }
@@ -256,16 +314,14 @@ function MoreProjects() {
   const typed = useTyped("ls -l ~/projects/more", seen, 30);
   return (
     <div className="more" ref={ref}>
-      <p className="sec-cmd more-cmd" aria-hidden>
-        <span className="c-green">rakibul</span><span className="c-dim">@</span><span className="c-blue">dhaka</span><span className="c-dim">:~$ </span>{typed}<span className="caret" />
-      </p>
+      <div className="more-cmd"><Prompt typed={typed} /></div>
       <h3 className="more-title">Also built</h3>
       <p className="c-dim more-total">total {moreProjects.length}</p>
       <ul className="ls">
         {moreProjects.map((p, i) => (
           <Reveal as="li" key={p.name} i={i} className="ls-row">
             <span className="ls-perm c-dim" aria-hidden>{p.private ? "drwx------" : "drwxr-xr-x"}</span>
-            <span className="ls-name"><span className="c-cyan">{slug(p.name)}/</span><span className="ls-kind c-dim">{p.kind}</span></span>
+            <span className="ls-name"><span className="c-cyan">{p.name}</span><span className="ls-kind c-dim">{p.kind}</span></span>
             <span className="ls-desc">{p.description}</span>
             <span className="ls-stack c-dim">{p.stack.join(", ")}</span>
             <span className="ls-links"><Links p={p} /></span>
@@ -320,7 +376,7 @@ function GitHubSection() {
       if (Array.isArray(res?.contributions)) setContribs(res.contributions);
       if (res?.total != null) setTotal(typeof res.total === "object" ? Object.values(res.total as Record<string, number>).reduce((a, b) => a + b, 0) : res.total);
     }).catch(() => {});
-    fetch("https://api.github.com/users/rakibulx33").then((r) => r.json()).then((u) => typeof u?.public_repos === "number" && setRepos(u.public_repos)).catch(() => {});
+    fetch("https://api.github.com/users/rakibulx33").then((r) => (r.ok ? r.json() : null)).then((u) => typeof u?.public_repos === "number" && setRepos(u.public_repos)).catch(() => {});
   }, []);
 
   const summary = [
@@ -346,7 +402,7 @@ function Heatmap({ days }: { days: Contrib[] }) {
   }, [days]);
   useEffect(() => { if (ref.current) ref.current.scrollLeft = ref.current.scrollWidth; }, [cells]);
   return (
-    <div ref={inRef} className={`heat-box ${seen ? "in" : ""}`}>
+    <div ref={inRef} className={`heat-box${seen ? " in" : ""}`}>
       <div className="heat-wrap" ref={ref}>
         <div className="heat" role="img" aria-label="GitHub contribution calendar for the last year">
           {cells.map((c, i) => (
@@ -372,25 +428,22 @@ function Contact() {
   ];
   const typed = useTyped("ping rakibul", seen, 60);
   const done = typed.length === "ping rakibul".length;
-  const heading = useScramble("Have a project in mind?", done, 800);
   return (
-    <section id="contact" className="sec contact">
+    <section id="contact" className="sec contact" aria-labelledby="contact-title">
       <div className="wrap" ref={ref}>
-        <p className="sec-cmd" aria-hidden>
-          <span className="c-green">rakibul</span><span className="c-dim">@</span><span className="c-blue">dhaka</span><span className="c-dim">:~$ </span>{typed}<span className="caret" />
-        </p>
+        <Prompt typed={typed} />
         <div className="ping" aria-hidden>
           {PING.map((l, i) => (
-            <div key={i} className={`ping-line ${done ? "in" : ""}`} style={{ ["--i" as string]: i }}>{l}</div>
+            <div key={i} className={`ping-line${done ? " in" : ""}`} style={{ ["--i" as string]: i }}>{l}</div>
           ))}
         </div>
-        <h2 aria-label="Have a project in mind?"><span aria-hidden>{heading}</span></h2>
+        <ScrambleHeading id="contact-title" text="Have a project in mind?" start={done} />
         <p className="sec-lede in">I take on freelance backend, automation and e-commerce work. Email is the fastest way to reach me.</p>
         <a className="mail" href={`mailto:${LINKS.email}`} onMouseMove={glow}>{LINKS.email}</a>
         <ul className="socials">
-          <li><a href={LINKS.github} target="_blank" rel="noreferrer">[github]</a></li>
-          <li><a href={LINKS.linkedin} target="_blank" rel="noreferrer">[linkedin]</a></li>
-          <li><a href={LINKS.facebook} target="_blank" rel="noreferrer">[facebook]</a></li>
+          <li><a href={LINKS.github} target="_blank" rel="noreferrer me">[github]</a></li>
+          <li><a href={LINKS.linkedin} target="_blank" rel="noreferrer me">[linkedin]</a></li>
+          <li><a href={LINKS.facebook} target="_blank" rel="noreferrer me">[facebook]</a></li>
         </ul>
       </div>
     </section>

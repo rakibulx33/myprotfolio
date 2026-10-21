@@ -1,6 +1,9 @@
 // Curated portfolio content. Edit this file to change what the site shows;
 // Portfolio.tsx only handles layout.
 
+/** Page-size portrait (720px WebP). /profile.jpg stays as the full-size image for search and social. */
+export const PORTRAIT = "/profile-720.webp";
+
 export const LINKS = {
   email: "rakibulx33@gmail.com",
   github: "https://github.com/rakibulx33",
@@ -185,6 +188,25 @@ export const research: Research[] = [
     venue: "IEEE conference paper",
     summary: "Detecting whether people are in a room without cameras or wearables.",
     tags: ["IoT", "Sensing"],
+  },
+];
+
+export const services: { title: string; text: string }[] = [
+  {
+    title: "Backend systems and APIs",
+    text: "REST and real-time APIs, databases and background jobs in Node.js, Laravel and FastAPI, built to run reliably in production.",
+  },
+  {
+    title: "E-commerce for Bangladesh",
+    text: "Online stores and admin panels with the payment and delivery options Bangladeshi customers expect.",
+  },
+  {
+    title: "Automation and AI integrations",
+    text: "Chatbots, n8n workflows and LLM features that answer customers, sync data between tools and remove manual work.",
+  },
+  {
+    title: "IoT prototypes",
+    text: "ESP32-based sensing and monitoring systems, from the device and firmware to the dashboard.",
   },
 ];
 

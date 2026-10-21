@@ -1,0 +1,26 @@
+# Rakibul Hasan
+
+> Rakibul Hasan (O.F.M. Rakibul Hasan, handle rakibulx33) is a freelance backend and automation developer in Dhaka, Bangladesh, and a third-year CSE student at Daffodil International University. He has been freelancing since 2022 and is open to freelance projects.
+
+## Services
+- Backend systems and APIs (Node.js, Laravel, FastAPI)
+- E-commerce for Bangladesh: online stores and admin panels with local payment and delivery options
+- Automation and AI integrations: chatbots, n8n workflows, LLM features
+- IoT prototypes with ESP32
+
+## Selected public work
+- [TradingSpark](https://github.com/rakibulx33/tradingspark): genetic strategy breeding and forward-tested trading on NautilusTrader (Python)
+- [Tender Package Builder](https://rakibulx33.github.io/devfest-241-15-223/): in-browser PDF package builder, solo build for AI DevFest 2026 (React, pdf-lib)
+- [Smart Escape](https://rakibulx33.github.io/AI-DEV-FEST-2026-VIBE-CODING-MOCK/): evacuation route simulator (JavaScript, SVG)
+- [DIU Job Hub](https://github.com/rakibulx33/diujobhub): university job platform with AI job matching (Next.js, MySQL)
+
+## Research (in preparation)
+- Smart energy monitoring for Bangladeshi homes (undergraduate thesis)
+- IoT monitoring for potato and onion storage (conference papers)
+- Device-free human presence sensing (IEEE conference paper)
+
+## Contact
+- Website: https://rakibulx33.me/
+- Email: rakibulx33@gmail.com
+- GitHub: https://github.com/rakibulx33
+- LinkedIn: https://www.linkedin.com/in/rakibulx33

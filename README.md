@@ -9,9 +9,19 @@ decrypt-style headings, and a vim status line.
 
 ## Terminal commands
 
-`help`, `whoami`, `projects` / `ls`, `open <project>`, `research`, `skills`, `contact`, `cd <section>`,
-`date`, `clear`. Press `/` anywhere to focus the prompt; `↑`/`↓` for history, `Tab` to complete.
-Number keys `0`–`4` jump between sections.
+`help`, `whoami` / `neofetch` (prints the photo inline with a glitch), `services`, `projects` / `ls`,
+`open <project>`, `research`, `skills`, `contact`, `cd <section>`, `date`, `clear`. Press `/` anywhere to focus the prompt; `↑`/`↓` for history, `Tab` to complete.
+Number keys `0`–`5` jump between sections. The profile.jpg window glitches whenever a command runs.
+
+## SEO
+
+- **Prerendered HTML.** `npm run build` server-renders the page (`src/entry-server.tsx` →
+  `scripts/prerender.mjs`) so crawlers, link previews and AI assistants get the full content
+  without JavaScript; the client hydrates it. Animations are progressive enhancement: content is
+  only hidden while JS runs (`html.js`).
+- ProfilePage + Person + WebSite JSON-LD, Open Graph/Twitter cards (`public/og.jpg`, 1200×630),
+  favicon set + web manifest, image sitemap (lastmod stamped at build), `robots.txt`, `llms.txt`.
+- IndexNow key in `public/` and a post-deploy ping in the workflow (Bing, Yandex, Seznam, Naver).
 
 ## Tech Stack
 
@@ -24,13 +34,15 @@ Number keys `0`–`4` jump between sections.
 
 ```
 index.html         — Vite entry + SEO/meta + JSON-LD
-src/main.tsx       — React entry
+src/main.tsx       — React entry (hydrates the prerendered HTML)
+src/entry-server.tsx — server render used at build time
+scripts/prerender.mjs — writes the rendered page into dist/index.html
 src/data.ts        — projects, research, skills and links (edit this to change content)
 src/Terminal.tsx   — the interactive terminal and its commands
 src/Portfolio.tsx  — page layout and sections
 src/hooks.ts       — in-view, typing, scramble and clock hooks
 src/styles.css     — tokens and styles
-public/            — profile.jpg, robots.txt, sitemap.xml, CNAME
+public/            — profile.jpg/.webp, og.jpg, icons, robots.txt, sitemap.xml, llms.txt, CNAME
 ```
 
 ## Run locally
