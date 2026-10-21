@@ -47,3 +47,14 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+  # Tell IndexNow search engines (Bing, Yandex, Seznam, Naver) the page changed.
+  # The key file lives at https://rakibulx33.me/2c66087bbdd723d9a5fbb5a8d24f57c4.txt
+  indexnow:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping IndexNow
+        run: |
+          curl -sS -o /dev/null -w "IndexNow HTTP %{http_code}\n" \
+            "https://api.indexnow.org/indexnow?url=https%3A%2F%2Frakibulx33.me%2F&key=2c66087bbdd723d9a5fbb5a8d24f57c4" || true
