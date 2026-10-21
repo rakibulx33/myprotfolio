@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
-import { LINKS } from "./data";
+import { HIRE_RELAY, LINKS } from "./data";
 import { prefersReducedMotion } from "./hooks";
 import { unlock, useRxEvent } from "./store";
 
-/* `hire`: a 30-second project brief, asked like a CLI, delivered to my inbox.
-   Sent through FormSubmit (free, no backend). The very first submission makes FormSubmit
-   email me an activation link; briefs sent before that are held and delivered afterwards.
-   If sending fails, the visitor can open their email app or copy the brief instead. */
+/* `hire`: a 30-second project brief, asked like a CLI, sent to me two ways at once:
+   by email through FormSubmit (free, no backend; its first submission emails me an activation link)
+   and, when HIRE_RELAY is set, to my Telegram through a small Cloudflare Worker (worker/).
+   It counts as delivered as soon as either one lands. If both fail, the visitor can open
+   their email app or copy the brief instead. */
 
 type Q = { key: string; label: string; q: string; options?: string[]; input?: "text" | "contact"; placeholder?: string; optional?: boolean };
 const QUESTIONS: Q[] = [
@@ -162,36 +163,55 @@ export default function Hire() {
     setPhase("sending");
     const ctrl = new AbortController();
     const timer = window.setTimeout(() => ctrl.abort(), 15000);
-    try {
-      const isEmail = EMAIL_RE.test(answers.contact ?? "");
-      const res = await fetch(ENDPOINT, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify({
-          _subject: `New project brief: ${answers.project} (${answers.name})`,
-          _template: "table",
-          ...(isEmail ? { _replyto: answers.contact } : {}),
-          name: answers.name,
-          reply_to: answers.contact,
-          project: answers.project,
-          stage: answers.stage,
-          launch: answers.launch,
-          details: answers.details || "(none)",
-          source: "rakibulx33.me terminal (hire)",
-        }),
-        signal: ctrl.signal,
-      });
+    const fields = {
+      name: answers.name,
+      reply_to: answers.contact,
+      project: answers.project,
+      stage: answers.stage,
+      launch: answers.launch,
+      details: answers.details || "",
+      source: "rakibulx33.me terminal (hire)",
+    };
+    const isEmail = EMAIL_RE.test(answers.contact ?? "");
+
+    // Email through FormSubmit. Its "please activate this form" reply also means it was received.
+    const email = fetch(ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify({
+        _subject: `New project brief: ${answers.project} (${answers.name})`,
+        _template: "table",
+        ...(isEmail ? { _replyto: answers.contact } : {}),
+        ...fields,
+        details: fields.details || "(none)",
+      }),
+      signal: ctrl.signal,
+    }).then(async (res) => {
       const data: { success?: string | boolean; message?: string } = await res.json().catch(() => ({}));
       const ok = res.ok && (data.success === true || data.success === "true" || /activat/i.test(String(data.message ?? "")));
       if (!ok) throw new Error(String(data.message || `HTTP ${res.status}`));
+    });
+    const jobs = [email];
+
+    // Telegram through the relay Worker. A text/plain body keeps it a simple request, with no CORS preflight.
+    if (HIRE_RELAY) {
+      jobs.push(fetch(HIRE_RELAY, { method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify(fields), signal: ctrl.signal })
+        .then(async (res) => {
+          const data: { ok?: boolean; error?: string } = await res.json().catch(() => ({}));
+          if (!(res.ok && data.ok)) throw new Error(data.error || `HTTP ${res.status}`);
+        }));
+    }
+    Promise.allSettled(jobs).finally(() => window.clearTimeout(timer));
+
+    try {
+      await Promise.any(jobs); // delivered as soon as either channel has it
       setPhase("sent");
       unlock("client");
       requestAnimationFrame(() => burst(burstCanvas.current, sendBtn.current ?? dialog.current));
     } catch (err) {
-      setWhy((err as Error).name === "AbortError" ? "the request timed out" : "the form service didn't accept it");
+      const reasons = err instanceof AggregateError ? err.errors : [err];
+      setWhy(reasons.some((e) => (e as Error)?.name === "AbortError") ? "the request timed out" : "the form service didn't accept it");
       setPhase("failed");
-    } finally {
-      window.clearTimeout(timer);
     }
   };
 
@@ -285,7 +305,7 @@ export default function Hire() {
 
           {phase === "sent" && (
             <div className="hire-result" role="status">
-              <div className="t-line c-green">✓ Delivered. Your brief is in my inbox.</div>
+              <div className="t-line c-green">✓ Delivered. I've got your brief.</div>
               <div className="t-line">I'll reply to <span className="c-cyan">{answers.contact}</span>. Feel free to keep exploring meanwhile.</div>
               <div className="hire-actions">
                 <button type="button" className="hire-primary" data-autofocus="" onClick={close}>close</button>

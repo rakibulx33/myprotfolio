@@ -34,6 +34,12 @@ export const PROCESS: { title: string; text: string }[] = [
   { title: "Launch", text: "We ship it. You get the code, the docs and help settling in after launch." },
 ];
 
+/**
+ * URL of the Telegram relay for `hire` briefs (worker/README.md). Empty means email only.
+ * VITE_HIRE_RELAY overrides it at build time; the tests use that.
+ */
+export const HIRE_RELAY: string = import.meta.env.VITE_HIRE_RELAY ?? "";
+
 export const LINKS = {
   email: "rakibulx33@gmail.com",
   github: "https://github.com/rakibulx33",

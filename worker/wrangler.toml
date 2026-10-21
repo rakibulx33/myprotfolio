@@ -1,0 +1,8 @@
+# Forwards hire briefs from rakibulx33.me to Telegram. Setup steps: README.md.
+name = "hire-relay"
+main = "hire-relay.js"
+compatibility_date = "2025-10-01"
+
+# The bot token and chat id are secrets, never stored here. Set them once:
+#   npx wrangler secret put BOT_TOKEN
+#   npx wrangler secret put CHAT_ID
