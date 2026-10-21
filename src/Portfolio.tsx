@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent, type ReactNode } from "react";
-import { featuredProjects, moreProjects, research, services, skillGroups, LINKS, PORTRAIT, type Project } from "./data";
+import { featuredProjects, moreProjects, research, services, skillGroups, LINKS, PORTRAIT, SOCIALS, PROCESS, HANDLE, type Project } from "./data";
+import Hire from "./Hire";
+import { HireDock, Matrix, Toaster, useKonami, useNudge } from "./Extras";
+import { TOTAL, emit, unlock, useAchievementCount } from "./store";
 import Terminal from "./Terminal";
 import { prefersReducedMotion, useClock, useInView, useScramble, useTyped } from "./hooks";
 
@@ -20,6 +23,8 @@ export default function Portfolio() {
   const [glitch, setGlitch] = useState(0);
   const onPhoto = useCallback(() => setPhotoOn(true), []);
   const onCommand = useCallback(() => setGlitch((n) => n + 1), []);
+  useKonami();
+  useNudge();
 
   return (
     <>
@@ -43,7 +48,7 @@ export default function Portfolio() {
       </header>
 
       <main>
-        <Section id="services" cmd="cat services.txt" title="What I build"
+        <Section id="services" onSeen={() => unlock("services")} cmd="cat services.txt" title="What I build"
           lede="I work as a freelance backend and automation developer for businesses and teams, remotely from Dhaka, Bangladesh.">
           <ul className="svc">
             {services.map((s, i) => (
@@ -53,7 +58,16 @@ export default function Portfolio() {
               </Reveal>
             ))}
           </ul>
-          <p className="links svc-cta"><a href="#contact">[start a project]</a><a href="#projects">[see selected work]</a></p>
+          <p className="links svc-cta">
+            <button type="button" className="linkish" onClick={() => emit("hire")}>[start a project]</button>
+            <a href="#projects">[see selected work]</a>
+          </p>
+        </Section>
+
+        <Section id="process" cmd="cat process.md" title="How we'd work together"
+          lede="From first message to launch, you always know what I'm building and what comes next.">
+          <Pipeline />
+          <p className="links svc-cta"><button type="button" className="linkish" onClick={() => emit("hire")}>[start with a brief]</button></p>
         </Section>
 
         <Section id="projects" cmd="ls ~/projects --featured" title="Selected work"
@@ -64,7 +78,7 @@ export default function Portfolio() {
           <MoreProjects />
         </Section>
 
-        <Section id="research" cmd="cat research.md" title="Research"
+        <Section id="research" onSeen={() => unlock("scholar")} cmd="cat research.md" title="Research"
           lede="Low-cost IoT for everyday problems in Bangladesh, written with classmates and faculty at Daffodil International University.">
           <ul className="papers">
             {research.map((r, i) => (
@@ -88,6 +102,10 @@ export default function Portfolio() {
       </main>
 
       <StatusBar />
+      <HireDock />
+      <Toaster />
+      <Matrix />
+      <Hire />
     </>
   );
 }
@@ -127,6 +145,7 @@ function TabBar() {
           </li>
         ))}
       </ol>
+      <AchievementCounter />
       <span className="tmux-clock">Dhaka {clock}</span>
     </nav>
   );
@@ -240,8 +259,54 @@ function ScrambleHeading({ id, text, start }: { id?: string; text: string; start
   );
 }
 
-function Section({ id, cmd, title, lede, children }: { id: string; cmd: string; title: string; lede?: string; children: ReactNode }) {
+function AchievementCounter() {
+  const n = useAchievementCount();
+  return (
+    <button type="button" className={`tmux-ach${n === TOTAL ? " all" : ""}`} onClick={() => emit("run", "achievements")}
+      title="Achievements: show the list in the terminal">
+      <span className="c-yellow" aria-hidden>★</span> {n}/{TOTAL}<span className="sr-only"> achievements unlocked</span>
+    </button>
+  );
+}
+
+/* Scroll-linked pipeline: the line fills and each step lights up as you read down. */
+function Pipeline() {
+  const ref = useRef<HTMLOListElement>(null);
+  const [p, setP] = useState(0);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (prefersReducedMotion()) { setP(1); return; }
+    let raf = 0;
+    const update = () => {
+      raf = 0;
+      const r = el.getBoundingClientRect();
+      const vh = window.innerHeight;
+      setP(Math.max(0, Math.min(1, (vh * 0.8 - r.top) / (r.height + vh * 0.35))));
+    };
+    const onScroll = () => { if (!raf) raf = requestAnimationFrame(update); };
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => { window.removeEventListener("scroll", onScroll); window.removeEventListener("resize", onScroll); cancelAnimationFrame(raf); };
+  }, []);
+  return (
+    <ol className="pipe" ref={ref} style={{ ["--p" as string]: p }}>
+      <li className="pipe-track" aria-hidden><span className="pipe-fill" /><span className="pipe-packet" /></li>
+      {PROCESS.map((s, i) => (
+        <li key={s.title} className={`pipe-step${p >= (i + 0.35) / PROCESS.length ? " lit" : ""}`}>
+          <span className="pipe-n">{String(i + 1).padStart(2, "0")}</span>
+          <h3>{s.title}</h3>
+          <p>{s.text}</p>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+function Section({ id, cmd, title, lede, onSeen, children }: { id: string; cmd: string; title: string; lede?: string; onSeen?: () => void; children: ReactNode }) {
   const [ref, seen] = useInView<HTMLDivElement>();
+  useEffect(() => { if (seen) onSeen?.(); }, [seen, onSeen]);
   const typed = useTyped(cmd, seen, 34);
   return (
     <section id={id} className="sec" aria-labelledby={`${id}-title`}>
@@ -277,8 +342,8 @@ function Links({ p }: { p: Project }) {
   if (!p.code && !p.live) return <span className="c-dim">private repository</span>;
   return (
     <span className="links">
-      {p.live && <a href={p.live} target="_blank" rel="noreferrer">[live site]<span className="sr-only"> for {p.name}</span></a>}
-      {p.code && <a href={p.code} target="_blank" rel="noreferrer">[source]<span className="sr-only"> for {p.name}</span></a>}
+      {p.live && <a href={p.live} target="_blank" rel="noreferrer" onClick={() => unlock("explorer")}>[live site]<span className="sr-only"> for {p.name}</span></a>}
+      {p.code && <a href={p.code} target="_blank" rel="noreferrer" onClick={() => unlock("explorer")}>[source]<span className="sr-only"> for {p.name}</span></a>}
     </span>
   );
 }
@@ -438,14 +503,46 @@ function Contact() {
           ))}
         </div>
         <ScrambleHeading id="contact-title" text="Have a project in mind?" start={done} />
-        <p className="sec-lede in">I take on freelance backend, automation and e-commerce work. Email is the fastest way to reach me.</p>
-        <a className="mail" href={`mailto:${LINKS.email}`} onMouseMove={glow}>{LINKS.email}</a>
-        <ul className="socials">
-          <li><a href={LINKS.github} target="_blank" rel="noreferrer me">[github]</a></li>
-          <li><a href={LINKS.linkedin} target="_blank" rel="noreferrer me">[linkedin]</a></li>
-          <li><a href={LINKS.facebook} target="_blank" rel="noreferrer me">[facebook]</a></li>
-        </ul>
+        <p className="sec-lede in">I take on freelance backend, automation and e-commerce work. The quickest start is a short brief: six questions, about 30 seconds.</p>
+        <div className="cta-row">
+          <button type="button" className="btn-hire" onClick={() => emit("hire")} onMouseMove={glow}>
+            <span className="c-dim">$</span> hire rakibul<span className="caret" aria-hidden />
+          </button>
+          <span className="cta-or">or email</span>
+          <span className="mail-row">
+            <a className="mail" href={`mailto:${LINKS.email}`} onClick={() => unlock("client")}>{LINKS.email}</a>
+            <CopyEmail />
+          </span>
+        </div>
+        <LocalTime />
+        <h3 className="soc-title">Find me everywhere as <span className="c-cyan">@{HANDLE}</span></h3>
+        <ol className="soc">
+          {SOCIALS.map((x, i) => (
+            <li key={x.name} className={`soc-${x.group.toLowerCase()}`}>
+              <a href={x.url} target="_blank" rel="noreferrer me" onMouseMove={glow}>
+                <span className="soc-n">{String(i + 1).padStart(2, "0")}</span>
+                <span className="soc-name">{x.name}</span>
+                <span className="soc-label">{x.label}</span>
+                <span className="soc-group">{x.group.toLowerCase()}</span>
+              </a>
+            </li>
+          ))}
+        </ol>
       </div>
     </section>
   );
+}
+
+function CopyEmail() {
+  const [done, setDone] = useState(false);
+  return (
+    <button type="button" className="copy" onClick={async () => {
+      try { await navigator.clipboard.writeText(LINKS.email); setDone(true); window.setTimeout(() => setDone(false), 1800); } catch { /* clipboard blocked */ }
+    }} aria-label="Copy email address">{done ? "[copied]" : "[copy]"}</button>
+  );
+}
+
+function LocalTime() {
+  const t = useClock("Asia/Dhaka");
+  return <p className="local-time c-dim">It's <span className="c-fg">{t}</span> in Dhaka right now.</p>;
 }

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type KeyboardEvent, type ReactNode } from "react";
-import { featuredProjects, moreProjects, research, services, skillGroups, LINKS, PORTRAIT } from "./data";
+import { featuredProjects, moreProjects, research, services, skillGroups, LINKS, PORTRAIT, SOCIALS, HANDLE } from "./data";
 import { prefersReducedMotion } from "./hooks";
+import { ACHIEVEMENTS, TOTAL, emit, isUnlocked, unlock, unlockedCount, useRxEvent } from "./store";
 
 type Line = { id: number; node: ReactNode };
 
@@ -13,9 +14,10 @@ const PROMPT = (
 
 const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 const ALL = [...featuredProjects, ...moreProjects];
-const SECTIONS = ["services", "projects", "research", "skills", "github", "contact"];
-const COMMANDS = ["help", "whoami", "neofetch", "photo", "services", "projects", "ls", "open", "research", "skills", "contact", "github", "linkedin", "email", "cd", "date", "clear", "sudo", "exit"];
-const CHIPS = ["help", "whoami", "services", "projects", "research", "skills", "contact"];
+const SECTIONS = ["services", "process", "projects", "research", "skills", "github", "contact"];
+const COMMANDS = ["help", "hire", "whoami", "neofetch", "photo", "services", "projects", "ls", "open", "research", "skills", "socials", "contact", "achievements", "github", "linkedin", "email", "cd", "date", "clear", "exit"];
+const CHIPS = ["hire", "help", "whoami", "services", "projects", "socials", "contact"];
+const used = new Set<string>(); // distinct commands this visit, for the "operator" achievement
 
 /* Boot timeline (ms after first paint). The transcript is static markup, so it is in the
    prerendered HTML for crawlers; CSS reveals each line at its delay. */
@@ -65,6 +67,73 @@ function Neofetch() {
   );
 }
 
+function Hack() {
+  const steps = [
+    ["c-dim", "connecting to rakibulx33.me:22 ..."],
+    ["c-dim", "bypassing firewall ...  [##########] 100%"],
+    ["c-dim", "decrypting /home/rakibul/.ssh ..."],
+    ["c-green", "ACCESS GRANTED"],
+    ["", "...just kidding. The only thing worth hacking here is your backlog."],
+  ];
+  const [n, setN] = useState(() => (prefersReducedMotion() ? steps.length : 1));
+  useEffect(() => {
+    if (n >= steps.length) return;
+    const id = window.setTimeout(() => setN(n + 1), 420);
+    return () => window.clearTimeout(id);
+  }, [n, steps.length]);
+  return (
+    <div>
+      {steps.slice(0, n).map(([c, t], i) => <div key={i} className={c}>{t}</div>)}
+      {n >= steps.length && <div>Run <button type="button" className="t-jump" onClick={() => emit("hire")}>hire</button> and I'll take care of it.</div>}
+    </div>
+  );
+}
+
+function SocialList() {
+  let group = "";
+  return (
+    <div>
+      {SOCIALS.map((x, i) => {
+        const head = x.group !== group ? (group = x.group) : null;
+        return (
+          <div key={x.name}>
+            {head && <div className="c-dim t-group"># {head.toLowerCase()}</div>}
+            <div className="t-row t-row-soc">
+              <span><span className="c-dim">{String(i + 1).padStart(2, "0")}</span> <span className="c-cyan">{x.name}</span></span>
+              <a href={x.url} target="_blank" rel="noreferrer me">{x.url.replace(/^https:\/\/(www\.)?/, "")}</a>
+            </div>
+          </div>
+        );
+      })}
+      <div className="c-dim">{SOCIALS.length} profiles, all @{HANDLE}, ranked by how useful they are for working together.</div>
+    </div>
+  );
+}
+
+function AchievementList() {
+  return (
+    <div>
+      {ACHIEVEMENTS.map((a) => {
+        const ok = isUnlocked(a.id);
+        return (
+          <div key={a.id}>
+            <span className={ok ? "c-green" : "c-dim"}>{ok ? "✓" : "·"}</span> <span className={ok ? "" : "c-dim"}>{a.title}</span>
+            {!ok && <span className="c-dim">  ({a.hint})</span>}
+          </div>
+        );
+      })}
+      <div className="c-yellow">{unlockedCount()}/{TOTAL} unlocked</div>
+    </div>
+  );
+}
+
+const MUG = `   ( (
+    ) )
+  ........
+  |      |]
+  \\      /
+   \`----'`;
+
 function run(raw: string, clear: () => void): ReactNode {
   const [cmd = "", ...args] = raw.trim().split(/\s+/);
   const arg = args.join(" ");
@@ -75,24 +144,51 @@ function run(raw: string, clear: () => void): ReactNode {
       return (
         <div className="t-grid">
           {[
+            ["hire", "start a project brief (30 seconds)"],
             ["whoami", "who I am, with photo (also: neofetch)"],
             ["services", "what I can build for you"],
             ["projects", "selected work (also: ls)"],
             ["open <name>", "links for a project"],
             ["research", "papers in preparation"],
             ["skills", "tools I use"],
+            ["socials", "every profile, ranked"],
             ["contact", "how to reach me"],
+            ["achievements", "what you've unlocked"],
             ["cd <section>", "scroll to a section"],
             ["clear", "clear the screen"],
           ].map(([c, d]) => (
             <div key={c} className="t-row"><span className="c-cyan">{c}</span><span className="c-dim">{d}</span></div>
           ))}
+          <div className="c-yellow">psst: a few commands are hidden. Start with <span className="c-cyan">ls -a</span>.</div>
         </div>
       );
+    case "hire":
+      setTimeout(() => emit("hire"), 120);
+      return <span className="c-dim">opening ~/hire ...</span>;
+    case "socials":
+    case "social":
+      return <SocialList />;
+    case "achievements":
+      return <AchievementList />;
+    case "matrix":
+      setTimeout(() => emit("matrix"), 150);
+      return <span className="c-green">entering the rain ...</span>;
+    case "hack":
+      unlock("egg");
+      return <Hack />;
+    case "coffee":
+    case "tea":
+    case "cha":
+      unlock("egg");
+      return <div><pre className="t-pre c-yellow">{MUG}</pre><div>Brewing cha ... done. Fuelled up. Now, what are we building? Try <span className="c-cyan">hire</span>.</div></div>;
+    case "rm":
+      unlock("egg");
+      return <span className="c-red">rm: permission denied. This terminal is read-only for visitors, but my inbox isn't. Try <span className="c-cyan">hire</span>.</span>;
     case "whoami":
     case "neofetch":
     case "fetch":
     case "photo":
+      unlock("whoami");
       return (
         <div>
           <div className="c-dim"><span className="c-yellow">[ IMG ]</span> rendering profile.jpg</div>
@@ -101,6 +197,14 @@ function run(raw: string, clear: () => void): ReactNode {
       );
     case "cat":
     case "display":
+      if (/^\.?secret/i.test(arg)) {
+        unlock("egg");
+        return <div><div className="c-green">You found the secret file.</div><div>Not many visitors get this far. If you send me a brief, mention "the secret file" so I know you explored.</div></div>;
+      }
+      if (/services/i.test(arg)) return run("services", clear);
+      if (/skills/i.test(arg)) return run("skills", clear);
+      if (/research/i.test(arg)) return run("research", clear);
+      if (/process/i.test(arg)) { setTimeout(() => scrollTo("process"), 150); return <span className="c-dim">opening ~/process ...</span>; }
       return /profile|photo|\.jpg|\.png|\.webp/i.test(arg)
         ? <Neofetch />
         : <span className="c-red">{cmd}: {arg || "?"}: try <span className="c-cyan">{cmd} profile.jpg</span></span>;
@@ -114,6 +218,15 @@ function run(raw: string, clear: () => void): ReactNode {
         </div>
       );
     case "ls":
+      if (/-\w*a/.test(arg)) {
+        return (
+          <div>
+            <div><span className="c-blue">./</span>  <span className="c-blue">../</span>  <span className="c-yellow">.secret</span>  <span className="c-blue">projects/</span>  <span className="c-blue">research/</span>  services.txt  process.md  skills.json  profile.jpg</div>
+            <div className="c-dim">hidden: matrix, hack, coffee, sudo hire rakibul ... and one more for keyboard veterans.</div>
+          </div>
+        );
+      }
+      return run("projects", clear);
     case "projects":
       return (
         <div>
@@ -130,7 +243,8 @@ function run(raw: string, clear: () => void): ReactNode {
       if (/profile|photo|\.jpg/i.test(arg)) return <Neofetch />;
       const p = arg ? ALL.find((x) => slug(x.name).startsWith(slug(arg))) : undefined;
       if (!p) return <span className="c-red">open: no project matching "{arg || "?"}". Try <span className="c-cyan">projects</span>.</span>;
-      if (!p.code && !p.live) return <span><span className="c-cyan t-strong">{p.name}</span>: private repository. Ask me for a walkthrough: <a href={`mailto:${LINKS.email}`}>{LINKS.email}</a></span>;
+      if (!p.code && !p.live) return <span><span className="c-cyan t-strong">{p.name}</span>: private repository. Ask me for a walkthrough: run <span className="c-cyan">hire</span>.</span>;
+      unlock("explorer");
       return (
         <div>
           <div className="c-cyan t-strong">{p.name}</div>
@@ -161,9 +275,12 @@ function run(raw: string, clear: () => void): ReactNode {
     case "email":
       return (
         <div>
+          <div>brief     run <button type="button" className="t-jump" onClick={() => emit("hire")}>hire</button> <span className="c-dim">(fastest)</span></div>
           <div>email     <a href={`mailto:${LINKS.email}`}>{LINKS.email}</a></div>
-          <div>github    <a href={LINKS.github} target="_blank" rel="noreferrer">github.com/rakibulx33</a></div>
+          <div>telegram  <a href="https://t.me/rakibulx33" target="_blank" rel="noreferrer">t.me/rakibulx33</a></div>
           <div>linkedin  <a href={LINKS.linkedin} target="_blank" rel="noreferrer">linkedin.com/in/rakibulx33</a></div>
+          <div>fiverr    <a href="https://www.fiverr.com/rakibulx33" target="_blank" rel="noreferrer">fiverr.com/rakibulx33</a></div>
+          <div className="c-dim">+ {SOCIALS.length - 4} more: run <span className="c-cyan">socials</span></div>
           <div className="c-green">Taking freelance projects.</div>
         </div>
       );
@@ -184,7 +301,12 @@ function run(raw: string, clear: () => void): ReactNode {
       clear();
       return null;
     case "sudo":
-      return <span className="c-red">rakibul is not in the sudoers file. This incident will be reported.</span>;
+      unlock("egg");
+      if (/^hire/i.test(arg)) {
+        setTimeout(() => emit("hire"), 700);
+        return <div><div className="c-dim">[sudo] password for visitor: ********</div><div className="c-green">access granted. opening ~/hire ...</div></div>;
+      }
+      return <span className="c-red">visitor is not in the sudoers file. This incident will be reported. (Try <span className="c-cyan">sudo hire rakibul</span>.)</span>;
     case "exit":
       setTimeout(() => scrollTo("services"), 150);
       return <span className="c-dim">logout. Scrolling to the work instead.</span>;
@@ -210,8 +332,22 @@ export default function Terminal({ onPhoto, onCommand }: { onPhoto: () => void; 
     push(<>{PROMPT} {raw}</>);
     const out = run(raw, clear);
     if (out != null) push(out);
+    const word = raw.trim().split(/\s+/)[0]?.toLowerCase();
+    if (word) { used.add(word); if (used.size >= 3) unlock("operator"); }
     onCommand?.();
   }, [push, clear, onCommand]);
+
+  // Other parts of the page can run a command here (e.g. the achievements counter).
+  useRxEvent<string>("run", useCallback((cmd: string) => {
+    document.getElementById("top")?.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth" });
+    execute(cmd);
+  }, [execute]));
+
+  // First achievement once the boot transcript has played.
+  useEffect(() => {
+    const id = window.setTimeout(() => unlock("booted"), prefersReducedMotion() ? 300 : 2200);
+    return () => window.clearTimeout(id);
+  }, []);
 
   // The "[ LOAD ] Decoding profile.jpg" line starts the portrait decode.
   useEffect(() => {
@@ -289,6 +425,7 @@ export default function Terminal({ onPhoto, onCommand }: { onPhoto: () => void; 
               <p className="t-sub c-dim">CSE student at Daffodil International University. Freelancing since 2022.</p>
             </div>
             <div className="t-line boot-line c-dim" style={at(T.hint)}>Type a command, or pick one below.</div>
+            <div className="t-line boot-line" style={at(T.hint + 60)}><span className="c-yellow">tip:</span> run <span className="c-cyan">hire</span> to start a project in 30 seconds. Some commands are hidden.</div>
           </div>
         )}
         <div className="t-out" aria-live="polite">
@@ -311,7 +448,7 @@ export default function Terminal({ onPhoto, onCommand }: { onPhoto: () => void; 
       </div>
       <div className="chips" role="group" aria-label="Quick commands">
         {CHIPS.map((c) => (
-          <button key={c} type="button" onClick={(e) => { e.stopPropagation(); execute(c); }}>
+          <button key={c} type="button" className={c === "hire" ? "chip-hire" : undefined} onClick={(e) => { e.stopPropagation(); execute(c); }}>
             {c}
           </button>
         ))}

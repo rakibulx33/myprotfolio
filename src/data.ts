@@ -4,6 +4,36 @@
 /** Page-size portrait (720px WebP). /profile.jpg stays as the full-size image for search and social. */
 export const PORTRAIT = "/profile-720.webp";
 
+/** Every public profile, all under the same handle, in priority order. */
+export const HANDLE = "rakibulx33";
+export type Social = { name: string; url: string; label: string; group: "Hire" | "Message" | "Social" | "Skills" | "Personal" };
+export const SOCIALS: Social[] = [
+  { name: "GitHub", url: "https://github.com/rakibulx33", label: "@rakibulx33", group: "Hire" },
+  { name: "LinkedIn", url: "https://www.linkedin.com/in/rakibulx33", label: "in/rakibulx33", group: "Hire" },
+  { name: "Fiverr", url: "https://www.fiverr.com/rakibulx33", label: "@rakibulx33", group: "Hire" },
+  { name: "Telegram", url: "https://t.me/rakibulx33", label: "t.me/rakibulx33", group: "Message" },
+  { name: "Facebook", url: "https://www.facebook.com/rakibulx33", label: "fb.com/rakibulx33", group: "Social" },
+  { name: "X", url: "https://x.com/rakibulx33", label: "@rakibulx33", group: "Social" },
+  { name: "YouTube", url: "https://www.youtube.com/@rakibulx33", label: "@rakibulx33", group: "Social" },
+  { name: "Instagram", url: "https://www.instagram.com/rakibulx33", label: "@rakibulx33", group: "Social" },
+  { name: "Kaggle", url: "https://www.kaggle.com/rakibulx33", label: "@rakibulx33", group: "Skills" },
+  { name: "Codeforces", url: "https://codeforces.com/profile/rakibulx33", label: "rakibulx33", group: "Skills" },
+  { name: "LeetCode", url: "https://leetcode.com/u/rakibulx33", label: "u/rakibulx33", group: "Skills" },
+  { name: "AtCoder", url: "https://atcoder.jp/users/rakibulx33", label: "rakibulx33", group: "Skills" },
+  { name: "CodeChef", url: "https://www.codechef.com/users/rakibulx33", label: "rakibulx33", group: "Skills" },
+  { name: "Reddit", url: "https://www.reddit.com/user/rakibulx33", label: "u/rakibulx33", group: "Personal" },
+  { name: "TikTok", url: "https://www.tiktok.com/@rakibulx33", label: "@rakibulx33", group: "Personal" },
+  { name: "Snapchat", url: "https://www.snapchat.com/add/rakibulx33", label: "rakibulx33", group: "Personal" },
+];
+
+/** How a project runs, start to finish (a real sequence, so it is numbered on the page). */
+export const PROCESS: { title: string; text: string }[] = [
+  { title: "Brief", text: "You tell me what you need: the problem, who it's for and when you'd like it live." },
+  { title: "Plan", text: "I reply with questions and a plan: scope, stack and milestones you can agree to." },
+  { title: "Build", text: "I build in small milestones you can try as we go, with regular progress updates." },
+  { title: "Launch", text: "We ship it. You get the code, the docs and help settling in after launch." },
+];
+
 export const LINKS = {
   email: "rakibulx33@gmail.com",
   github: "https://github.com/rakibulx33",
