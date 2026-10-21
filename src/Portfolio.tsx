@@ -1,271 +1,398 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent, type ReactNode } from "react";
 import { featuredProjects, moreProjects, research, skillGroups, LINKS, type Project } from "./data";
+import Terminal from "./Terminal";
+import { prefersReducedMotion, useClock, useInView, useScramble, useTyped } from "./hooks";
 
 const PORTRAIT = "/profile.jpg?v=5";
+const TABS = [
+  { id: "top", label: "home" },
+  { id: "projects", label: "projects" },
+  { id: "research", label: "research" },
+  { id: "skills", label: "skills" },
+  { id: "contact", label: "contact" },
+];
+const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
 type Contrib = { date: string; count: number; level: number };
 
-/* Chip geometry, in the same units as the 400x500 viewBox that sits over the portrait.
-   Six pins per side; the middle four on each side are routed down into the page. */
-const PIN_Y = Array.from({ length: 6 }, (_, i) => 63.5 + i * 74.6);
-const LEFT_ROUTES = [1, 2, 3, 4].map((pin, k) => {
-  const x = -48 - 14 * (3 - k);
-  return `M -30 ${PIN_Y[pin]} H ${x} V 560 L ${x - 40} 600 V 1000`;
-});
-const RIGHT_ROUTES = [1, 2, 3, 4].map((pin, k) => {
-  const x = 452 + 18 * (3 - k);
-  return `M 430 ${PIN_Y[pin]} H ${x} V 560 L ${x + 40} 600 V 1000`;
-});
-
 export default function Portfolio() {
-  const [contribs, setContribs] = useState<Contrib[]>([]);
-  const [total, setTotal] = useState<number | null>(null);
-  const [repos, setRepos] = useState<number | null>(null);
-
-  useEffect(() => {
-    fetch("https://github-contributions-api.jogruber.de/v4/rakibulx33?y=last")
-      .then((r) => r.json())
-      .then((res) => {
-        if (Array.isArray(res?.contributions)) setContribs(res.contributions);
-        if (res?.total != null) {
-          const t = typeof res.total === "object" ? Object.values(res.total as Record<string, number>).reduce((a, b) => a + b, 0) : res.total;
-          setTotal(t);
-        }
-      })
-      .catch(() => {});
-    fetch("https://api.github.com/users/rakibulx33")
-      .then((r) => r.json())
-      .then((u) => typeof u?.public_repos === "number" && setRepos(u.public_repos))
-      .catch(() => {});
-  }, []);
+  const [photoOn, setPhotoOn] = useState(false);
+  const onPhoto = useCallback(() => setPhotoOn(true), []);
 
   return (
     <>
-      <a className="skip" href="#work">Skip to work</a>
+      <a className="skip" href="#projects">Skip to projects</a>
+      <TabBar />
 
-      <header className="board">
-        <span className="fiducial" style={{ left: 22, bottom: 30 }} aria-hidden />
-        <span className="fiducial" style={{ right: 22, top: 104 }} aria-hidden />
-
-        <nav className="nav wrap" aria-label="Main">
-          <a href="#top" className="nav-name" style={{ textDecoration: "none" }}>Rakibul Hasan</a>
-          <div style={{ display: "flex", alignItems: "center", gap: 32 }}>
-            <ul>
-              <li><a href="#work">Work</a></li>
-              <li><a href="#research">Research</a></li>
-              <li><a href="#skills">Skills</a></li>
-            </ul>
-            <a href="#contact" className="nav-cta">Contact</a>
-          </div>
-        </nav>
-
-        <div id="top" className="hero wrap">
-          <div>
-            <p className="hero-kicker">Backend and automation developer in Dhaka</p>
-            <h1>
-              <span>Rakibul</span>
-              <span>Hasan</span>
-            </h1>
-            <p className="hero-lede">
-              I build the systems behind online stores, AI-powered SaaS and trading bots, and research low-cost IoT
-              as a CSE student at Daffodil International University. Freelancing since 2022.
-            </p>
-            <div className="hero-actions">
-              <a className="btn btn-gold" href="#work">See my work</a>
-              <a className="btn btn-line" href={`mailto:${LINKS.email}`}>Email me</a>
-              <span className="availability">Taking freelance projects</span>
+      <header id="top" className="hero">
+        <div className="hero-bg" aria-hidden />
+        <div className="hero-stage wrap">
+          <Terminal onPhoto={onPhoto} />
+          <div className="win photo-win">
+            <div className="win-bar">
+              <span className="dots" aria-hidden><i /><i /><i /></span>
+              <span className="win-title">profile.jpg</span>
+              <span className="win-meta">1086×1448</span>
             </div>
-          </div>
-
-          <div className="chip">
-            <svg className="traces" viewBox="0 0 400 500" aria-hidden>
-              {[...LEFT_ROUTES, ...RIGHT_ROUTES].map((d) => (
-                <path key={d} d={d} />
-              ))}
-              <circle className="via" cx={-48 - 14 * 2 - 40} cy={600} r={6} />
-              <circle className="via" cx={452 + 18 * 1 + 40} cy={600} r={6} />
-            </svg>
-            <span className="chip-label" aria-hidden>U1</span>
-            <span className="chip-outline" aria-hidden />
-            <span className="pins l" aria-hidden>{PIN_Y.map((y) => <span key={y} />)}</span>
-            <span className="pins r" aria-hidden>{PIN_Y.map((y) => <span key={y} />)}</span>
-            <div className="chip-photo">
-              <img src={PORTRAIT} alt="Rakibul Hasan in a grey waistcoat and red tie" width={1086} height={1448} />
-            </div>
+            <PixelPhoto start={photoOn} />
           </div>
         </div>
+        <a className="scroll-hint" href="#projects">scroll or type <kbd>cd projects</kbd></a>
       </header>
 
       <main>
-        <section id="work" className="section">
-          <div className="wrap">
-            <div className="section-head">
-              <h2>Selected work</h2>
-              <p>
-                Production systems for clients and my own products. Private repositories are described without code;
-                I'm happy to walk through them on a call.
-              </p>
-            </div>
-
-            <ul className="work-list">
-              {featuredProjects.map((p) => (
-                <li key={p.name} className="work">
-                  <div>
-                    <h3>{p.name}</h3>
-                    <p className="kind">{p.kind}</p>
-                  </div>
-                  <p className="desc">{p.description}</p>
-                  <div className="meta">
-                    <p>{p.stack.join(", ")}</p>
-                    <ProjectLinks p={p} />
-                  </div>
-                </li>
-              ))}
-            </ul>
-
-            <h3 className="more-title">Also built</h3>
-            <table className="more">
-              <thead>
-                <tr>
-                  <th scope="col">Project</th>
-                  <th scope="col">What it does</th>
-                  <th scope="col">Built with</th>
-                  <th scope="col">Links</th>
-                </tr>
-              </thead>
-              <tbody>
-                {moreProjects.map((p) => (
-                  <tr key={p.name}>
-                    <td>
-                      <span className="pname">{p.name}</span>
-                      <span className="pkind">{p.kind}</span>
-                    </td>
-                    <td>{p.description}</td>
-                    <td>{p.stack.join(", ")}</td>
-                    <td><ProjectLinks p={p} /></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        <Section id="projects" cmd="ls ~/projects --featured" title="Selected work"
+          lede="Production systems for clients and my own products. Private repositories are described without code; I'm happy to walk through them on a call.">
+          <div className="panes">
+            {featuredProjects.map((p, i) => <ProjectPane key={p.name} p={p} i={i} />)}
           </div>
-        </section>
+          <MoreProjects />
+        </Section>
 
-        <section id="research" className="section tint">
-          <div className="wrap">
-            <div className="section-head">
-              <h2>Research</h2>
-              <p>
-                Low-cost IoT for everyday problems in Bangladesh, written with classmates and faculty at Daffodil
-                International University. All four papers are in preparation.
-              </p>
-            </div>
-            <ul className="papers">
-              {research.map((r) => (
-                <li key={r.title} className="paper">
-                  <h3>{r.title}</h3>
-                  <p className="venue">{r.venue}</p>
-                  <p>{r.summary}</p>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </section>
+        <Section id="research" cmd="cat research.md" title="Research"
+          lede="Low-cost IoT for everyday problems in Bangladesh, written with classmates and faculty at Daffodil International University.">
+          <ul className="papers">
+            {research.map((r, i) => (
+              <Reveal as="li" key={r.title} i={i} className="paper">
+                <p className="paper-status"><span className="c-yellow">[in preparation]</span> <span className="c-dim">{r.venue}</span></p>
+                <h3><span className="c-magenta" aria-hidden>## </span>{r.title}</h3>
+                <p>{r.summary}</p>
+              </Reveal>
+            ))}
+          </ul>
+        </Section>
 
-        <section id="skills" className="section">
-          <div className="wrap">
-            <div className="section-head">
-              <h2>Tools I use</h2>
-              <p>Chosen per project. Most of my production work is in TypeScript, Python and PHP.</p>
-            </div>
-            <dl className="skills">
-              {skillGroups.map((g) => (
-                <div key={g.label}>
-                  <dt>{g.label}</dt>
-                  <dd>{g.items.join(", ")}</dd>
-                </div>
-              ))}
-            </dl>
-          </div>
-        </section>
+        <Section id="skills" cmd="cat skills.json" title="Tools I use"
+          lede="Chosen per project. Most of my production work is in TypeScript, Python and PHP.">
+          <SkillsJson />
+        </Section>
 
-        <section id="github" className="section tint">
-          <div className="wrap">
-            <div className="section-head">
-              <h2>On GitHub</h2>
-              <p>
-                {total != null ? `${total.toLocaleString()} contributions in the last year` : "My public code and day-to-day activity"}
-                {repos != null ? `, across ${repos} public repositories.` : "."}{" "}
-                <span className="links" style={{ display: "inline-flex" }}>
-                  <a href={LINKS.github} target="_blank" rel="noreferrer">Open my profile</a>
-                </span>
-              </p>
-            </div>
-            {contribs.length > 0 && <Heatmap days={contribs} />}
-          </div>
-        </section>
+        <GitHubSection />
+
+        <Contact />
       </main>
 
-      <footer id="contact" className="board">
-        <span className="fiducial" style={{ right: 22, top: 30 }} aria-hidden />
-        <div className="contact wrap">
-          <h2>Have a project in mind?</h2>
-          <p>I take on freelance backend, automation and e-commerce work. Email is the fastest way to reach me.</p>
-          <a className="mail" href={`mailto:${LINKS.email}`}>{LINKS.email}</a>
-          <ul className="socials">
-            <li><a href={LINKS.github} target="_blank" rel="noreferrer">GitHub</a></li>
-            <li><a href={LINKS.linkedin} target="_blank" rel="noreferrer">LinkedIn</a></li>
-            <li><a href={LINKS.facebook} target="_blank" rel="noreferrer">Facebook</a></li>
-          </ul>
-          <div className="footer">
-            <span>© {new Date().getFullYear()} Rakibul Hasan</span>
-            <a href="#top">Back to top</a>
-          </div>
-        </div>
-      </footer>
+      <StatusBar />
     </>
   );
 }
 
-function ProjectLinks({ p }: { p: Project }) {
-  if (!p.code && !p.live) return <span className="private">Private repository</span>;
+/* ---------------------------------------------------------------- chrome */
+
+function TabBar() {
+  const [active, setActive] = useState("top");
+  const clock = useClock("Asia/Dhaka");
+  useEffect(() => {
+    const els = TABS.map((t) => document.getElementById(t.id)).filter(Boolean) as HTMLElement[];
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => e.isIntersecting && setActive(e.target.id));
+    }, { rootMargin: "-45% 0px -50% 0px" });
+    els.forEach((el) => io.observe(el));
+    const onKey = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || e.metaKey || e.ctrlKey || e.altKey) return;
+      const n = Number(e.key);
+      if (Number.isInteger(n) && n >= 0 && n < TABS.length) {
+        document.getElementById(TABS[n].id)?.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth" });
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => { io.disconnect(); window.removeEventListener("keydown", onKey); };
+  }, []);
+
   return (
-    <div className="links">
-      {p.live && <a href={p.live} target="_blank" rel="noreferrer">Live site<span className="sr-only"> for {p.name}</span></a>}
-      {p.code && <a href={p.code} target="_blank" rel="noreferrer">Source code<span className="sr-only"> for {p.name}</span></a>}
+    <nav className="tmux" aria-label="Sections">
+      <span className="tmux-session">[rakibul]</span>
+      <ol>
+        {TABS.map((t, i) => (
+          <li key={t.id}>
+            <a href={`#${t.id}`} aria-current={active === t.id ? "location" : undefined} className={active === t.id ? "on" : ""}>
+              <span className="tmux-n">{i}</span>:{t.label}{active === t.id ? "*" : ""}
+            </a>
+          </li>
+        ))}
+      </ol>
+      <span className="tmux-clock">Dhaka {clock}</span>
+    </nav>
+  );
+}
+
+function StatusBar() {
+  return (
+    <footer className="status">
+      <span className="status-mode">NORMAL</span>
+      <span className="status-item">main</span>
+      <span className="status-item grow">rakibulx33.me</span>
+      <span className="status-item">utf-8</span>
+      <span className="status-item">© {new Date().getFullYear()} Rakibul Hasan</span>
+      <a className="status-item" href="#top">gg</a>
+    </footer>
+  );
+}
+
+/* ---------------------------------------------------------------- hero photo */
+
+function PixelPhoto({ start }: { start: boolean }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [done, setDone] = useState(false);
+
+  useEffect(() => {
+    if (!start) return;
+    if (prefersReducedMotion()) { setDone(true); return; }
+    const img = new Image();
+    img.src = PORTRAIT;
+    let raf = 0;
+    img.onload = () => {
+      const c = canvasRef.current;
+      if (!c) return;
+      const ctx = c.getContext("2d")!;
+      c.width = 543; c.height = 724;
+      const steps = [48, 32, 20, 12, 7, 4, 2];
+      const t0 = performance.now();
+      const per = 150;
+      const tiny = document.createElement("canvas");
+      const tctx = tiny.getContext("2d")!;
+      const draw = (t: number) => {
+        const k = Math.max(0, Math.floor((t - t0) / per));
+        if (k >= steps.length) { setDone(true); return; }
+        const b = steps[k];
+        tiny.width = Math.ceil(c.width / b); tiny.height = Math.ceil(c.height / b);
+        tctx.drawImage(img, 0, 0, tiny.width, tiny.height);
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(tiny, 0, 0, tiny.width, tiny.height, 0, 0, c.width, c.height);
+        raf = requestAnimationFrame(draw);
+      };
+      raf = requestAnimationFrame(draw);
+    };
+    return () => cancelAnimationFrame(raf);
+  }, [start]);
+
+  return (
+    <div className={`photo ${done ? "done" : ""} ${start ? "started" : ""}`}>
+      <canvas ref={canvasRef} aria-hidden />
+      <img src={PORTRAIT} alt="Rakibul Hasan in a grey waistcoat and red tie" width={1086} height={1448} />
+      <span className="photo-sweep" aria-hidden />
     </div>
+  );
+}
+
+/* ---------------------------------------------------------------- section kit */
+
+function Section({ id, cmd, title, lede, children }: { id: string; cmd: string; title: string; lede?: string; children: ReactNode }) {
+  const [ref, seen] = useInView<HTMLDivElement>();
+  const typed = useTyped(cmd, seen, 34);
+  const heading = useScramble(title, seen && typed.length === cmd.length, 700);
+  return (
+    <section id={id} className="sec">
+      <div className="wrap">
+        <div ref={ref} className="sec-head">
+          <p className="sec-cmd" aria-hidden>
+            <span className="c-green">rakibul</span><span className="c-dim">@</span><span className="c-blue">dhaka</span>
+            <span className="c-dim">:~$ </span>{typed}<span className="caret" />
+          </p>
+          <h2 aria-label={title}><span aria-hidden>{heading}</span></h2>
+          {lede && <p className={`sec-lede ${seen ? "in" : ""}`}>{lede}</p>}
+        </div>
+        {children}
+      </div>
+    </section>
+  );
+}
+
+function Reveal({ as: Tag = "div", i = 0, className = "", children, style }: { as?: "div" | "li" | "tr"; i?: number; className?: string; children: ReactNode; style?: CSSProperties }) {
+  const [ref, seen] = useInView<HTMLElement>("0px 0px -8% 0px");
+  const Comp = Tag as "div";
+  return (
+    <Comp ref={ref as never} className={`reveal ${seen ? "in" : ""} ${className}`} style={{ ...style, ["--i" as string]: i }}>
+      {children}
+    </Comp>
+  );
+}
+
+function glow(e: MouseEvent<HTMLElement>) {
+  const r = e.currentTarget.getBoundingClientRect();
+  e.currentTarget.style.setProperty("--mx", `${e.clientX - r.left}px`);
+  e.currentTarget.style.setProperty("--my", `${e.clientY - r.top}px`);
+}
+
+function Links({ p }: { p: Project }) {
+  if (!p.code && !p.live) return <span className="c-dim">private repository</span>;
+  return (
+    <span className="links">
+      {p.live && <a href={p.live} target="_blank" rel="noreferrer">[live site]<span className="sr-only"> for {p.name}</span></a>}
+      {p.code && <a href={p.code} target="_blank" rel="noreferrer">[source]<span className="sr-only"> for {p.name}</span></a>}
+    </span>
+  );
+}
+
+function ProjectPane({ p, i }: { p: Project; i: number }) {
+  return (
+    <Reveal i={i % 2} className="win pane">
+      <div className="pane-inner" onMouseMove={glow}>
+        <div className="win-bar">
+          <span className="win-title">~/projects/{slug(p.name)}</span>
+          <span className={`badge ${p.private ? "b-private" : "b-public"}`}>{p.private ? "private" : "public"}</span>
+        </div>
+        <div className="pane-body">
+          <p className="pane-kind">{p.kind}</p>
+          <h3>{p.name}</h3>
+          <p className="pane-desc">{p.description}</p>
+          <p className="pane-stack">
+            <span className="c-magenta">stack</span><span className="c-dim"> = [</span>
+            {p.stack.map((s, k) => (
+              <span key={s}><span className="c-green">"{s}"</span>{k < p.stack.length - 1 && <span className="c-dim">, </span>}</span>
+            ))}
+            <span className="c-dim">]</span>
+          </p>
+          <Links p={p} />
+        </div>
+      </div>
+    </Reveal>
+  );
+}
+
+function MoreProjects() {
+  const [ref, seen] = useInView<HTMLDivElement>();
+  const typed = useTyped("ls -l ~/projects/more", seen, 30);
+  return (
+    <div className="more" ref={ref}>
+      <p className="sec-cmd more-cmd" aria-hidden>
+        <span className="c-green">rakibul</span><span className="c-dim">@</span><span className="c-blue">dhaka</span><span className="c-dim">:~$ </span>{typed}<span className="caret" />
+      </p>
+      <h3 className="more-title">Also built</h3>
+      <p className="c-dim more-total">total {moreProjects.length}</p>
+      <ul className="ls">
+        {moreProjects.map((p, i) => (
+          <Reveal as="li" key={p.name} i={i} className="ls-row">
+            <span className="ls-perm c-dim" aria-hidden>{p.private ? "drwx------" : "drwxr-xr-x"}</span>
+            <span className="ls-name"><span className="c-cyan">{slug(p.name)}/</span><span className="ls-kind c-dim">{p.kind}</span></span>
+            <span className="ls-desc">{p.description}</span>
+            <span className="ls-stack c-dim">{p.stack.join(", ")}</span>
+            <span className="ls-links"><Links p={p} /></span>
+          </Reveal>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function SkillsJson() {
+  const lines = useMemo(() => {
+    const out: ReactNode[] = [<span className="c-dim">{"{"}</span>];
+    skillGroups.forEach((g, gi) => {
+      out.push(
+        <>
+          {"  "}<span className="c-cyan">"{g.label}"</span><span className="c-dim">: [</span>
+          {g.items.map((it, k) => (
+            <span key={it}><span className="c-green">"{it}"</span>{k < g.items.length - 1 && <span className="c-dim">, </span>}</span>
+          ))}
+          <span className="c-dim">]{gi < skillGroups.length - 1 ? "," : ""}</span>
+        </>,
+      );
+    });
+    out.push(<span className="c-dim">{"}"}</span>);
+    return out;
+  }, []);
+  return (
+    <div className="win code" onMouseMove={glow}>
+      <div className="win-bar">
+        <span className="dots" aria-hidden><i /><i /><i /></span>
+        <span className="win-title">skills.json</span>
+        <span className="win-meta">JSON</span>
+      </div>
+      <ol className="code-body">
+        {lines.map((l, i) => (
+          <Reveal as="li" key={i} i={i} className="code-line"><span>{l}</span></Reveal>
+        ))}
+      </ol>
+    </div>
+  );
+}
+
+/* ---------------------------------------------------------------- GitHub */
+
+function GitHubSection() {
+  const [contribs, setContribs] = useState<Contrib[]>([]);
+  const [total, setTotal] = useState<number | null>(null);
+  const [repos, setRepos] = useState<number | null>(null);
+  useEffect(() => {
+    fetch("https://github-contributions-api.jogruber.de/v4/rakibulx33?y=last").then((r) => r.json()).then((res) => {
+      if (Array.isArray(res?.contributions)) setContribs(res.contributions);
+      if (res?.total != null) setTotal(typeof res.total === "object" ? Object.values(res.total as Record<string, number>).reduce((a, b) => a + b, 0) : res.total);
+    }).catch(() => {});
+    fetch("https://api.github.com/users/rakibulx33").then((r) => r.json()).then((u) => typeof u?.public_repos === "number" && setRepos(u.public_repos)).catch(() => {});
+  }, []);
+
+  const summary = [
+    total != null ? `${total.toLocaleString()} contributions in the last year` : "My public code and recent activity",
+    repos != null ? ` across ${repos} public repositories` : "",
+  ].join("");
+
+  return (
+    <Section id="github" cmd='git log --since="1 year" --graph' title="On GitHub" lede={`${summary}.`}>
+      {contribs.length > 0 && <Heatmap days={contribs} />}
+      <p className="links gh-link"><a href={LINKS.github} target="_blank" rel="noreferrer">[open github.com/rakibulx33]</a></p>
+    </Section>
   );
 }
 
 function Heatmap({ days }: { days: Contrib[] }) {
   const ref = useRef<HTMLDivElement>(null);
+  const [inRef, seen] = useInView<HTMLDivElement>();
   const cells = useMemo(() => {
     const recent = days.slice(-364);
     const pad = recent.length ? new Date(recent[0].date + "T00:00:00").getDay() : 0;
     return [...Array<Contrib | null>(pad).fill(null), ...recent];
   }, [days]);
-
-  useEffect(() => {
-    if (ref.current) ref.current.scrollLeft = ref.current.scrollWidth;
-  }, [cells]);
-
+  useEffect(() => { if (ref.current) ref.current.scrollLeft = ref.current.scrollWidth; }, [cells]);
   return (
-    <div>
+    <div ref={inRef} className={`heat-box ${seen ? "in" : ""}`}>
       <div className="heat-wrap" ref={ref}>
         <div className="heat" role="img" aria-label="GitHub contribution calendar for the last year">
           {cells.map((c, i) => (
-            <span key={i} data-l={c ? Math.min(4, c.level) : 0} title={c ? `${c.count} on ${c.date}` : undefined} style={c ? undefined : { visibility: "hidden" }} />
+            <span key={i} data-l={c ? Math.min(4, c.level) : 0} title={c ? `${c.count} on ${c.date}` : undefined}
+              style={{ visibility: c ? undefined : "hidden", ["--d" as string]: `${Math.floor(i / 7) * 14}ms` }} />
           ))}
         </div>
       </div>
-      <div className="heat-legend" aria-hidden>
-        Less
-        <span style={{ background: "#d3ddd6" }} />
-        <span style={{ background: "#a9c9b8" }} />
-        <span style={{ background: "#5f9a82" }} />
-        <span style={{ background: "#2a6a55" }} />
-        <span style={{ background: "var(--mask)" }} />
-        More
-      </div>
     </div>
+  );
+}
+
+/* ---------------------------------------------------------------- contact */
+
+function Contact() {
+  const [ref, seen] = useInView<HTMLDivElement>();
+  const PING = [
+    <>PING rakibul (rakibulx33.me): 56 data bytes</>,
+    <>64 bytes from rakibul: icmp_seq=0 <span className="c-green">status=available</span></>,
+    <>64 bytes from rakibul: icmp_seq=1 <span className="c-green">open_to=freelance</span></>,
+    <>64 bytes from rakibul: icmp_seq=2 <span className="c-green">location=Dhaka</span></>,
+    <span className="c-dim">--- 3 packets transmitted, 3 received, 0% packet loss ---</span>,
+  ];
+  const typed = useTyped("ping rakibul", seen, 60);
+  const done = typed.length === "ping rakibul".length;
+  const heading = useScramble("Have a project in mind?", done, 800);
+  return (
+    <section id="contact" className="sec contact">
+      <div className="wrap" ref={ref}>
+        <p className="sec-cmd" aria-hidden>
+          <span className="c-green">rakibul</span><span className="c-dim">@</span><span className="c-blue">dhaka</span><span className="c-dim">:~$ </span>{typed}<span className="caret" />
+        </p>
+        <div className="ping" aria-hidden>
+          {PING.map((l, i) => (
+            <div key={i} className={`ping-line ${done ? "in" : ""}`} style={{ ["--i" as string]: i }}>{l}</div>
+          ))}
+        </div>
+        <h2 aria-label="Have a project in mind?"><span aria-hidden>{heading}</span></h2>
+        <p className="sec-lede in">I take on freelance backend, automation and e-commerce work. Email is the fastest way to reach me.</p>
+        <a className="mail" href={`mailto:${LINKS.email}`} onMouseMove={glow}>{LINKS.email}</a>
+        <ul className="socials">
+          <li><a href={LINKS.github} target="_blank" rel="noreferrer">[github]</a></li>
+          <li><a href={LINKS.linkedin} target="_blank" rel="noreferrer">[linkedin]</a></li>
+          <li><a href={LINKS.facebook} target="_blank" rel="noreferrer">[facebook]</a></li>
+        </ul>
+      </div>
+    </section>
   );
 }
