@@ -21,7 +21,7 @@ A few commands are hidden (start with `ls -a`), and visitors collect 8 achieveme
 
 - **Email** through [FormSubmit](https://formsubmit.co) (no backend). The first submission sends an activation link to the inbox.
 - **Telegram** through a small Cloudflare Worker in [`worker/`](worker/README.md), which keeps the bot token secret.
-  It's off until `HIRE_RELAY` in `src/data.ts` is set to the Worker's URL.
+  `HIRE_RELAY` in `src/data.ts` points the site at it (set it to `""` for email only).
 
 The visitor sees "Delivered" as soon as either one lands. If both fail, they can open their email app or copy the brief.
 
