@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type KeyboardEvent, type ReactNode } from "react";
-import { featuredProjects, moreProjects, research, services, skillGroups, LINKS, PORTRAIT, SOCIALS, HANDLE } from "./data";
+import { companies, featuredProjects, moreProjects, research, services, skillGroups, LINKS, PORTRAIT, SOCIALS, HANDLE } from "./data";
 import { prefersReducedMotion } from "./hooks";
 import { ACHIEVEMENTS, TOTAL, emit, isUnlocked, unlock, unlockedCount, useRxEvent } from "./store";
 
@@ -14,8 +14,8 @@ const PROMPT = (
 
 const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 const ALL = [...featuredProjects, ...moreProjects];
-const SECTIONS = ["services", "process", "projects", "research", "skills", "github", "contact"];
-const COMMANDS = ["help", "hire", "whoami", "neofetch", "photo", "services", "projects", "ls", "open", "research", "skills", "socials", "contact", "achievements", "github", "linkedin", "email", "cd", "date", "clear", "exit"];
+const SECTIONS = ["services", "process", "projects", "companies", "research", "skills", "github", "contact"];
+const COMMANDS = ["help", "hire", "whoami", "neofetch", "photo", "services", "projects", "ls", "open", "companies", "research", "skills", "socials", "contact", "achievements", "github", "linkedin", "email", "cd", "date", "clear", "exit"];
 const CHIPS = ["hire", "help", "whoami", "services", "projects", "socials", "contact"];
 const used = new Set<string>(); // distinct commands this visit, for the "operator" achievement
 
@@ -149,7 +149,8 @@ function run(raw: string, clear: () => void): ReactNode {
             ["services", "what I can build for you"],
             ["projects", "selected work (also: ls)"],
             ["open <name>", "links for a project"],
-            ["research", "papers in preparation"],
+            ["companies", "companies I build for"],
+            ["research", "thesis and papers"],
             ["skills", "tools I use"],
             ["socials", "every profile, ranked"],
             ["contact", "how to reach me"],
@@ -204,6 +205,7 @@ function run(raw: string, clear: () => void): ReactNode {
       if (/services/i.test(arg)) return run("services", clear);
       if (/skills/i.test(arg)) return run("skills", clear);
       if (/research/i.test(arg)) return run("research", clear);
+      if (/compan/i.test(arg)) return run("companies", clear);
       if (/process/i.test(arg)) { setTimeout(() => scrollTo("process"), 150); return <span className="c-dim">opening ~/process ...</span>; }
       return /profile|photo|\.jpg|\.png|\.webp/i.test(arg)
         ? <Neofetch />
@@ -258,9 +260,19 @@ function run(raw: string, clear: () => void): ReactNode {
       return (
         <div>
           {research.map((r) => (
-            <div key={r.title}><span className="c-yellow">[in preparation]</span> {r.title}</div>
+            <div key={r.title}><span className="c-yellow">[{r.status ?? "in preparation"}]</span> {r.title}</div>
           ))}
           <Jump to="research" />
+        </div>
+      );
+    case "companies":
+    case "company":
+      return (
+        <div>
+          {companies.map((c) => (
+            <div key={c.name} className="t-row"><span className="c-cyan t-strong">{c.name}</span><span className="c-dim">{c.kind}</span></div>
+          ))}
+          <Jump to="companies" />
         </div>
       );
     case "skills":

@@ -193,11 +193,46 @@ export const moreProjects: Project[] = [
   },
 ];
 
+export type Company = {
+  name: string;
+  kind: string;
+  description: string;
+  /** What I do there, in a few words. */
+  role: string;
+  url?: string;
+};
+
+/** Companies I build for. No team sizes or ownership split on purpose. */
+export const companies: Company[] = [
+  {
+    name: "Gikpik",
+    kind: "Software company",
+    description: "A software company building web, mobile and automation products for businesses, with a focus on professional delivery.",
+    role: "Backend, automation and full-stack development",
+  },
+  {
+    name: "BuildIoT BD",
+    kind: "E-commerce, electronics and IoT parts",
+    description: "An online store for electronics and IoT parts in Bangladesh, with local payments, delivery and a staff admin panel.",
+    role: "Technical side: platform, backend and design",
+    url: "https://buildiotbd.com",
+  },
+  {
+    name: "BuildIoT Lab",
+    kind: "IoT lab",
+    description: "The lab behind BuildIoT: prototypes, tutorials and build notes for practical IoT.",
+    role: "Technical side: website and IoT builds",
+    url: "https://buildiotlabs.com",
+  },
+];
+
 export type Research = {
   title: string;
   venue: string;
   summary: string;
   tags: string[];
+  /** Shown in brackets before the venue. */
+  status?: "in progress" | "in preparation";
 };
 
 export const research: Research[] = [
@@ -206,6 +241,13 @@ export const research: Research[] = [
     venue: "Undergraduate thesis, DIU CSE",
     summary: "Low-cost IoT and machine learning to help households understand their electricity use and costs.",
     tags: ["IoT", "Machine learning", "Energy"],
+    status: "in progress",
+  },
+  {
+    title: "Single-meter energy insights for homes",
+    venue: "IEEE conference paper, first author",
+    summary: "Showing households where their electricity goes, using one low-cost meter and no extra sensors.",
+    tags: ["IoT", "Energy"],
   },
   {
     title: "IoT monitoring for potato storage",
@@ -215,7 +257,7 @@ export const research: Research[] = [
   },
   {
     title: "IoT monitoring for onion storage",
-    venue: "Conference paper",
+    venue: "Springer conference paper",
     summary: "Low-cost sensing to reduce post-harvest losses in stored onions.",
     tags: ["IoT", "Agritech"],
   },

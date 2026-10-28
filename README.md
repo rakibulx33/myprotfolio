@@ -10,9 +10,9 @@ decrypt-style headings, and a vim status line.
 ## Terminal commands
 
 `hire`, `help`, `whoami` / `neofetch` (prints the photo inline with a glitch), `services`, `projects` / `ls`,
-`open <project>`, `research`, `skills`, `socials`, `contact`, `achievements`, `cd <section>`, `date`, `clear`.
+`open <project>`, `companies`, `research`, `skills`, `socials`, `contact`, `achievements`, `cd <section>`, `date`, `clear`.
 Press `/` anywhere to focus the prompt; `↑`/`↓` for history, `Tab` to complete.
-Number keys `0`–`5` jump between sections. The profile.jpg window glitches whenever a command runs.
+Number keys `0`–`6` jump between sections. The profile.jpg window glitches whenever a command runs.
 A few commands are hidden (start with `ls -a`), and visitors collect 8 achievements as they explore.
 
 ## Project briefs (`hire`)

@@ -14,8 +14,14 @@
 - [Smart Escape](https://rakibulx33.github.io/AI-DEV-FEST-2026-VIBE-CODING-MOCK/): evacuation route simulator (JavaScript, SVG)
 - [DIU Job Hub](https://github.com/rakibulx33/diujobhub): university job platform with AI job matching (Next.js, MySQL)
 
-## Research (in preparation)
-- Smart energy monitoring for Bangladeshi homes (undergraduate thesis)
+## Companies
+- Gikpik: software company building web, mobile and automation products
+- [BuildIoT BD](https://buildiotbd.com): online store for electronics and IoT parts in Bangladesh
+- [BuildIoT Lab](https://buildiotlabs.com): IoT prototypes and build notes
+
+## Research
+- Smart energy monitoring for Bangladeshi homes (undergraduate thesis, in progress)
+- Single-meter energy insights for homes (IEEE conference paper, in preparation)
 - IoT monitoring for potato and onion storage (conference papers)
 - Device-free human presence sensing (IEEE conference paper)
 

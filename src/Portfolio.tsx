@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent, type ReactNode } from "react";
-import { featuredProjects, moreProjects, research, services, skillGroups, LINKS, PORTRAIT, SOCIALS, PROCESS, HANDLE, type Project } from "./data";
+import { companies, featuredProjects, moreProjects, research, services, skillGroups, LINKS, PORTRAIT, SOCIALS, PROCESS, HANDLE, type Project } from "./data";
 import Hire from "./Hire";
 import { HireDock, Matrix, Toaster, useKonami, useNudge } from "./Extras";
 import { TOTAL, emit, unlock, useAchievementCount } from "./store";
@@ -10,6 +10,7 @@ const TABS = [
   { id: "top", label: "home" },
   { id: "services", label: "services" },
   { id: "projects", label: "projects" },
+  { id: "companies", label: "companies" },
   { id: "research", label: "research" },
   { id: "skills", label: "skills" },
   { id: "contact", label: "contact" },
@@ -78,12 +79,26 @@ export default function Portfolio() {
           <MoreProjects />
         </Section>
 
+        <Section id="companies" cmd="cat companies.md" title="Companies"
+          lede="Alongside freelance work, I build the technical side of a few companies.">
+          <ul className="svc">
+            {companies.map((c, i) => (
+              <Reveal as="li" key={c.name} i={i} className="svc-item">
+                <h3><span className="c-cyan" aria-hidden>› </span>{c.url ? <a href={c.url} target="_blank" rel="noreferrer">{c.name}</a> : c.name}</h3>
+                <p className="c-dim">{c.kind}</p>
+                <p>{c.description}</p>
+                <p className="c-dim">role = &quot;{c.role}&quot;</p>
+              </Reveal>
+            ))}
+          </ul>
+        </Section>
+
         <Section id="research" onSeen={() => unlock("scholar")} cmd="cat research.md" title="Research"
           lede="Low-cost IoT for everyday problems in Bangladesh, written with classmates and faculty at Daffodil International University.">
           <ul className="papers">
             {research.map((r, i) => (
               <Reveal as="li" key={r.title} i={i} className="paper">
-                <p className="paper-status"><span className="c-yellow">[in preparation]</span> <span className="c-dim">{r.venue}</span></p>
+                <p className="paper-status"><span className="c-yellow">[{r.status ?? "in preparation"}]</span> <span className="c-dim">{r.venue}</span></p>
                 <h3><span className="c-magenta" aria-hidden>## </span>{r.title}</h3>
                 <p>{r.summary}</p>
               </Reveal>
