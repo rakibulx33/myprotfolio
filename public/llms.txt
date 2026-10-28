@@ -14,10 +14,10 @@
 - [Smart Escape](https://rakibulx33.github.io/AI-DEV-FEST-2026-VIBE-CODING-MOCK/): evacuation route simulator (JavaScript, SVG)
 - [DIU Job Hub](https://github.com/rakibulx33/diujobhub): university job platform with AI job matching (Next.js, MySQL)
 
-## Companies
-- Gikpik: software company building web, mobile and automation products
-- [BuildIoT BD](https://buildiotbd.com): online store for electronics and IoT parts in Bangladesh
-- [BuildIoT Lab](https://buildiotlabs.com): IoT prototypes and build notes
+## Sister companies
+- [Gikpik](https://rakibulx33.github.io/gikpik/): software and automation studio
+- [BuildIoT Lab](https://buildiotlabs.com): IoT and embedded engineering
+- [BuildIoT BD](https://buildiotbd.com): online store for electronics and IoT parts
 
 ## Research
 - Smart energy monitoring for Bangladeshi homes (undergraduate thesis, in progress)

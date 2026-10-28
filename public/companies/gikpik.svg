@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Gikpik">
+  <defs>
+    <linearGradient id="gkPeak" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#00EB8A"/>
+      <stop offset="1" stop-color="#00E6B6"/>
+    </linearGradient>
+  </defs>
+  <path fill="url(#gkPeak)" d="M256.5,0 L512,265.5 L268.5,512 L268.5,240 L272.5,240 L318,285.5 L318,342 L394,266 L256.5,126 L119,266 L195,342 L195,285.5 L240.5,240 L244.5,240 L244.5,512 L0,265.5 Z"/>
+</svg>

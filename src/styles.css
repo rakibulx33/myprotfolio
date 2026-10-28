@@ -584,3 +584,11 @@ a.status-item:hover { color: var(--cyan); }
   .chips button.chip-hire, .dock-dot, .hire, .toast, .matrix, .hire-q { animation: none; }
   .dock, .btn-hire, .soc a { transition: none; }
 }
+
+/* sister companies */
+.co-logo { display: flex; align-items: center; height: 44px; margin-bottom: 14px; }
+.co-logo img { display: block; height: 36px; width: auto; }
+.co-logo.plate { align-self: flex-start; width: fit-content; padding: 4px 12px; background: #f4f1ea; border-radius: 6px; }
+.co-word { font-family: var(--mono); font-weight: 700; font-size: 20px; letter-spacing: -0.02em; }
+.co-word b { color: var(--green); }
+.co-word i { margin-left: 0.3em; font-style: normal; font-weight: 400; color: var(--fg-2); }

@@ -200,29 +200,34 @@ export type Company = {
   /** What I do there, in a few words. */
   role: string;
   url?: string;
+  /** Logo in /public/companies. `plate` puts it on a light tile, for artwork that vanishes on dark. */
+  logo?: { src: string; plate?: boolean };
 };
 
 /** Companies I build for. No team sizes or ownership split on purpose. */
 export const companies: Company[] = [
   {
     name: "Gikpik",
-    kind: "Software company",
+    kind: "Sister company · software and automation",
     description: "A software company building web, mobile and automation products for businesses, with a focus on professional delivery.",
     role: "Backend, automation and full-stack development",
+    url: "https://rakibulx33.github.io/gikpik/",
+    logo: { src: "/companies/gikpik.svg" },
   },
   {
     name: "BuildIoT BD",
-    kind: "E-commerce, electronics and IoT parts",
+    kind: "Sister company · electronics and IoT parts store",
     description: "An online store for electronics and IoT parts in Bangladesh, with local payments, delivery and a staff admin panel.",
     role: "Technical side: platform, backend and design",
     url: "https://buildiotbd.com",
   },
   {
     name: "BuildIoT Lab",
-    kind: "IoT lab",
-    description: "The lab behind BuildIoT: prototypes, tutorials and build notes for practical IoT.",
+    kind: "Sister company · IoT and embedded engineering",
+    description: "Hardware design, custom PCBs, firmware and connected software, delivered remotely.",
     role: "Technical side: website and IoT builds",
     url: "https://buildiotlabs.com",
+    logo: { src: "/companies/buildiot-lab.png", plate: true },
   },
 ];
 

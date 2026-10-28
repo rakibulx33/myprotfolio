@@ -80,10 +80,17 @@ export default function Portfolio() {
         </Section>
 
         <Section id="companies" cmd="cat companies.md" title="Companies"
-          lede="Alongside freelance work, I build the technical side of a few companies.">
+          lede="Gikpik, BuildIoT Lab and BuildIoT BD are sister companies. Alongside freelance work, I build the technical side of each.">
           <ul className="svc">
             {companies.map((c, i) => (
               <Reveal as="li" key={c.name} i={i} className="svc-item">
+                {c.logo ? (
+                  <span className={`co-logo${c.logo.plate ? " plate" : ""}`}>
+                    <img src={c.logo.src} alt="" height={36} decoding="async" loading="lazy" />
+                  </span>
+                ) : (
+                  <span className="co-logo co-word" aria-hidden><b>Build</b>IoT <i>BD</i></span>
+                )}
                 <h3><span className="c-cyan" aria-hidden>› </span>{c.url ? <a href={c.url} target="_blank" rel="noreferrer">{c.name}</a> : c.name}</h3>
                 <p className="c-dim">{c.kind}</p>
                 <p>{c.description}</p>
