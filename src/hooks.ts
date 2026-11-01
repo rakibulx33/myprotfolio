@@ -34,3 +34,18 @@ export function useClock(timeZone: string) {
   }, [timeZone]);
   return now;
 }
+
+/** True while the element is on screen (toggles both ways). Animations pause when it is false. */
+export function useOnScreen<T extends Element>(margin = "80px") {
+  const ref = useRef<T>(null);
+  const [on, setOn] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (typeof IntersectionObserver === "undefined") { setOn(true); return; }
+    const io = new IntersectionObserver(([e]) => setOn(e.isIntersecting), { rootMargin: margin });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [margin]);
+  return [ref, on] as const;
+}

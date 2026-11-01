@@ -16,6 +16,7 @@ export const SECTIONS = [
   { id: "top", label: "Top of the page", keys: "home start" },
   { id: "services", label: "What I build", keys: "services backend e-commerce automation ai iot" },
   { id: "work", label: "Selected work", keys: "work projects portfolio" },
+  { id: "lab", label: "Computer science, running", keys: "lab cs algorithms dijkstra genetic compiler cache rate limit demo" },
   { id: "process", label: "How we'd work together", keys: "process steps brief plan build launch" },
   { id: "companies", label: "Companies", keys: "gikpik buildiot sister" },
   { id: "research", label: "Research", keys: "papers thesis ieee" },

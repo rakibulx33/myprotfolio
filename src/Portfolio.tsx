@@ -1,12 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import {
   HANDLE, LINKS, PORTRAIT, PROCESS, SOCIALS, companies, featuredProjects, moreProjects, research, services, skillGroups,
   type Line, type Project, type Social,
 } from "./data";
 import Board from "./Board";
+import { CompanyBus, CONCEPT, Handshake, Live, PresenceDemo, ProgramCounter, ServiceGlyph } from "./Concepts";
 import { HireDock, Matrix, ResumeLauncher, Toaster, useKonami, useNudge } from "./Extras";
 import GitHubYear from "./GitHubYear";
 import Hire from "./Hire";
+import Lab from "./Lab";
 import { prefersReducedMotion, useClock, useInView } from "./hooks";
 import Palette from "./Palette";
 import Signal from "./Signal";
@@ -15,6 +17,7 @@ import { useTheme } from "./theme";
 
 const NAV = [
   { id: "work", label: "Work" },
+  { id: "lab", label: "Lab" },
   { id: "research", label: "Research" },
   { id: "github", label: "GitHub" },
   { id: "contact", label: "Contact" },
@@ -33,10 +36,12 @@ export default function Portfolio() {
     <>
       <a className="skip" href="#main">Skip to content</a>
       <Board />
+      <ProgramCounter />
       <Header />
       <main id="main">
         <Hero />
         <Work />
+        <Lab />
         <Process />
         <Companies />
         <Research />
@@ -163,8 +168,10 @@ function Hero() {
               <li key={s.key} className={`svc-item ph-${s.key}${active === s.key ? " on" : ""}`}
                 onMouseEnter={() => setActive(s.key)} onMouseLeave={() => setActive(null)}>
                 <span className="wire" aria-hidden />
+                <ServiceGlyph line={s.key} />
                 <h3>{s.title}</h3>
                 <p>{s.text}</p>
+                <p className="svc-concept"><b>{CONCEPT[s.key].name}.</b> {CONCEPT[s.key].text}</p>
               </li>
             ))}
           </ul>
@@ -236,6 +243,7 @@ function Work() {
 /* ---------------------------------------------------------------- process */
 
 function Process() {
+  const [ref, seen] = useInView<HTMLOListElement>("0px 0px -25% 0px");
   return (
     <section id="process" className="sec sec-tint" aria-labelledby="process-title">
       <div className="wrap">
@@ -243,15 +251,16 @@ function Process() {
           <h2 id="process-title">How we’d work together</h2>
           <p className="sec-lede">From first message to launch, you always know what I’m building and what comes next.</p>
         </header>
-        <ol className="steps">
+        <ol className="steps" ref={ref} data-run={seen ? "" : undefined}>
           {PROCESS.map((s, i) => (
             <li key={s.title} className="step">
-              <span className="step-n" aria-hidden>{i + 1}</span>
+              <span className="step-n" aria-hidden style={{ "--i": i } as CSSProperties}>{i + 1}</span>
               <h3>{s.title}</h3>
               <p>{s.text}</p>
             </li>
           ))}
         </ol>
+        <p className="fig-note"><b>A delivery pipeline.</b> Each stage has to pass before the next one starts, the same rule a build pipeline follows before it ships.</p>
         <p className="steps-cta">
           <button type="button" className="btn btn-ink" onClick={() => emit("hire")}>Start with a brief</button>
         </p>
@@ -276,6 +285,7 @@ function Companies() {
           <h2 id="companies-title">Companies</h2>
           <p className="sec-lede">Gikpik, BuildIoT Lab and BuildIoT BD are sister companies. Alongside freelance work, I build the technical side of each.</p>
         </header>
+        <CompanyBus />
         <ul className="co-list">
           {companies.map((c) => (
             <li key={c.name} className="co">
@@ -314,6 +324,7 @@ function Research() {
             </li>
           ))}
         </ul>
+        <PresenceDemo />
       </div>
     </section>
   );
@@ -321,7 +332,11 @@ function Research() {
 
 /* ---------------------------------------------------------------- skills */
 
+const STACK_ORDER = ["Languages", "Frontend & Mobile", "Backend", "Data", "AI & Automation", "DevOps & IoT"];
+const STACK_LINE: Record<string, Line> = { Backend: "backend", "AI & Automation": "automation", "DevOps & IoT": "iot" };
+
 function Skills() {
+  const rows = STACK_ORDER.map((l) => skillGroups.find((g) => g.label === l)).filter(Boolean) as typeof skillGroups;
   return (
     <section id="skills" className="sec" aria-labelledby="skills-title">
       <div className="wrap">
@@ -329,14 +344,18 @@ function Skills() {
           <h2 id="skills-title">Tools I use</h2>
           <p className="sec-lede">Chosen per project. Most of my production work is in TypeScript, Python and PHP.</p>
         </header>
-        <dl className="skills">
-          {skillGroups.map((g) => (
-            <div key={g.label}>
-              <dt>{g.label}</dt>
-              <dd>{g.items.join(", ")}</dd>
-            </div>
-          ))}
-        </dl>
+        <Live className="layers">
+          <ol className="layer-list">
+            {rows.map((g, i) => (
+              <li key={g.label} className={`layer ph-${STACK_LINE[g.label] ?? "ink"}`} style={{ "--i": i, "--n": rows.length } as CSSProperties}>
+                <span className="layer-node" aria-hidden />
+                <h3>{g.label}</h3>
+                <ul className="chips">{g.items.map((t) => <li key={t}>{t}</li>)}</ul>
+              </li>
+            ))}
+          </ol>
+          <p className="fig-note"><b>Layers.</b> A request passes down through every layer I work in, from the screen to the database to the board, and the answer comes back up.</p>
+        </Live>
       </div>
     </section>
   );
@@ -379,6 +398,7 @@ function Contact() {
           <p className="mail">
             Or email <a href={`mailto:${LINKS.email}`} onClick={() => unlock("client")}>{LINKS.email}</a> <CopyEmail />
           </p>
+          <Handshake />
           <h3 className="soc-h">Find me everywhere as @{HANDLE}</h3>
           <div className="soc">
             {SOCIAL_GROUPS.map((g) => (

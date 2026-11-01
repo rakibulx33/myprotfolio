@@ -39,6 +39,23 @@ all content). It measures the real layout, treats every content block as a keep-
 It runs at 60 fps, draws only what is on screen, pauses in background tabs, and with reduced motion it is drawn
 once, fully powered and still. Phones get only the links between sections.
 
+## Computer science in every section
+
+Each section carries a small figure of a real computer-science idea that belongs to the work beside it
+(`src/Concepts.tsx`, styles in `src/concepts.css`). They animate only while on screen, and without motion they
+are plain, complete diagrams.
+
+- **What I build**: request and response (backend), a finite state machine (store), an agent loop (automation and
+  AI), sampling and quantizing (IoT).
+- **Lab** (`src/Lab.tsx`): five running demos on dark "instrument" screens, each tied to a project. Shortest path
+  with Dijkstra (Smart Escape, draw walls and close exits), a genetic algorithm (TradingSpark), a lexer, parser
+  and C generator you can type into (BongoScript), an LRU cache (ClanWar Coach) and a token bucket (Mosque Admin
+  Panel). Numbers on screen come from the code beside them; times are modelled and labelled as such.
+- **Process**: a delivery pipeline that draws itself. **Companies**: a bus topology. **Research**: a simulated
+  Wi-Fi signal for presence sensing (labelled as simulated). **Tools**: a signal passing down the layers and back.
+  **Contact**: the TCP handshake. A small program counter at the bottom left (wide screens) shows where you are
+  as a hex address.
+
 ## Command palette
 
 `Ctrl K`, `⌘K` or `/` opens the palette (`src/Palette.tsx`): every section, project, research paper, profile and
@@ -115,6 +132,7 @@ src/github.json    — last year of GitHub contributions (written by scripts/fet
 src/Portfolio.tsx  — page layout and sections
 src/Signal.tsx     — the hero figure: one reading split into four kinds of work, and the model that splits it
 src/Board.tsx      — the live circuit board behind the page
+src/Concepts.tsx   — the per-section CS figures; Lab.tsx holds the five interactive demos
 src/GitHubYear.tsx — the animated contribution year
 src/Palette.tsx    — command palette (Ctrl K) and the typed commands
 src/theme.ts       — light / load-shedding (dark) theme
