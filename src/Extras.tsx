@@ -18,19 +18,17 @@ export function Toaster() {
 
   useEffect(() => onUnlock((id) => {
     const a = ACHIEVEMENTS.find((x) => x.id === id);
-    if (!a) return;
+    if (!a || id === "booted") return; // the first one is earned quietly, so nothing covers the page on arrival
     const n = unlockedCount();
-    const extra = n === TOTAL ? "All unlocked. Thanks for exploring!" : n === TOTAL - 1 && !isUnlocked("client") ? "One left: run hire to start a project." : "Keep exploring to unlock more.";
-    push({ kind: "achievement", title: a.title, body: `${n}/${TOTAL}  ${extra}`, action: n === TOTAL - 1 && !isUnlocked("client") ? { label: "[hire]", event: "hire" } : undefined });
+    const extra = n === TOTAL ? "All unlocked. Thanks for exploring." : n === TOTAL - 1 && !isUnlocked("client") ? "One left: start a project brief." : "Press Ctrl K to find more.";
+    push({ kind: "achievement", title: a.title, body: `${n} of ${TOTAL}. ${extra}`, action: n === TOTAL - 1 && !isUnlocked("client") ? { label: "Start a brief", event: "hire" } : undefined });
   }), [push]);
 
   return (
     <div className="toasts" aria-live="polite">
       {items.map((t) => (
         <div key={t.id} className={`toast toast-${t.kind}`}>
-          <div className="toast-head">
-            {t.kind === "achievement" ? <><span className="c-yellow">★</span> achievement unlocked</> : <><span className="c-cyan">tip</span></>}
-          </div>
+          <div className="toast-head">{t.kind === "achievement" ? "Achievement unlocked" : "Tip"}</div>
           <div className="toast-title">{t.title}</div>
           {t.body && <div className="toast-body">{t.body}</div>}
           {t.action && (
@@ -48,7 +46,7 @@ export function Toaster() {
 export function HireDock() {
   const [show, setShow] = useState(false);
   useEffect(() => {
-    const targets = [document.querySelector("#top .chips"), document.querySelector("#contact .cta-row")].filter((x): x is Element => !!x);
+    const targets = [document.querySelector("#top .hero-cta"), document.querySelector("#contact .cta"), document.querySelector("#process .steps-cta")].filter((x): x is Element => !!x);
     if (!targets.length) return;
     const visible = new Map<Element, boolean>(targets.map((t) => [t, t === targets[0]]));
     // The top margin skips the area under the fixed tmux bar, so a sliver hidden behind it doesn't count as visible.
@@ -61,9 +59,8 @@ export function HireDock() {
   }, []);
   return (
     <button type="button" className={`dock${show ? " show" : ""}`} onClick={() => emit("hire")} tabIndex={show ? 0 : -1} aria-hidden={show ? undefined : true}>
-      <span className="dock-dot" aria-hidden />
-      <span><span className="c-dim">$</span> hire rakibul</span>
-      <span className="caret" aria-hidden />
+      <span className="live-dot" aria-hidden />
+      <span>Start a project brief</span>
     </button>
   );
 }
@@ -93,6 +90,7 @@ export function ResumeLauncher() {
 }
 
 /* ------------------------------------------------------------------ matrix easter egg */
+const PHASES = ["#7d97ff", "#ff6b5b", "#ffc53d", "#46c98a"];
 const RAIN = "অআইঈউএওকখগঘচছজঝটঠডঢণতথদধনপফবভমযরলশষসহড়য়০১২৩৪৫৬৭৮৯01<>/{}[]=+*#$";
 
 /** Digital rain in the site's colours, with Bangla letters mixed in. Any key or click exits. */
@@ -116,7 +114,7 @@ export function Matrix() {
       c.width = window.innerWidth * dpr; c.height = window.innerHeight * dpr;
       cols = Math.ceil(c.width / size);
       drops = Array.from({ length: cols }, () => Math.random() * -50);
-      ctx.fillStyle = "#0b0e1a"; ctx.fillRect(0, 0, c.width, c.height);
+      ctx.fillStyle = "#0f1318"; ctx.fillRect(0, 0, c.width, c.height);
     };
     resize();
     let raf = 0;
@@ -125,12 +123,12 @@ export function Matrix() {
       raf = requestAnimationFrame(draw);
       if (t - last < 50) return;
       last = t;
-      ctx.fillStyle = "rgba(11, 14, 26, 0.17)";
+      ctx.fillStyle = "rgba(15, 19, 24, 0.17)";
       ctx.fillRect(0, 0, c.width, c.height);
-      ctx.font = `${size * 0.82}px "Martian Mono Variable", ui-monospace, monospace`;
+      ctx.font = `600 ${size * 0.82}px "Geologica Variable", system-ui, sans-serif`;
       for (let i = 0; i < cols; i++) {
         const y = drops[i] * size;
-        ctx.fillStyle = Math.random() > 0.96 ? "#dce1f0" : i % 3 === 0 ? "#7ee787" : "#5ce1e6";
+        ctx.fillStyle = Math.random() > 0.96 ? "#ede9e0" : PHASES[i % 4];
         ctx.fillText(RAIN[(Math.random() * RAIN.length) | 0], i * size, y);
         if (y > c.height && Math.random() > 0.97) drops[i] = 0;
         drops[i] += 1;
@@ -153,10 +151,10 @@ export function Matrix() {
     <div className="matrix" role="dialog" aria-modal="true" aria-label="Easter egg: digital rain" onClick={() => setOn(false)}>
       <canvas ref={canvas} aria-hidden />
       <div className="matrix-msg">
-        <p>you found the rain.</p>
-        <p>every system has a door.</p>
-        <p>mine is <button type="button" onClick={(e) => { e.stopPropagation(); setOn(false); emit("hire"); }}>hire</button></p>
-        <p className="c-dim">click anywhere or press any key to exit</p>
+        <p>You found the rain.</p>
+        <p>Every system has a door.</p>
+        <p>Mine is a <button type="button" onClick={(e) => { e.stopPropagation(); setOn(false); emit("hire"); }}>project brief</button>.</p>
+        <p className="matrix-dim">Click anywhere or press any key to exit.</p>
       </div>
     </div>
   );
@@ -191,7 +189,7 @@ export function useNudge() {
       cleanup();
       try { if (window.sessionStorage.getItem("rx33.nudged") === "1") return; window.sessionStorage.setItem("rx33.nudged", "1"); } catch { /* ignore */ }
       if (isUnlocked("client")) return;
-      emit("toast", { kind: "tip", title: "Got an idea in mind?", body: "Run hire and I'll turn it into a project brief in about 30 seconds.", action: { label: "[start a brief]", event: "hire" } } satisfies Toast);
+      emit("toast", { kind: "tip", title: "Got an idea in mind?", body: "Answer six quick questions and I’ll have a project brief in about 30 seconds.", action: { label: "Start a brief", event: "hire" } } satisfies Toast);
     };
     const timer = window.setTimeout(fire, 45000);
     const onScroll = () => {

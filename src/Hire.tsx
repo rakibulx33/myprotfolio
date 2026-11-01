@@ -23,19 +23,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const PHONE_RE = /^\+?[\d\s()-]{8,20}$/;
 type Phase = "ask" | "review" | "sending" | "sent" | "failed";
 
-const PROMPT = (
-  <span className="t-prompt">
-    <span className="c-green">visitor</span><span className="c-dim">@</span><span className="c-blue">rakibulx33.me</span><span className="c-dim">:~$</span>
-  </span>
-);
-
-function Spinner() {
-  const [i, setI] = useState(0);
-  useEffect(() => { const id = window.setInterval(() => setI((n) => (n + 1) % 4), 90); return () => window.clearInterval(id); }, []);
-  return <span className="c-cyan" aria-hidden>{"|/-\\"[i]}</span>;
-}
-
-/** A short burst of terminal glyphs, used when the brief is delivered. */
+/** A short burst of sparks in the four mains colours, played when the brief is delivered. */
 function burst(canvas: HTMLCanvasElement | null, from: HTMLElement | null) {
   if (!canvas || prefersReducedMotion()) return;
   const host = canvas.parentElement!.getBoundingClientRect();
@@ -46,12 +34,11 @@ function burst(canvas: HTMLCanvasElement | null, from: HTMLElement | null) {
   if (!ctx) return;
   const ox = ((origin ? origin.left + origin.width / 2 : host.left + host.width / 2) - host.left) * dpr;
   const oy = ((origin ? origin.top : host.top + host.height * 0.7) - host.top) * dpr;
-  const glyphs = ["✦", "*", "+", "•", "·", "{", "}", "1", "0"];
-  const colors = ["#5ce1e6", "#7ee787", "#f2cc60", "#f778ba", "#7aa2ff", "#dce1f0"];
+  const colors = ["#2347c5", "#cc3326", "#e8a200", "#23885a"];
   const parts = Array.from({ length: 70 }, () => {
     const a = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI * 1.1;
     const v = (4 + Math.random() * 7) * dpr;
-    return { x: ox, y: oy, vx: Math.cos(a) * v, vy: Math.sin(a) * v, g: glyphs[(Math.random() * glyphs.length) | 0], c: colors[(Math.random() * colors.length) | 0], s: (11 + Math.random() * 9) * dpr };
+    return { x: ox, y: oy, vx: Math.cos(a) * v, vy: Math.sin(a) * v, r: Math.random() * Math.PI, vr: (Math.random() - 0.5) * 0.3, c: colors[(Math.random() * colors.length) | 0], s: (8 + Math.random() * 8) * dpr };
   });
   const t0 = performance.now();
   const step = (t: number) => {
@@ -61,7 +48,8 @@ function burst(canvas: HTMLCanvasElement | null, from: HTMLElement | null) {
     ctx.globalAlpha = 1 - k;
     for (const p of parts) {
       p.x += p.vx; p.y += p.vy; p.vy += 0.28 * dpr; p.vx *= 0.985;
-      ctx.fillStyle = p.c; ctx.font = `${p.s}px ui-monospace, monospace`; ctx.fillText(p.g, p.x, p.y);
+      p.r += p.vr;
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r); ctx.fillStyle = p.c; ctx.fillRect(-p.s / 2, -p.s / 7, p.s, (p.s * 2) / 7); ctx.restore();
     }
     requestAnimationFrame(step);
   };
@@ -151,10 +139,9 @@ export default function Hire() {
 
   const restart = () => { setAnswers({}); setStep(0); setPhase("ask"); setText(""); setHi(0); setError(""); };
 
-  const rows = useMemo(() => QUESTIONS.map((x) => [x.label, answers[x.key] || (x.optional ? "" : "")] as const), [answers]);
   const briefText = useMemo(
-    () => ["# brief.yml (from rakibulx33.me)", ...rows.map(([k, v]) => `${(k + ":").padEnd(10)}${k === "details" ? JSON.stringify(v || "") : v}`)].join("\n"),
-    [rows],
+    () => ["Project brief from rakibulx33.me", "", ...QUESTIONS.map((x) => `${x.q}\n${answers[x.key] || "(skipped)"}`)].join("\n"),
+    [answers],
   );
   const mailto = `mailto:${LINKS.email}?subject=${encodeURIComponent(`Project brief: ${answers.project ?? "new project"}`)}&body=${encodeURIComponent(briefText)}`;
 
@@ -239,89 +226,89 @@ export default function Hire() {
   };
 
   if (!mounted) return null;
+  const answered = QUESTIONS.slice(0, phase === "ask" ? step : QUESTIONS.length);
+  const progress = (phase === "ask" ? step : QUESTIONS.length) / QUESTIONS.length;
+  const stepLabel = phase === "ask" ? `Question ${step + 1} of ${QUESTIONS.length}` : phase === "review" ? "Check your brief" : phase === "sending" ? "Sending" : phase === "sent" ? "Delivered" : "Not sent yet";
+
   return (
-    <div className={`hire-backdrop${open ? " open" : ""}`} hidden={!open} onMouseDown={(e) => { if (e.target === e.currentTarget) close(); }}>
-      <div className="win hire" role="dialog" aria-modal="true" aria-labelledby="hire-title" ref={dialog} onKeyDown={onKeyDown}>
-        <div className="win-bar">
-          <span className="dots" aria-hidden><i /><i /><i /></span>
-          <span className="win-title" id="hire-title">~/hire: new project brief</span>
-          <button type="button" className="win-close" onClick={close} aria-label="Close the project brief">esc</button>
-        </div>
+    <div className={`dlg-backdrop${open ? " open" : ""}`} hidden={!open} onMouseDown={(e) => { if (e.target === e.currentTarget) close(); }}>
+      <div className="dlg hire" role="dialog" aria-modal="true" aria-labelledby="hire-title" ref={dialog} onKeyDown={onKeyDown}>
+        <header className="dlg-head">
+          <div>
+            <h2 id="hire-title">Start a project brief</h2>
+            <p className="dlg-step" aria-live="polite">{stepLabel}</p>
+          </div>
+          <button type="button" className="dlg-x" onClick={close} aria-label="Close the project brief">Close</button>
+        </header>
+        <div className="dlg-progress" aria-hidden><span style={{ transform: `scaleX(${progress})` }} /></div>
 
-        <div className="hire-body" ref={body}>
-          <div className="t-line">{PROMPT} hire rakibul</div>
-          <div className="t-line c-dim">Let's scope your project. It takes about 30 seconds.</div>
-
-          {QUESTIONS.slice(0, phase === "ask" ? step : QUESTIONS.length).map((x) => (
-            <div key={x.key} className="t-line hire-done">
-              <span className="c-green">✓</span> {x.q} <span className="c-cyan">{answers[x.key] || "(skipped)"}</span>
-            </div>
-          ))}
+        <div className="dlg-body hire-body" ref={body}>
+          {phase === "ask" && answered.length > 0 && (
+            <ul className="hire-done">
+              {answered.map((x) => <li key={x.key}><span>{x.q}</span> <strong>{answers[x.key] || "Skipped"}</strong></li>)}
+            </ul>
+          )}
 
           {phase === "ask" && (
             <div className="hire-q" key={q.key}>
-              <div className="t-line"><span className="c-yellow">?</span> <strong>{q.q}</strong>{q.optional && <span className="c-dim"> (optional, enter to skip)</span>}</div>
+              <p className="hire-ask" id="hire-ask">{q.q}{q.optional && <span className="hire-opt">Optional</span>}</p>
               {q.options ? (
-                <div className="hire-opts" role="group" aria-label={q.q}>
+                <div className="hire-opts" role="group" aria-labelledby="hire-ask">
                   {q.options.map((o, i) => (
                     <button key={o} type="button" className={i === hi ? "on" : ""} data-autofocus={i === hi ? "" : undefined}
                       onMouseEnter={() => setHi(i)} onFocus={() => setHi(i)} onClick={() => answer(o)}>
-                      <span className="hire-key">{i + 1}</span><span className="hire-arrow" aria-hidden>{i === hi ? "›" : " "}</span>{o}
+                      <kbd aria-hidden>{i + 1}</kbd><span>{o}</span>
                     </button>
                   ))}
                 </div>
               ) : (
                 <form className="hire-input" onSubmit={(e) => { e.preventDefault(); submitText(); }}>
-                  <span className="c-cyan" aria-hidden>›</span>
                   <input data-autofocus="" value={text} onChange={(e) => { setText(e.target.value); setError(""); }}
-                    placeholder={q.placeholder} maxLength={q.key === "details" ? 400 : 120} aria-label={q.q} aria-invalid={error ? true : undefined}
-                    type={q.input === "contact" ? "text" : "text"} inputMode={q.input === "contact" ? "email" : undefined}
+                    placeholder={q.placeholder} maxLength={q.key === "details" ? 400 : 120} aria-labelledby="hire-ask" aria-invalid={error ? true : undefined}
+                    type="text" inputMode={q.input === "contact" ? "email" : undefined}
                     autoComplete={q.key === "name" ? "name" : q.input === "contact" ? "email" : "off"} spellCheck={q.key === "details"} />
-                  <button type="submit" className="hire-enter">enter</button>
+                  <button type="submit" className="btn btn-ink">{q.optional && !text.trim() ? "Skip" : "Continue"}</button>
                 </form>
               )}
-              {error && <div className="t-line c-red" role="alert">{error}</div>}
+              {error && <p className="hire-err" role="alert">{error}</p>}
             </div>
           )}
 
           {phase !== "ask" && (
-            <pre className="hire-brief" aria-label="Your project brief">
-              <span className="c-dim"># brief.yml</span>{"\n"}
-              {rows.map(([k, v]) => (
-                <span key={k}><span className="c-cyan">{(k + ":").padEnd(10)}</span>{k === "details" ? <span className="c-green">{JSON.stringify(v || "")}</span> : v}{"\n"}</span>
-              ))}
-            </pre>
+            <dl className="hire-brief" aria-label="Your project brief">
+              {QUESTIONS.map((x) => <div key={x.key}><dt>{x.q}</dt><dd>{answers[x.key] || "Skipped"}</dd></div>)}
+            </dl>
           )}
 
           {phase === "review" && (
             <div className="hire-actions">
-              <button type="button" ref={sendBtn} className="hire-primary" data-autofocus="" onClick={send}>send to rakibul <span aria-hidden>↵</span></button>
-              <button type="button" onClick={back}>[edit]</button>
-              <a href={mailto} onClick={() => unlock("client")}>[email instead]</a>
+              <button type="button" ref={sendBtn} className="btn btn-ink" data-autofocus="" onClick={send}>Send brief</button>
+              <button type="button" className="btn btn-line" onClick={back}>Edit answers</button>
+              <a className="btn-text" href={mailto} onClick={() => unlock("client")}>Email it instead</a>
             </div>
           )}
 
-          {phase === "sending" && <div className="t-line"><Spinner /> <span className="c-dim">sending brief.yml to rakibul…</span></div>}
+          {phase === "sending" && <p className="hire-status"><span className="spin" aria-hidden /> Sending your brief…</p>}
 
           {phase === "sent" && (
             <div className="hire-result" role="status">
-              <div className="t-line c-green">✓ Delivered. I've got your brief.</div>
-              <div className="t-line">I'll reply to <span className="c-cyan">{answers.contact}</span>. Feel free to keep exploring meanwhile.</div>
+              <p className="hire-ok">Delivered. I’ve got your brief.</p>
+              <p>I’ll reply to {answers.contact}. Feel free to keep exploring meanwhile.</p>
               <div className="hire-actions">
-                <button type="button" className="hire-primary" data-autofocus="" onClick={close}>close</button>
-                <button type="button" onClick={restart}>[new brief]</button>
+                <button type="button" className="btn btn-ink" data-autofocus="" onClick={close}>Close</button>
+                <button type="button" className="btn btn-line" onClick={restart}>Write another brief</button>
               </div>
             </div>
           )}
 
           {phase === "failed" && (
             <div className="hire-result" role="alert">
-              <div className="t-line c-red">✗ Couldn't send it from here ({why}).</div>
-              <div className="t-line">Your brief is safe. Send it another way:</div>
+              <p className="hire-bad">Couldn’t send it from here: {why}.</p>
+              <p>Your answers are safe. Send them another way:</p>
               <div className="hire-actions">
-                <a className="hire-primary" data-autofocus="" href={mailto} onClick={() => unlock("client")}>open email app</a>
-                <button type="button" onClick={copy}>{copied ? "[copied]" : "[copy brief]"}</button>
-                <button type="button" onClick={send}>[try again]</button>
+                <a className="btn btn-ink" data-autofocus="" href={mailto} onClick={() => unlock("client")}>Open my email app</a>
+                <button type="button" className="btn btn-line" onClick={copy}>{copied ? "Copied" : "Copy the brief"}</button>
+                <button type="button" className="btn-text" onClick={send}>Try again</button>
               </div>
             </div>
           )}
@@ -329,14 +316,14 @@ export default function Hire() {
           <input ref={honey} className="hp" tabIndex={-1} autoComplete="off" aria-hidden="true" name="_honey" />
         </div>
 
-        <div className="hire-foot">
-          <span className="c-dim">
-            {phase === "ask" ? (q.options ? `↑↓ to choose, 1–${q.options.length} to pick, enter to select` : "enter to continue") : phase === "review" ? "enter to send" : ""}
-          </span>
+        <footer className="dlg-foot">
+          <p>
+            {phase === "ask" ? (q.options ? `Use the arrow keys or 1–${q.options.length} to choose.` : "Press Enter to continue.") : phase === "review" ? "Press Enter to send." : ""}
+          </p>
           {((phase === "ask" && step > 0) || phase === "review" || phase === "failed") && (
-            <button type="button" className="hire-back" onClick={back}>[back]</button>
+            <button type="button" className="btn-text" onClick={back}>Back</button>
           )}
-        </div>
+        </footer>
         <canvas ref={burstCanvas} className="hire-burst" aria-hidden />
       </div>
     </div>

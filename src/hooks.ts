@@ -23,56 +23,6 @@ export function useInView<T extends Element>(margin = "0px 0px -15% 0px") {
   return [ref, seen] as const;
 }
 
-/** Types `text` out once `start` is true. */
-export function useTyped(text: string, start: boolean, speed = 38) {
-  const [out, setOut] = useState("");
-  useEffect(() => {
-    if (!start) return;
-    if (prefersReducedMotion()) { setOut(text); return; }
-    let i = 0;
-    const id = window.setInterval(() => {
-      i++;
-      setOut(text.slice(0, i));
-      if (i >= text.length) window.clearInterval(id);
-    }, speed);
-    return () => window.clearInterval(id);
-  }, [text, start, speed]);
-  return out;
-}
-
-const GLYPHS = "!<>-_\\/[]{}=+*^?#01ABCDEFX";
-
-/**
- * Decrypt effect for a heading. The real text always stays in the DOM (for search
- * engines and screen readers); `fx` is a decorative overlay drawn on top until `done`.
- */
-export function useScramble(text: string, start: boolean, duration = 900) {
-  const [state, setState] = useState({ fx: "", done: false });
-  useEffect(() => {
-    if (!start) return;
-    if (prefersReducedMotion()) { setState({ fx: text, done: true }); return; }
-    let raf = 0;
-    const t0 = performance.now();
-    const tick = (t: number) => {
-      const p = Math.min(1, Math.max(0, (t - t0) / duration));
-      if (p >= 1) { setState({ fx: text, done: true }); return; }
-      const fixed = Math.floor(p * text.length);
-      let s = "";
-      for (let i = 0; i < text.length; i++) {
-        const ch = text[i];
-        if (i < fixed || ch === " ") s += ch;
-        else if (i < fixed + 6) s += GLYPHS[(Math.random() * GLYPHS.length) | 0];
-        else s += " ";
-      }
-      setState({ fx: s, done: false });
-      raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [text, start, duration]);
-  return state;
-}
-
 /** Live clock for an IANA zone. Starts as a placeholder so the prerendered HTML matches. */
 export function useClock(timeZone: string) {
   const [now, setNow] = useState("--:--");

@@ -58,11 +58,14 @@ export type Project = {
   live?: string;
   /** Repo is private: shown as a case study with no code link. */
   private?: boolean;
+  /** Which kind of work it is (sets its colour in the project index). */
+  line?: Line;
 };
 
 export const featuredProjects: Project[] = [
   {
     name: "BuildIoT BD",
+    line: "commerce",
     kind: "E-commerce platform",
     description:
       "A full online store for electronics and IoT parts in Bangladesh, with customer accounts, local payments and delivery, and a staff admin panel.",
@@ -71,6 +74,7 @@ export const featuredProjects: Project[] = [
   },
   {
     name: "TradingSpark",
+    line: "automation",
     kind: "Algorithmic trading system",
     description:
       "Breeds thousands of trading-strategy variants with a genetic algorithm on NautilusTrader. Survivors are forward-tested on data they have never seen, and the graded winners go into a vault. From there it builds decorrelated portfolios and runs them 24/7, demo first, with real money only behind an explicit gate.",
@@ -79,6 +83,7 @@ export const featuredProjects: Project[] = [
   },
   {
     name: "ShopTalk",
+    line: "commerce",
     kind: "Multi-tenant SaaS",
     description:
       "A multi-tenant storefront platform where each shop gets an AI assistant that helps customers find products by voice and chat.",
@@ -87,6 +92,7 @@ export const featuredProjects: Project[] = [
   },
   {
     name: "Replixon",
+    line: "automation",
     kind: "AI social inbox",
     description:
       "An AI-assisted inbox that brings a business's social messaging channels into one place and helps answer customers faster.",
@@ -95,6 +101,7 @@ export const featuredProjects: Project[] = [
   },
   {
     name: "InstaMiner",
+    line: "backend",
     kind: "Mobile + backend platform",
     description:
       "A social engagement platform with a native Android app, a backend API and an admin panel.",
@@ -103,6 +110,7 @@ export const featuredProjects: Project[] = [
   },
   {
     name: "Tender Package Builder",
+    line: "automation",
     kind: "Solo build for AI DevFest 2026",
     description:
       "Takes a tender's requirements.json and a set of PDFs and produces one checked, correctly ordered PDF package, with a cover page and a page footer on every page. Everything runs in the browser, in English and Bangla, and no file is ever uploaded.",
@@ -274,20 +282,31 @@ export const research: Research[] = [
   },
 ];
 
-export const services: { title: string; text: string }[] = [
+/** The four kinds of work. Each has one colour across the site (the mains phases: blue, red, yellow, earth green). */
+export type Line = "backend" | "commerce" | "automation" | "iot";
+
+export const services: { key: Line; title: string; short: string; text: string }[] = [
   {
+    key: "backend",
+    short: "Backend",
     title: "Backend systems and APIs",
     text: "REST and real-time APIs, databases and background jobs in Node.js, Laravel and FastAPI, built to run reliably in production.",
   },
   {
+    key: "commerce",
+    short: "E-commerce",
     title: "E-commerce for Bangladesh",
     text: "Online stores and admin panels with the payment and delivery options Bangladeshi customers expect.",
   },
   {
+    key: "automation",
+    short: "Automation and AI",
     title: "Automation and AI integrations",
     text: "Chatbots, n8n workflows and LLM features that answer customers, sync data between tools and remove manual work.",
   },
   {
+    key: "iot",
+    short: "IoT",
     title: "IoT prototypes",
     text: "ESP32-based sensing and monitoring systems, from the device and firmware to the dashboard.",
   },

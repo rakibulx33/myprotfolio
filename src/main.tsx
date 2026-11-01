@@ -1,6 +1,5 @@
 import { createRoot, hydrateRoot } from "react-dom/client";
-import "@fontsource-variable/martian-mono/wdth.css";
-import "@fontsource-variable/instrument-sans";
+import "@fontsource-variable/geologica/shrp.css"; // weight + sharpness axes
 import "./styles.css";
 import Portfolio from "./Portfolio";
 

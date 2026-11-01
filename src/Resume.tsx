@@ -6,6 +6,8 @@ import {
   canSplit, companyKind, contactItems, defaultOptions, effectiveMax, fileName, firstSentence, orderedSkills, pickProjects,
   sanitizeOptions, sectionsFor, shortUrl, type ContactItem, type DocType, type Options, type SectionKey,
 } from "./resumeModel";
+import "@fontsource-variable/instrument-sans";
+import "@fontsource-variable/martian-mono/wdth.css";
 import "./resume.css";
 
 /* The résumé builder (`resume` / `cv` in the terminal). It lays out a document from the same data the
@@ -376,7 +378,7 @@ export default function ResumeBuilder({ onClose }: { onClose: () => void }) {
       <style>{"@page{size:A4;margin:0}"}</style>
       <div className="rb">
         <header className="rb-bar">
-          <h2 id={`${uid}-title`}><span className="c-dim">$</span> resume --build</h2>
+          <h2 id={`${uid}-title`}>Resume builder</h2>
           <p className={`rb-pages${over ? " warn" : ""}`} role="status">
             ≈ {pages} {pages === 1 ? "page" : "pages"}{over ? ". Over one page." : ""}
           </p>
