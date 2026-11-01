@@ -3,6 +3,7 @@ import {
   HANDLE, LINKS, PORTRAIT, PROCESS, SOCIALS, companies, featuredProjects, moreProjects, research, services, skillGroups,
   type Line, type Project, type Social,
 } from "./data";
+import Board from "./Board";
 import { HireDock, Matrix, ResumeLauncher, Toaster, useKonami, useNudge } from "./Extras";
 import GitHubYear from "./GitHubYear";
 import Hire from "./Hire";
@@ -31,6 +32,7 @@ export default function Portfolio() {
   return (
     <>
       <a className="skip" href="#main">Skip to content</a>
+      <Board />
       <Header />
       <main id="main">
         <Hero />
@@ -405,7 +407,8 @@ function Footer() {
       <div className="wrap ft-row">
         <p suppressHydrationWarning>© {new Date().getFullYear()} Rakibul Hasan</p>
         <p className="ft-colophon">
-          Set in Geologica. The four colours are the mains: the red, yellow and blue phases, and earth green.
+          Set in Geologica. The four colours are the mains: the red, yellow and blue phases, and earth green. Power runs
+          down the left margin and data down the right.
         </p>
         <p>
           Press <button type="button" className="btn-text" onClick={() => emit("palette")}><kbd>{mac ? "⌘K" : "Ctrl K"}</kbd></button> for commands.

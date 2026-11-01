@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { services, type Line } from "./data";
 
 /* The hero figure. My thesis (non-intrusive load monitoring) takes one electricity meter's reading and
@@ -65,26 +65,74 @@ function build() {
   const trace = "M" + xs.map((x, i) => `${sx(x)},${sy(acc[i])}`).join(" L");
   // The label for the single reading floats just above the early-morning dip, where there is clear space.
   const a = Math.round(0.235 * N), b = Math.round(0.34 * N);
-  return { bands, trace, reading: { left: (a / N) * 100, top: (Math.min(...acc.slice(a, b).map(sy)) / H) * 100 } };
+  // Where the background circuit wires in: mains into the reading on the left, four outputs out on the right.
+  const feedIn = (sy(acc[0]) / H) * 100;
+  const feedsOut = STACK.map((key, k) => ({ key, y: ((sy(layers[k][N]) + sy(k ? layers[k - 1][N] : 0)) / 2 / H) * 100 }));
+  const traceY = acc.map((v) => (sy(v) / H) * 100);
+  return { bands, trace, reading: { left: (a / N) * 100, top: (Math.min(...acc.slice(a, b).map(sy)) / H) * 100 }, feedIn, feedsOut, traceY };
 }
 
 const HOURS = ["00:00", "06:00", "12:00", "18:00", "24:00"];
 
+/** A tiny neural network (3 inputs, 4 hidden, 4 outputs), the outputs in the four band colours. */
+const NN_IN = [8, 17, 26];
+const NN_MID = [5, 13, 21, 29];
+const NN_OUT: [number, Line][] = [[5, "commerce"], [13, "automation"], [21, "iot"], [29, "backend"]];
+function NeuralNet() {
+  return (
+    <svg className="nn" viewBox="0 0 52 34" aria-hidden focusable="false">
+      <g className="nn-edges">
+        {NN_IN.map((a) => NN_MID.map((b) => <line key={`a${a}${b}`} x1="7" y1={a} x2="26" y2={b} />))}
+        {NN_MID.map((a) => NN_OUT.map(([b]) => <line key={`b${a}${b}`} x1="26" y1={a} x2="45" y2={b} />))}
+      </g>
+      {NN_IN.map((y) => <circle key={`i${y}`} className="nn-n nn-l0" cx="7" cy={y} r="2.6" />)}
+      {NN_MID.map((y) => <circle key={`h${y}`} className="nn-n nn-l1" cx="26" cy={y} r="2.6" />)}
+      {NN_OUT.map(([y, key]) => <circle key={`o${y}`} className={`nn-n nn-l2 ph-${key}`} cx="45" cy={y} r="2.9" />)}
+    </svg>
+  );
+}
+
+/** Time of day in Dhaka as a fraction of 24 hours, or null on the server and before mount. */
+function useDhakaDay() {
+  const [f, setF] = useState<number | null>(null);
+  useEffect(() => {
+    const read = () => {
+      const parts = new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Dhaka", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).formatToParts(new Date());
+      const h = Number(parts.find((p) => p.type === "hour")?.value ?? 0), m = Number(parts.find((p) => p.type === "minute")?.value ?? 0);
+      setF((h * 60 + m) / 1440);
+    };
+    read();
+    const id = window.setInterval(read, 30_000);
+    return () => window.clearInterval(id);
+  }, []);
+  return f;
+}
+
 export default function Signal({ active, onActive }: { active: Line | null; onActive: (l: Line | null) => void }) {
-  const { bands, trace, reading } = useMemo(build, []);
+  const { bands, trace, reading, feedIn, feedsOut, traceY } = useMemo(build, []);
+  const now = useDhakaDay();
+  const nowY = now == null ? 0 : traceY[Math.round(now * N)];
   return (
     <figure className={`sig${active ? " has-active" : ""}`} aria-labelledby="sig-cap">
-      <div className="sig-plot" onMouseLeave={() => onActive(null)}>
+      <div
+        className="sig-plot"
+        onMouseLeave={() => onActive(null)}
+        data-feed-in={feedIn.toFixed(2)}
+        data-feeds-out={feedsOut.map((f) => `${f.key}:${f.y.toFixed(2)}`).join(",")}
+      >
         <svg className="sig-svg" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" aria-hidden focusable="false">
           <defs>
             <clipPath id="sig-wipe">
               <rect className="sig-wipe" x="0" y="0" width={W} height={H} />
             </clipPath>
+            <clipPath id="sig-reveal">
+              <rect className="sig-reveal" x="0" y="0" width={W} height={H} />
+            </clipPath>
           </defs>
           {HOURS.map((_, i) => (
             <line key={i} className="sig-grid" x1={(i / 4) * W} x2={(i / 4) * W} y1="0" y2={H} />
           ))}
-          <g className="sig-bands">
+          <g className="sig-bands" clipPath="url(#sig-reveal)">
             {bands.map((b, i) => (
               <path
                 key={b.key}
@@ -102,13 +150,22 @@ export default function Signal({ active, onActive }: { active: Line | null; onAc
             <span
               key={b.key}
               className={`sig-label ph-${b.key}${active === b.key ? " on" : ""}`}
-              style={{ left: `${b.label.left}%`, top: `${b.label.top}%`, ["--i" as string]: i }}
+              style={{ left: `${b.label.left}%`, top: `${b.label.top}%`, ["--x" as string]: (b.label.left / 100).toFixed(3), ["--i" as string]: i }}
             >
               {SHORT[b.key]}
             </span>
           ))}
           <span className="sig-reading" style={{ left: `${reading.left}%`, top: `${reading.top}%` }}>One reading</span>
         </div>
+        {/* The model sweeps the day once (CSS only), splitting the reading as it goes. */}
+        <div className="sig-win sig-scan" aria-hidden><span className="sig-chip"><NeuralNet /></span></div>
+        {/* Then it reads live, at the current time in Dhaka. */}
+        {now != null && (
+          <div className="sig-win sig-now" aria-hidden style={{ left: `${now * 100}%`, ["--y" as string]: `${nowY}%` }}>
+            <span className="sig-chip"><NeuralNet /></span>
+            <span className="sig-dot" />
+          </div>
+        )}
       </div>
       <div className="sig-axis" aria-hidden>
         {HOURS.map((h) => <span key={h}>{h}</span>)}
@@ -119,8 +176,8 @@ export default function Signal({ active, onActive }: { active: Line | null; onAc
         {[...STACK].reverse().map((k) => <li key={k} className={`ph-${k}`}><i />{SHORT[k]}</li>)}
       </ul>
       <figcaption id="sig-cap" className="sig-cap">
-        My thesis splits one electricity meter’s reading into the appliances behind it. This is the same idea applied to my work:
-        one day, four kinds of load.
+        My thesis uses machine learning to split one electricity meter’s reading into the appliances behind it. Here a small
+        model does the same with my work: one day, four kinds of load, read live at the current time in Dhaka.
       </figcaption>
     </figure>
   );

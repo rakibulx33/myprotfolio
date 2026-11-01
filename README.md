@@ -19,6 +19,26 @@ page comes back "on IPS backup". It follows the system setting until a visitor p
 
 **Live:** [rakibulx33.me](https://rakibulx33.me) · **GitHub:** [@rakibulx33](https://github.com/rakibulx33)
 
+## The board and the model
+
+The whole page is a live circuit board (`src/Board.tsx`, one fixed canvas above section backgrounds and below
+all content). It measures the real layout, treats every content block as a keep-out zone and routes around it:
+
+- **Mains** (red, yellow and blue phases) enters at the top left and runs down the left margin. It feeds the meter
+  in the hero. A green indicator lights beside each section heading when the current reaches it, so the page
+  powers up as you scroll.
+- **The model** in the hero is a small neural network on a chip. It sweeps the day once like a sliding-window
+  model, splitting the reading into the four bands as it passes, then reads live at the current time in Dhaka.
+- **Data**: the model's four outputs leave on the right as data lanes, one per kind of work, carrying bit trains
+  that spell a message in ASCII (`MESSAGE` in `Board.tsx`).
+- **Links** cross the gaps between sections from power to data, with 45° jogs, vias, a dashed bottom layer for
+  outer phases, and parts from my projects (ESP32-S3, PZEM-004T, SX1276 LoRa and others).
+- **Load-shedding** cuts the mains: the board browns out, then an IPS keeps one phase and the critical links
+  alive with slow amber current and amber indicators. Ending it sends a surge back through the board.
+
+It runs at 60 fps, draws only what is on screen, pauses in background tabs, and with reduced motion it is drawn
+once, fully powered and still. Phones get only the links between sections.
+
 ## Command palette
 
 `Ctrl K`, `⌘K` or `/` opens the palette (`src/Palette.tsx`): every section, project, research paper, profile and
@@ -93,7 +113,8 @@ scripts/prerender.mjs — writes the rendered page into dist/index.html
 src/data.ts        — projects, research, skills and links (edit this to change content)
 src/github.json    — last year of GitHub contributions (written by scripts/fetch-github.mjs)
 src/Portfolio.tsx  — page layout and sections
-src/Signal.tsx     — the hero figure: one reading split into four kinds of work
+src/Signal.tsx     — the hero figure: one reading split into four kinds of work, and the model that splits it
+src/Board.tsx      — the live circuit board behind the page
 src/GitHubYear.tsx — the animated contribution year
 src/Palette.tsx    — command palette (Ctrl K) and the typed commands
 src/theme.ts       — light / load-shedding (dark) theme

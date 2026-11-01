@@ -177,6 +177,7 @@ function textCommand(raw: string): Result | null {
           <div className="pal-lines">
             <p>.secret  projects/  research/  services.txt  resume.pdf  profile.jpg</p>
             <p className="pal-dim">Hidden: matrix, hack, cha, sudo hire rakibul, and one for keyboard veterans.</p>
+            <p className="pal-dim">The bits running down the right-hand data lanes are ASCII, if you fancy decoding them.</p>
           </div>
         ) };
       }
