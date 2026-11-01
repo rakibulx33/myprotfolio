@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type ComponentType } from "react";
 import { prefersReducedMotion } from "./hooks";
 import { ACHIEVEMENTS, TOTAL, emit, isUnlocked, onUnlock, unlock, unlockedCount, useRxEvent, type Toast } from "./store";
 
@@ -66,6 +66,30 @@ export function HireDock() {
       <span className="caret" aria-hidden />
     </button>
   );
+}
+
+/* ------------------------------------------------------------------ résumé builder */
+/** Opens the résumé builder on the `resume` event. The builder is its own chunk, fetched the first time it is wanted. */
+export function ResumeLauncher() {
+  const [Builder, setBuilder] = useState<ComponentType<{ onClose: () => void }> | null>(null);
+  const [open, setOpen] = useState(false);
+  const opener = useRef<HTMLElement | null>(null);
+  const show = useCallback(() => {
+    opener.current = document.activeElement as HTMLElement | null;
+    setOpen(true);
+    import("./Resume")
+      .then((m) => setBuilder(() => m.default))
+      .catch(() => {
+        setOpen(false);
+        emit("toast", { kind: "tip", title: "Couldn't load the resume builder", body: "Check your connection and run resume again." } satisfies Toast);
+      });
+  }, []);
+  useRxEvent("resume", show);
+  const close = useCallback(() => {
+    setOpen(false);
+    opener.current?.focus?.({ preventScroll: true });
+  }, []);
+  return open && Builder ? <Builder onClose={close} /> : null;
 }
 
 /* ------------------------------------------------------------------ matrix easter egg */

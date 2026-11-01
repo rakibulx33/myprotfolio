@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent, type ReactNode } from "react";
 import { companies, featuredProjects, moreProjects, research, services, skillGroups, LINKS, PORTRAIT, SOCIALS, PROCESS, HANDLE, type Project } from "./data";
 import Hire from "./Hire";
-import { HireDock, Matrix, Toaster, useKonami, useNudge } from "./Extras";
+import { HireDock, Matrix, ResumeLauncher, Toaster, useKonami, useNudge } from "./Extras";
 import { TOTAL, emit, unlock, useAchievementCount } from "./store";
 import Terminal from "./Terminal";
 import { prefersReducedMotion, useClock, useInView, useScramble, useTyped } from "./hooks";
@@ -62,6 +62,7 @@ export default function Portfolio() {
           <p className="links svc-cta">
             <button type="button" className="linkish" onClick={() => emit("hire")}>[start a project]</button>
             <a href="#projects">[see selected work]</a>
+            <button type="button" className="linkish" onClick={() => emit("resume")}>[get my resume]</button>
           </p>
         </Section>
 
@@ -128,6 +129,7 @@ export default function Portfolio() {
       <Toaster />
       <Matrix />
       <Hire />
+      <ResumeLauncher />
     </>
   );
 }
@@ -536,6 +538,7 @@ function Contact() {
             <CopyEmail />
           </span>
         </div>
+        <p className="cta-resume c-dim">Hiring? <button type="button" className="linkish" onClick={() => emit("resume")}>Get my resume, CV or project portfolio as a PDF</button></p>
         <LocalTime />
         <h3 className="soc-title">Find me everywhere as <span className="c-cyan">@{HANDLE}</span></h3>
         <ol className="soc">

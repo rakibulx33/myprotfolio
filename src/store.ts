@@ -65,7 +65,7 @@ export function useAchievementCount() {
 }
 
 /* Page-wide events: the terminal, buttons and keyboard shortcuts talk through these. */
-type EventName = "hire" | "matrix" | "run" | "toast";
+type EventName = "hire" | "resume" | "matrix" | "run" | "toast";
 export const emit = (name: EventName, detail?: unknown) => {
   if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent(`rx:${name}`, { detail }));
 };

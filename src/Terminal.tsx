@@ -15,7 +15,7 @@ const PROMPT = (
 const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 const ALL = [...featuredProjects, ...moreProjects];
 const SECTIONS = ["services", "process", "projects", "companies", "research", "skills", "github", "contact"];
-const COMMANDS = ["help", "hire", "whoami", "neofetch", "photo", "services", "projects", "ls", "open", "companies", "research", "skills", "socials", "contact", "achievements", "github", "linkedin", "email", "cd", "date", "clear", "exit"];
+const COMMANDS = ["help", "hire", "whoami", "neofetch", "photo", "services", "projects", "ls", "open", "companies", "research", "resume", "cv", "skills", "socials", "contact", "achievements", "github", "linkedin", "email", "cd", "date", "clear", "exit"];
 const CHIPS = ["hire", "help", "whoami", "services", "projects", "socials", "contact"];
 const used = new Set<string>(); // distinct commands this visit, for the "operator" achievement
 
@@ -151,6 +151,7 @@ function run(raw: string, clear: () => void): ReactNode {
             ["open <name>", "links for a project"],
             ["companies", "companies I build for"],
             ["research", "thesis and papers"],
+            ["resume", "build a resume, CV or portfolio PDF (also: cv)"],
             ["skills", "tools I use"],
             ["socials", "every profile, ranked"],
             ["contact", "how to reach me"],
@@ -166,6 +167,11 @@ function run(raw: string, clear: () => void): ReactNode {
     case "hire":
       setTimeout(() => emit("hire"), 120);
       return <span className="c-dim">opening ~/hire ...</span>;
+    case "resume":
+    case "cv":
+    case "resume.pdf":
+      setTimeout(() => emit("resume"), 120);
+      return <span className="c-dim">opening ~/resume ...</span>;
     case "socials":
     case "social":
       return <SocialList />;
@@ -206,6 +212,7 @@ function run(raw: string, clear: () => void): ReactNode {
       if (/skills/i.test(arg)) return run("skills", clear);
       if (/research/i.test(arg)) return run("research", clear);
       if (/compan/i.test(arg)) return run("companies", clear);
+      if (/resume|^cv/i.test(arg)) return run("resume", clear);
       if (/process/i.test(arg)) { setTimeout(() => scrollTo("process"), 150); return <span className="c-dim">opening ~/process ...</span>; }
       return /profile|photo|\.jpg|\.png|\.webp/i.test(arg)
         ? <Neofetch />
@@ -223,7 +230,7 @@ function run(raw: string, clear: () => void): ReactNode {
       if (/-\w*a/.test(arg)) {
         return (
           <div>
-            <div><span className="c-blue">./</span>  <span className="c-blue">../</span>  <span className="c-yellow">.secret</span>  <span className="c-blue">projects/</span>  <span className="c-blue">research/</span>  services.txt  process.md  skills.json  profile.jpg</div>
+            <div><span className="c-blue">./</span>  <span className="c-blue">../</span>  <span className="c-yellow">.secret</span>  <span className="c-blue">projects/</span>  <span className="c-blue">research/</span>  services.txt  process.md  skills.json  resume.pdf  profile.jpg</div>
             <div className="c-dim">hidden: matrix, hack, coffee, sudo hire rakibul ... and one more for keyboard veterans.</div>
           </div>
         );

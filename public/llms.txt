@@ -25,6 +25,9 @@
 - IoT monitoring for potato and onion storage (conference papers)
 - Device-free human presence sensing (IEEE conference paper)
 
+## Resume
+- Run `resume` in the website's terminal, or use "Get my resume", to download a resume, CV or project portfolio as a PDF
+
 ## Contact
 - Website: https://rakibulx33.me/
 - Email: rakibulx33@gmail.com

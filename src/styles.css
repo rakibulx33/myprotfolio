@@ -592,3 +592,5 @@ a.status-item:hover { color: var(--cyan); }
 .co-word { font-family: var(--mono); font-weight: 700; font-size: 20px; letter-spacing: -0.02em; }
 .co-word b { color: var(--green); }
 .co-word i { margin-left: 0.3em; font-style: normal; font-weight: 400; color: var(--fg-2); }
+
+.cta-resume { margin: 22px 0 0; font-size: 15px; }

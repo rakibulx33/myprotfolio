@@ -10,10 +10,24 @@ decrypt-style headings, and a vim status line.
 ## Terminal commands
 
 `hire`, `help`, `whoami` / `neofetch` (prints the photo inline with a glitch), `services`, `projects` / `ls`,
-`open <project>`, `companies`, `research`, `skills`, `socials`, `contact`, `achievements`, `cd <section>`, `date`, `clear`.
+`open <project>`, `companies`, `research`, `resume` / `cv`, `skills`, `socials`, `contact`, `achievements`, `cd <section>`, `date`, `clear`.
 Press `/` anywhere to focus the prompt; `↑`/`↓` for history, `Tab` to complete.
 Number keys `0`–`6` jump between sections. The profile.jpg window glitches whenever a command runs.
 A few commands are hidden (start with `ls -a`), and visitors collect 8 achievements as they explore.
+
+## Resume builder (`resume`)
+
+`resume` (or `cv`, or the "get my resume" buttons) opens a builder that lays out a **resume** (one page), a **CV**
+(full record) or a **project portfolio** (cover page plus a card per project) from the same data as the site, and
+exports it to PDF with the browser's print dialog, so the PDF has real, selectable text. Options: three looks
+(Clean, Split for the resume, Terminal), accent colour, a focus (backend, full-stack, automation and AI, IoT) that
+puts the most relevant projects and skills first, editable headline and summary, section toggles, project count,
+optional photo and phone number. The page count shown is an estimate and matched Chromium's output in testing.
+
+- Content comes from `src/data.ts` (`PROFILE`, projects, companies, research, skills), so updating the site updates the documents.
+- The phone number is typed into the builder and saved only in the visitor's own browser. Do not put it in the repo.
+- Code: `src/Resume.tsx` (UI and document), `src/resumeModel.ts` (options and content rules), `src/resume.css`
+  (builder, templates and print rules). It is loaded on demand, so it does not affect the first page load.
 
 ## Project briefs (`hire`)
 
@@ -50,6 +64,7 @@ src/main.tsx       — React entry (hydrates the prerendered HTML)
 src/entry-server.tsx — server render used at build time
 scripts/prerender.mjs — writes the rendered page into dist/index.html
 src/data.ts        — projects, research, skills and links (edit this to change content)
+src/Resume.tsx     — resume / CV / portfolio builder (lazy-loaded); resumeModel.ts, resume.css
 src/Terminal.tsx   — the interactive terminal and its commands
 src/Portfolio.tsx  — page layout and sections
 src/Hire.tsx       — the `hire` project-brief wizard

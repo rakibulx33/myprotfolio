@@ -301,3 +301,36 @@ export const skillGroups: { label: string; items: string[] }[] = [
   { label: "AI & Automation", items: ["Groq", "Gemini", "Ollama", "n8n", "Selenium", "LLM evals"] },
   { label: "DevOps & IoT", items: ["Docker", "Linux", "GitHub Actions", "Cloudflare Tunnel", "ESP32", "LoRa"] },
 ];
+
+/**
+ * Résumé content, used by the `resume` builder (src/Resume.tsx). Everything here is already public on the
+ * site, so editing the site's data above keeps the generated documents current. Contact details that are
+ * not public (a phone number) are typed into the builder and stay in the visitor's browser, never in this repo.
+ */
+export const PROFILE = {
+  name: "Rakibul Hasan",
+  title: "Backend & Automation Developer",
+  location: "Dhaka, Bangladesh",
+  email: LINKS.email,
+  website: "rakibulx33.me",
+  github: "github.com/rakibulx33",
+  linkedin: "linkedin.com/in/rakibulx33",
+  summary:
+    "Freelance backend and automation developer in Dhaka, Bangladesh, and a third-year CSE student at Daffodil International University. Builds Laravel, Node.js and Python systems, AI integrations and ESP32-based IoT prototypes for businesses and teams. Freelancing since 2022.",
+  education: [
+    { degree: "BSc in Computer Science and Engineering", school: "Daffodil International University", detail: "Third-year student" },
+  ],
+  experience: [
+    {
+      role: "Freelance Backend & Automation Developer",
+      org: "Self-employed, remote",
+      period: "2022 – present",
+      points: [
+        "Build REST and real-time APIs, databases and background jobs in Node.js, Laravel and FastAPI for client projects.",
+        "Deliver e-commerce stores and admin panels with the payment and delivery options Bangladeshi customers expect.",
+        "Build chatbots, n8n workflows and LLM features that answer customers, sync data between tools and remove manual work.",
+        "Prototype ESP32-based sensing and monitoring systems, from the device and firmware to the dashboard.",
+      ],
+    },
+  ],
+};
