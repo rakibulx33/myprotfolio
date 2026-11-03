@@ -3,45 +3,45 @@ import {
   HANDLE, LINKS, PORTRAIT, PROCESS, SOCIALS, companies, featuredProjects, moreProjects, research, services, skillGroups,
   type Line, type Project, type Social,
 } from "./data";
-import Board from "./Board";
-import { CompanyBus, CONCEPT, Handshake, Live, PresenceDemo, ProgramCounter, ServiceGlyph } from "./Concepts";
 import { HireDock, Matrix, ResumeLauncher, Toaster, useKonami, useNudge } from "./Extras";
+import { InkChip, INKS, Poster, RisoDefs, Torch } from "./Gallery";
 import GitHubYear from "./GitHubYear";
 import Hire from "./Hire";
-import Lab from "./Lab";
 import { prefersReducedMotion, useClock, useInView } from "./hooks";
 import Palette from "./Palette";
-import Signal from "./Signal";
 import { emit, unlock } from "./store";
 import { useTheme } from "./theme";
 
+/* "Exhibition": the portfolio hangs like a small gallery show. White walls, framed work with museum
+   labels, research papers in a display case. Load-shedding turns the gallery lights off. */
+
 const NAV = [
   { id: "work", label: "Work" },
-  { id: "lab", label: "Lab" },
   { id: "research", label: "Research" },
   { id: "github", label: "GitHub" },
   { id: "contact", label: "Contact" },
 ];
 const LINE_NAME = Object.fromEntries(services.map((s) => [s.key, s.short])) as Record<Line, string>;
+/** "A, B and C" */
+const list = (xs: string[]) => (xs.length < 2 ? xs.join("") : `${xs.slice(0, -1).join(", ")} and ${xs[xs.length - 1]}`);
 
 export default function Portfolio() {
   useKonami();
   useNudge();
   useEffect(() => {
-    const id = window.setTimeout(() => unlock("booted"), prefersReducedMotion() ? 300 : 2800);
+    const id = window.setTimeout(() => unlock("booted"), prefersReducedMotion() ? 300 : 2400);
     return () => window.clearTimeout(id);
   }, []);
 
   return (
     <>
       <a className="skip" href="#main">Skip to content</a>
-      <Board />
-      <ProgramCounter />
+      <RisoDefs />
       <Header />
       <main id="main">
         <Hero />
+        <Services />
         <Work />
-        <Lab />
         <Process />
         <Companies />
         <Research />
@@ -50,6 +50,7 @@ export default function Portfolio() {
         <Contact />
       </main>
       <Footer />
+      <Torch />
       <HireDock />
       <Toaster />
       <Matrix />
@@ -73,7 +74,7 @@ function LoadShedding() {
   const on = theme === "dark";
   return (
     <button type="button" role="switch" aria-checked={on} className="ls" onClick={toggle}
-      title={on ? "The power is out. Switch load-shedding off for light mode." : "Switch load-shedding on for dark mode."}>
+      title={on ? "The power is out. Switch load-shedding off to turn the gallery lights back on." : "Switch load-shedding on for dark mode."}>
       <span className="ls-track" aria-hidden><span className="ls-knob" /></span>
       <span className="ls-label">Load-shedding</span>
     </button>
@@ -119,69 +120,81 @@ function Header() {
   );
 }
 
-/* ---------------------------------------------------------------- hero */
+/* ---------------------------------------------------------------- hero: the entrance wall */
 
 function Hero() {
-  const [active, setActive] = useState<Line | null>(null);
   const [theme] = useTheme();
   const clock = useClock("Asia/Dhaka");
-  const [replay, setReplay] = useState(0);
-  const [svcRef, svcSeen] = useInView<HTMLDivElement>();
-  useEffect(() => { if (svcSeen) unlock("services"); }, [svcSeen]);
-  // Flipping the load-shedding switch replays the signal, as if the meter came back on.
-  useEffect(() => {
-    const on = () => setReplay((n) => n + 1);
-    window.addEventListener("rx:power", on);
-    return () => window.removeEventListener("rx:power", on);
-  }, []);
-
   return (
     <section id="top" className="hero" aria-labelledby="hero-title">
-      <div className="wrap">
-        <h1 id="hero-title" className="hero-h1">
-          <span className="hero-name">Rakibul Hasan</span>
-          <span className="hero-role">Backend and automation developer in Dhaka, Bangladesh</span>
-        </h1>
-        <div className="hero-row">
+      <div className="wrap hero-grid">
+        <div className="hero-main">
+          <h1 id="hero-title" className="hero-h1">
+            <span className="hero-name"><span className="vinyl">Rakibul</span> <span className="vinyl">Hasan</span></span>
+            <span className="hero-role">Backend and automation developer in Dhaka, Bangladesh</span>
+          </h1>
           <p className="hero-lede">
             I build APIs, online stores, AI automations and ESP32 devices for businesses, and research low-cost IoT at
             Daffodil International University. Freelancing since 2022.
           </p>
-          <div className="hero-act">
-            <div className="hero-cta">
-              <button type="button" className="btn btn-ink" onClick={() => emit("hire")}>Start a project brief</button>
-              <button type="button" className="btn btn-line" onClick={() => emit("resume")}>Get my resume</button>
-            </div>
-            <p className="hero-meta">
-              <span className="live-dot" aria-hidden /> Taking new projects. It’s <span className="tnum">{clock}</span> in Dhaka
-              {theme === "dark" ? <>, and the power is out. This page is running on IPS backup.</> : "."}
-            </p>
+          <div className="hero-cta">
+            <button type="button" className="btn btn-ink" onClick={() => emit("hire")}>Start a project brief</button>
+            <button type="button" className="btn btn-line" onClick={() => emit("resume")}>Get my resume</button>
           </div>
+          <p className="hero-open">
+            <span className="open-dot" aria-hidden /> Taking new projects. It’s <span className="tnum">{clock}</span> in Dhaka
+            {theme === "dark" ? <>, and the power is out, so the gallery is running on backup lights.</> : "."}
+          </p>
         </div>
 
-        <Signal key={replay} active={active} onActive={setActive} />
-
-        <div id="services" className="svc" ref={svcRef}>
-          <h2 className="svc-h">What I build</h2>
-          <ul className="svc-list">
-            {services.map((s) => (
-              <li key={s.key} className={`svc-item ph-${s.key}${active === s.key ? " on" : ""}`}
-                onMouseEnter={() => setActive(s.key)} onMouseLeave={() => setActive(null)}>
-                <span className="wire" aria-hidden />
-                <ServiceGlyph line={s.key} />
-                <h3>{s.title}</h3>
-                <p>{s.text}</p>
-                <p className="svc-concept"><b>{CONCEPT[s.key].name}.</b> {CONCEPT[s.key].text}</p>
-              </li>
-            ))}
-          </ul>
-        </div>
+        <figure className="work hero-portrait">
+          <div className="frame">
+            <img src={PORTRAIT} alt="Rakibul Hasan in a grey waistcoat and red tie" width={720} height={960} decoding="async" fetchPriority="high" />
+          </div>
+          <figcaption className="placard">
+            <p className="pl-title">Rakibul Hasan <span lang="bn" className="bn">রাকিবুল হাসান</span></p>
+            <p className="pl-meta">Developer and IoT researcher, Dhaka</p>
+          </figcaption>
+        </figure>
       </div>
     </section>
   );
 }
 
-/* ---------------------------------------------------------------- work */
+/* ---------------------------------------------------------------- what I build: the four inks */
+
+function Services() {
+  const [ref, seen] = useInView<HTMLUListElement>();
+  useEffect(() => { if (seen) unlock("services"); }, [seen]);
+  return (
+    <section id="services" className="sec sec-alt" aria-labelledby="services-title">
+      <div className="wrap">
+        <header className="sec-head">
+          <h2 id="services-title">What I build</h2>
+          <p className="sec-lede">Four kinds of work, each printed in its own ink. The posters in the next room use the same colours.</p>
+        </header>
+        <ul className="svc-list" ref={ref}>
+          {services.map((s) => {
+            const works = featuredProjects.filter((p) => p.line === s.key).map((p) => p.name);
+            return (
+              <li key={s.key} className={`svc ph-${s.key}`}>
+                <InkChip line={s.key} />
+                <h3>{s.title}</h3>
+                <p>{s.text}</p>
+                <p className="svc-works">
+                  <span className="sr-only">Printed in {INKS[s.key].name.toLowerCase()}. </span>
+                  {works.length ? <>On the wall: {list(works)}</> : <>See the research papers below</>}
+                </p>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    </section>
+  );
+}
+
+/* ---------------------------------------------------------------- work: the main room */
 
 function ProjectLinks({ p }: { p: Project }) {
   if (!p.code && !p.live) return <p className="proj-links proj-private">Private repository, walkthrough on request</p>;
@@ -193,6 +206,16 @@ function ProjectLinks({ p }: { p: Project }) {
   );
 }
 
+/** A salon hang: frames of different sizes, dropped to different heights. `ratio` is the poster's height over its width. */
+const HANG = [
+  { span: 5, ratio: 1.25, drop: 0 },
+  { span: 4, ratio: 1, drop: 72 },
+  { span: 3, ratio: 4 / 3, drop: 24 },
+  { span: 3, ratio: 4 / 3, drop: 40 },
+  { span: 4, ratio: 1.25, drop: 0 },
+  { span: 5, ratio: 0.8, drop: 96 },
+];
+
 function Work() {
   return (
     <section id="work" className="sec" aria-labelledby="work-title">
@@ -200,25 +223,27 @@ function Work() {
         <header className="sec-head">
           <h2 id="work-title">Selected work</h2>
           <p className="sec-lede">
-            Production systems for clients and my own products. The colour on the left shows the kind of work. Private
-            repositories are described without code, and I’m happy to walk you through them on a call.
+            Production systems for clients and my own products. Each poster is drawn by code from its project, in the
+            ink of its kind of work. Private repositories are described without code, and I’m happy to walk you through
+            them on a call.
           </p>
         </header>
-        <ul className="proj-list">
-          {featuredProjects.map((p) => (
-            <li key={p.name} className={`proj ph-${p.line ?? "backend"}`}>
-              <div className="proj-id">
-                <h3>{p.name}</h3>
-                <p className="proj-kind">{p.kind}</p>
-                {p.line && <p className="sr-only">Kind of work: {LINE_NAME[p.line]}</p>}
-              </div>
-              <div className="proj-body">
-                <p>{p.description}</p>
-                <ul className="stack" aria-label="Built with">{p.stack.map((t) => <li key={t}>{t}</li>)}</ul>
-                <ProjectLinks p={p} />
-              </div>
-            </li>
-          ))}
+        <ul className="hang">
+          {featuredProjects.map((p, i) => {
+            const h = HANG[i % HANG.length];
+            return (
+              <li key={p.name} className={`work ph-${p.line ?? "backend"}`} style={{ "--span": h.span, "--drop": `${h.drop}px` } as CSSProperties}>
+                <div className="frame"><Poster project={p} ratio={h.ratio} /></div>
+                <div className="placard">
+                  <h3 className="pl-title"><i>{p.name}</i></h3>
+                  <p className="pl-meta">{p.kind}{p.line && <span className="sr-only">. Kind of work: {LINE_NAME[p.line]}</span>}</p>
+                  <p className="pl-medium">{p.stack.join(", ")}</p>
+                  <p className="pl-desc">{p.description}</p>
+                  <ProjectLinks p={p} />
+                </div>
+              </li>
+            );
+          })}
         </ul>
 
         <div className="more">
@@ -243,24 +268,22 @@ function Work() {
 /* ---------------------------------------------------------------- process */
 
 function Process() {
-  const [ref, seen] = useInView<HTMLOListElement>("0px 0px -25% 0px");
   return (
-    <section id="process" className="sec sec-tint" aria-labelledby="process-title">
+    <section id="process" className="sec sec-alt" aria-labelledby="process-title">
       <div className="wrap">
         <header className="sec-head">
           <h2 id="process-title">How we’d work together</h2>
           <p className="sec-lede">From first message to launch, you always know what I’m building and what comes next.</p>
         </header>
-        <ol className="steps" ref={ref} data-run={seen ? "" : undefined}>
+        <ol className="steps">
           {PROCESS.map((s, i) => (
             <li key={s.title} className="step">
-              <span className="step-n" aria-hidden style={{ "--i": i } as CSSProperties}>{i + 1}</span>
+              <span className="step-n" aria-hidden>{i + 1}</span>
               <h3>{s.title}</h3>
               <p>{s.text}</p>
             </li>
           ))}
         </ol>
-        <p className="fig-note"><b>A delivery pipeline.</b> Each stage has to pass before the next one starts, the same rule a build pipeline follows before it ships.</p>
         <p className="steps-cta">
           <button type="button" className="btn btn-ink" onClick={() => emit("hire")}>Start with a brief</button>
         </p>
@@ -272,8 +295,8 @@ function Process() {
 /* ---------------------------------------------------------------- companies */
 
 function CompanyLogo({ name }: { name: string }) {
-  if (name === "Gikpik") return <img className="co-mark" src="/companies/gikpik.svg" alt="" width={40} height={40} loading="lazy" />;
-  if (name === "BuildIoT Lab") return <span className="co-plate"><img src="/companies/buildiot-lab.png" alt="" width={781} height={188} loading="lazy" /></span>;
+  if (name === "Gikpik") return <img className="co-mark" src="/companies/gikpik.svg" alt="" width={56} height={56} loading="lazy" />;
+  if (name === "BuildIoT Lab") return <img className="co-img" src="/companies/buildiot-lab.png" alt="" width={781} height={188} loading="lazy" />;
   return <span className="co-word" aria-hidden><b>Build</b>IoT <i>BD</i></span>;
 }
 
@@ -285,15 +308,16 @@ function Companies() {
           <h2 id="companies-title">Companies</h2>
           <p className="sec-lede">Gikpik, BuildIoT Lab and BuildIoT BD are sister companies. Alongside freelance work, I build the technical side of each.</p>
         </header>
-        <CompanyBus />
         <ul className="co-list">
           {companies.map((c) => (
-            <li key={c.name} className="co">
-              <div className="co-logo"><CompanyLogo name={c.name} /></div>
-              <h3>{c.url ? <a href={c.url} target="_blank" rel="noreferrer">{c.name}</a> : c.name}</h3>
-              <p className="co-kind">{c.kind.split(" · ").pop()}</p>
-              <p>{c.description}</p>
-              <p className="co-role">My part: {c.role.charAt(0).toLowerCase() + c.role.slice(1)}</p>
+            <li key={c.name} className="co work">
+              <div className="frame frame-sm"><div className="co-logo"><CompanyLogo name={c.name} /></div></div>
+              <div className="placard">
+                <h3 className="pl-title">{c.url ? <a href={c.url} target="_blank" rel="noreferrer">{c.name}</a> : c.name}</h3>
+                <p className="pl-meta">{c.kind.split(" · ").pop()}</p>
+                <p className="pl-desc">{c.description}</p>
+                <p className="co-role">My part: {c.role.charAt(0).toLowerCase() + c.role.slice(1)}</p>
+              </div>
             </li>
           ))}
         </ul>
@@ -302,29 +326,30 @@ function Companies() {
   );
 }
 
-/* ---------------------------------------------------------------- research */
+/* ---------------------------------------------------------------- research: the display case */
 
 function Research() {
   const [ref, seen] = useInView<HTMLDivElement>();
   useEffect(() => { if (seen) unlock("scholar"); }, [seen]);
   return (
-    <section id="research" className="sec sec-tint" aria-labelledby="research-title">
+    <section id="research" className="sec sec-alt" aria-labelledby="research-title">
       <div className="wrap" ref={ref}>
         <header className="sec-head">
           <h2 id="research-title">Research</h2>
           <p className="sec-lede">Low-cost IoT for everyday problems in Bangladesh, written with classmates and faculty at Daffodil International University.</p>
         </header>
-        <ul className="papers">
-          {research.map((r, i) => (
-            <li key={r.title} className={`paper${i === 0 ? " lead" : ""}`}>
-              <p className="paper-meta"><span className={`status s-${(r.status ?? "in preparation").replace(" ", "-")}`}>{r.status ? r.status.charAt(0).toUpperCase() + r.status.slice(1) : "In preparation"}</span>{r.venue}</p>
-              <h3>{r.title}</h3>
-              <p>{r.summary}</p>
-              {i === 0 && <p className="paper-note">The idea behind the signal at the top of this page.</p>}
-            </li>
-          ))}
-        </ul>
-        <PresenceDemo />
+        <div className="vitrine">
+          <ul className="papers">
+            {research.map((r, i) => (
+              <li key={r.title} className={`paper${i === 0 ? " lead" : ""}`}>
+                <p className="paper-tag">{r.status ? r.status.charAt(0).toUpperCase() + r.status.slice(1) : "In preparation"}</p>
+                <h3>{r.title}</h3>
+                <p className="paper-venue">{r.venue}</p>
+                <p className="paper-sum">{r.summary}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
     </section>
   );
@@ -332,30 +357,22 @@ function Research() {
 
 /* ---------------------------------------------------------------- skills */
 
-const STACK_ORDER = ["Languages", "Frontend & Mobile", "Backend", "Data", "AI & Automation", "DevOps & IoT"];
-const STACK_LINE: Record<string, Line> = { Backend: "backend", "AI & Automation": "automation", "DevOps & IoT": "iot" };
-
 function Skills() {
-  const rows = STACK_ORDER.map((l) => skillGroups.find((g) => g.label === l)).filter(Boolean) as typeof skillGroups;
   return (
-    <section id="skills" className="sec" aria-labelledby="skills-title">
+    <section id="skills" className="sec sec-alt" aria-labelledby="skills-title">
       <div className="wrap">
         <header className="sec-head">
           <h2 id="skills-title">Tools I use</h2>
           <p className="sec-lede">Chosen per project. Most of my production work is in TypeScript, Python and PHP.</p>
         </header>
-        <Live className="layers">
-          <ol className="layer-list">
-            {rows.map((g, i) => (
-              <li key={g.label} className={`layer ph-${STACK_LINE[g.label] ?? "ink"}`} style={{ "--i": i, "--n": rows.length } as CSSProperties}>
-                <span className="layer-node" aria-hidden />
-                <h3>{g.label}</h3>
-                <ul className="chips">{g.items.map((t) => <li key={t}>{t}</li>)}</ul>
-              </li>
-            ))}
-          </ol>
-          <p className="fig-note"><b>Layers.</b> A request passes down through every layer I work in, from the screen to the database to the board, and the answer comes back up.</p>
-        </Live>
+        <dl className="skills">
+          {skillGroups.map((g) => (
+            <div key={g.label}>
+              <dt>{g.label}</dt>
+              <dd>{g.items.join(", ")}</dd>
+            </div>
+          ))}
+        </dl>
       </div>
     </section>
   );
@@ -383,11 +400,7 @@ const SOCIAL_GROUPS: { group: Social["group"]; label: string }[] = [
 function Contact() {
   return (
     <section id="contact" className="sec contact" aria-labelledby="contact-title">
-      <div className="wrap contact-grid">
-        <figure className="me">
-          <img src={PORTRAIT} alt="Rakibul Hasan in a grey waistcoat and red tie" width={720} height={960} loading="lazy" decoding="async" />
-          <figcaption><span lang="bn" className="bn">রাকিবুল হাসান</span> Rakibul Hasan, Dhaka</figcaption>
-        </figure>
+      <div className="wrap">
         <div className="contact-main">
           <h2 id="contact-title">Have a project in mind?</h2>
           <p className="sec-lede">I take on freelance backend, automation and e-commerce work. The quickest start is a short brief: six questions, about 30 seconds.</p>
@@ -398,20 +411,19 @@ function Contact() {
           <p className="mail">
             Or email <a href={`mailto:${LINKS.email}`} onClick={() => unlock("client")}>{LINKS.email}</a> <CopyEmail />
           </p>
-          <Handshake />
-          <h3 className="soc-h">Find me everywhere as @{HANDLE}</h3>
-          <div className="soc">
-            {SOCIAL_GROUPS.map((g) => (
-              <div key={g.group} className="soc-g">
-                <p className="soc-gl">{g.label}</p>
-                <ul>
-                  {SOCIALS.filter((s) => s.group === g.group).map((s) => (
-                    <li key={s.name}><a href={s.url} target="_blank" rel="noreferrer me">{s.name}</a></li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
+        </div>
+        <h3 className="soc-h">Find me everywhere as @{HANDLE}</h3>
+        <div className="soc">
+          {SOCIAL_GROUPS.map((g) => (
+            <div key={g.group} className="soc-g">
+              <p className="soc-gl">{g.label}</p>
+              <ul>
+                {SOCIALS.filter((s) => s.group === g.group).map((s) => (
+                  <li key={s.name}><a href={s.url} target="_blank" rel="noreferrer me">{s.name}</a></li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
       </div>
     </section>
@@ -427,8 +439,8 @@ function Footer() {
       <div className="wrap ft-row">
         <p suppressHydrationWarning>© {new Date().getFullYear()} Rakibul Hasan</p>
         <p className="ft-colophon">
-          Set in Geologica. The four colours are the mains: the red, yellow and blue phases, and earth green. Power runs
-          down the left margin and data down the right.
+          Set in Libre Franklin and Newsreader. The posters are two-colour prints drawn by code: each ink is a kind of
+          work, and each picture is what the project does.
         </p>
         <p>
           Press <button type="button" className="btn-text" onClick={() => emit("palette")}><kbd>{mac ? "⌘K" : "Ctrl K"}</kbd></button> for commands.

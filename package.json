@@ -10,9 +10,10 @@
     "github": "node scripts/fetch-github.mjs"
   },
   "dependencies": {
-    "@fontsource-variable/geologica": "^5.3.0",
     "@fontsource-variable/instrument-sans": "^5.3.0",
+    "@fontsource-variable/libre-franklin": "^5.3.0",
     "@fontsource-variable/martian-mono": "^5.3.0",
+    "@fontsource-variable/newsreader": "^5.3.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },

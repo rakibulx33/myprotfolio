@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
    prerendered HTML and the first client render always match. */
 
 export const ACHIEVEMENTS = [
-  { id: "booted", title: "Powered up", hint: "load the page" },
+  { id: "booted", title: "Lights on", hint: "load the page" },
   { id: "whoami", title: "Met the developer", hint: "run whoami from the command palette" },
   { id: "operator", title: "Operator", hint: "run three different commands (Ctrl K)" },
   { id: "explorer", title: "Explorer", hint: "open one of my projects" },

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { prefersReducedMotion } from "./hooks";
 
-/* Light is "mains on"; dark is "load-shedding". index.html sets data-theme before first paint
+/* Light is "gallery lights on"; dark is "load-shedding", with the lights out. index.html sets data-theme before first paint
    (saved choice, else the system setting), so this module only reads and changes it. */
 
 export type Theme = "light" | "dark";
@@ -13,7 +13,7 @@ export const currentTheme = (): Theme =>
 
 function apply(t: Theme) {
   document.documentElement.dataset.theme = t;
-  document.querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]').forEach((m) => { m.content = t === "dark" ? "#0f1318" : "#f1f3f2"; m.removeAttribute("media"); });
+  document.querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]').forEach((m) => { m.content = t === "dark" ? "#1a1917" : "#fafaf7"; m.removeAttribute("media"); });
   listeners.forEach((l) => l(t));
 }
 

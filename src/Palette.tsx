@@ -16,7 +16,6 @@ export const SECTIONS = [
   { id: "top", label: "Top of the page", keys: "home start" },
   { id: "services", label: "What I build", keys: "services backend e-commerce automation ai iot" },
   { id: "work", label: "Selected work", keys: "work projects portfolio" },
-  { id: "lab", label: "Computer science, running", keys: "lab cs algorithms dijkstra genetic compiler cache rate limit demo" },
   { id: "process", label: "How we'd work together", keys: "process steps brief plan build launch" },
   { id: "companies", label: "Companies", keys: "gikpik buildiot sister" },
   { id: "research", label: "Research", keys: "papers thesis ieee" },
@@ -178,7 +177,7 @@ function textCommand(raw: string): Result | null {
           <div className="pal-lines">
             <p>.secret  projects/  research/  services.txt  resume.pdf  profile.jpg</p>
             <p className="pal-dim">Hidden: matrix, hack, cha, sudo hire rakibul, and one for keyboard veterans.</p>
-            <p className="pal-dim">The bits running down the right-hand data lanes are ASCII, if you fancy decoding them.</p>
+            <p className="pal-dim">Every poster on the wall is drawn by code from its project. Switch load-shedding on and bring a torch.</p>
           </div>
         ) };
       }

@@ -2,59 +2,36 @@
 
 Personal portfolio of **Rakibul Hasan**, backend & automation developer and CSE student at DIU, Dhaka.
 
-The design is called **Signal**. It comes from my thesis, which splits one electricity meter's reading into the
-appliances behind it: the hero draws one day of "load" as a single ink trace, then splits it into four coloured
-bands, one per kind of work. The four colours are the mains (the red, yellow and blue phases, and earth green),
-and each always means the same thing across the site:
+The design is called **Exhibition**: the portfolio hangs like a small gallery show. White walls, each featured
+project framed as a two-colour screen print with a museum label beside it, research papers laid out in a glass
+display case, and the GitHub year framed as a work called *Daily practice*.
 
-| Colour | Kind of work |
+The posters (`src/Gallery.tsx`) are drawn by code from each project, so nothing is a stock image: the ink is the
+kind of work, and the picture is what the project does (candles for the trading system, speech bubbles for the
+shop assistant, a stack of pages for the tender builder, and so on). The two inks overprint with `multiply`, as
+they do on paper, and the second ink sits a hair out of register. Each poster prints itself the first time it
+scrolls into view: the first ink, then the second, sliding into register.
+
+| Ink | Kind of work |
 | --- | --- |
 | Blue | Backend systems and APIs |
-| Red | E-commerce for Bangladesh |
-| Yellow | Automation and AI |
-| Earth green | IoT prototypes |
+| Fluorescent pink | E-commerce for Bangladesh |
+| Orange | Automation and AI |
+| Teal | IoT prototypes |
 
-Light mode is "mains on". The **Load-shedding** switch in the header is dark mode: the lights flicker out and the
-page comes back "on IPS backup". It follows the system setting until a visitor picks one.
+Light mode is "gallery lights on". The **Load-shedding** switch in the header is dark mode: the lights flicker out,
+the walls go dark and only the framed works stay lit, each under its own picture light. On a desktop the pointer
+becomes a torch. It follows the system setting until a visitor picks one.
+
+On arrival there is one moment: the name goes up on the wall like vinyl lettering and the portrait's light comes
+on. With reduced motion everything is simply there, and without JavaScript the page is complete.
+
+Type is Libre Franklin for names, headings and labels and Newsreader for reading text.
 
 **Live:** [rakibulx33.me](https://rakibulx33.me) · **GitHub:** [@rakibulx33](https://github.com/rakibulx33)
 
-## The board and the model
-
-The whole page is a live circuit board (`src/Board.tsx`, one fixed canvas above section backgrounds and below
-all content). It measures the real layout, treats every content block as a keep-out zone and routes around it:
-
-- **Mains** (red, yellow and blue phases) enters at the top left and runs down the left margin. It feeds the meter
-  in the hero. A green indicator lights beside each section heading when the current reaches it, so the page
-  powers up as you scroll.
-- **The model** in the hero is a small neural network on a chip. It sweeps the day once like a sliding-window
-  model, splitting the reading into the four bands as it passes, then reads live at the current time in Dhaka.
-- **Data**: the model's four outputs leave on the right as data lanes, one per kind of work, carrying bit trains
-  that spell a message in ASCII (`MESSAGE` in `Board.tsx`).
-- **Links** cross the gaps between sections from power to data, with 45° jogs, vias, a dashed bottom layer for
-  outer phases, and parts from my projects (ESP32-S3, PZEM-004T, SX1276 LoRa and others).
-- **Load-shedding** cuts the mains: the board browns out, then an IPS keeps one phase and the critical links
-  alive with slow amber current and amber indicators. Ending it sends a surge back through the board.
-
-It runs at 60 fps, draws only what is on screen, pauses in background tabs, and with reduced motion it is drawn
-once, fully powered and still. Phones get only the links between sections.
-
-## Computer science in every section
-
-Each section carries a small figure of a real computer-science idea that belongs to the work beside it
-(`src/Concepts.tsx`, styles in `src/concepts.css`). They animate only while on screen, and without motion they
-are plain, complete diagrams.
-
-- **What I build**: request and response (backend), a finite state machine (store), an agent loop (automation and
-  AI), sampling and quantizing (IoT).
-- **Lab** (`src/Lab.tsx`): five running demos on dark "instrument" screens, each tied to a project. Shortest path
-  with Dijkstra (Smart Escape, draw walls and close exits), a genetic algorithm (TradingSpark), a lexer, parser
-  and C generator you can type into (BongoScript), an LRU cache (ClanWar Coach) and a token bucket (Mosque Admin
-  Panel). Numbers on screen come from the code beside them; times are modelled and labelled as such.
-- **Process**: a delivery pipeline that draws itself. **Companies**: a bus topology. **Research**: a simulated
-  Wi-Fi signal for presence sensing (labelled as simulated). **Tools**: a signal passing down the layers and back.
-  **Contact**: the TCP handshake. A small program counter at the bottom left (wide screens) shows where you are
-  as a hex address.
+The previous design, Signal (the circuit board, the hero energy model and the computer-science Lab), is kept on
+the `signal-theme` branch.
 
 ## Command palette
 
@@ -114,7 +91,7 @@ The visitor sees "Delivered" as soon as either one lands. If both fail, they can
 
 - **Vite** + **React 19** + **TypeScript** (static SPA, deploys to GitHub Pages)
 - Hand-written CSS with design tokens (`src/styles.css`), Tailwind v4 for the reset
-- **Geologica** (variable weight and sharpness; the hero name sharpens as the signal draws), self-hosted.
+- **Libre Franklin** and **Newsreader** (variable fonts), self-hosted.
   The Bangla name uses a 4.5 KB subset of **Tiro Bangla** (`public/fonts/`, SIL OFL), made with
   `pyftsubset … --text="রাকিবুল হাসান" --layout-features='*' --flavor=woff2`
 - The resume builder keeps **Instrument Sans** and **Martian Mono** for its documents, loaded only with the builder
@@ -130,9 +107,7 @@ scripts/prerender.mjs — writes the rendered page into dist/index.html
 src/data.ts        — projects, research, skills and links (edit this to change content)
 src/github.json    — last year of GitHub contributions (written by scripts/fetch-github.mjs)
 src/Portfolio.tsx  — page layout and sections
-src/Signal.tsx     — the hero figure: one reading split into four kinds of work, and the model that splits it
-src/Board.tsx      — the live circuit board behind the page
-src/Concepts.tsx   — the per-section CS figures; Lab.tsx holds the five interactive demos
+src/Gallery.tsx    — the posters drawn from each project, the ink swatches, and the torch
 src/GitHubYear.tsx — the animated contribution year
 src/Palette.tsx    — command palette (Ctrl K) and the typed commands
 src/theme.ts       — light / load-shedding (dark) theme

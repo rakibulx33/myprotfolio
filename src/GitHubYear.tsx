@@ -3,7 +3,7 @@ import gh from "./github.json";
 import { LINKS } from "./data";
 import { prefersReducedMotion, useInView } from "./hooks";
 
-/* A year of GitHub contributions, read like a meter: the weekly load profile on top, one cell per day
+/* A year of GitHub contributions, hung as a framed work: the weekly total drawn on top, one cell per day
    below. src/github.json is fetched from GitHub before every build and refreshed every hour by the
    deploy workflow (scripts/fetch-github.mjs), so the page never waits on a third-party API.
 
@@ -173,6 +173,8 @@ export default function GitHubYear() {
           </p>
         </header>
 
+        <figure className="work gy-work">
+        <div className="frame frame-wide">
         <div ref={ref} className={`gy${run ? " run" : ""}`} style={{ ["--sweep" as string]: `${SWEEP_S}s` }}>
           <div className="gy-scroll" ref={scroller}>
             <div className="gy-canvas" style={{ ["--left" as string]: `${(LEFT / m.width) * 100}%` }}>
@@ -243,6 +245,13 @@ export default function GitHubYear() {
             <span>More</span>
           </div>
         </div>
+        </div>
+        <figcaption className="placard">
+          <p className="pl-title"><i>Daily practice</i></p>
+          <p className="pl-meta">GitHub contributions over the last twelve months</p>
+          <p className="pl-medium">One square per day, with the weekly total drawn above</p>
+        </figcaption>
+        </figure>
 
         <dl className="gy-facts">
           <div><dt>Active days</dt><dd>{n(active)}</dd></div>

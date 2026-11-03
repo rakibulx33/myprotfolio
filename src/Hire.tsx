@@ -23,7 +23,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const PHONE_RE = /^\+?[\d\s()-]{8,20}$/;
 type Phase = "ask" | "review" | "sending" | "sent" | "failed";
 
-/** A short burst of sparks in the four mains colours, played when the brief is delivered. */
+/** A short burst of confetti in the four print inks, played when the brief is delivered. */
 function burst(canvas: HTMLCanvasElement | null, from: HTMLElement | null) {
   if (!canvas || prefersReducedMotion()) return;
   const host = canvas.parentElement!.getBoundingClientRect();
@@ -34,7 +34,7 @@ function burst(canvas: HTMLCanvasElement | null, from: HTMLElement | null) {
   if (!ctx) return;
   const ox = ((origin ? origin.left + origin.width / 2 : host.left + host.width / 2) - host.left) * dpr;
   const oy = ((origin ? origin.top : host.top + host.height * 0.7) - host.top) * dpr;
-  const colors = ["#2347c5", "#cc3326", "#e8a200", "#23885a"];
+  const colors = ["#0078bf", "#ff48b0", "#ff6c2f", "#00838a"];
   const parts = Array.from({ length: 70 }, () => {
     const a = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI * 1.1;
     const v = (4 + Math.random() * 7) * dpr;

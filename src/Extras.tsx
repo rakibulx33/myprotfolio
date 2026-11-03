@@ -90,7 +90,7 @@ export function ResumeLauncher() {
 }
 
 /* ------------------------------------------------------------------ matrix easter egg */
-const PHASES = ["#7d97ff", "#ff6b5b", "#ffc53d", "#46c98a"];
+const PHASES = ["#0078bf", "#ff48b0", "#ff6c2f", "#00838a"];
 const RAIN = "অআইঈউএওকখগঘচছজঝটঠডঢণতথদধনপফবভমযরলশষসহড়য়০১২৩৪৫৬৭৮৯01<>/{}[]=+*#$";
 
 /** Digital rain in the site's colours, with Bangla letters mixed in. Any key or click exits. */
@@ -125,10 +125,10 @@ export function Matrix() {
       last = t;
       ctx.fillStyle = "rgba(15, 19, 24, 0.17)";
       ctx.fillRect(0, 0, c.width, c.height);
-      ctx.font = `600 ${size * 0.82}px "Geologica Variable", system-ui, sans-serif`;
+      ctx.font = `600 ${size * 0.82}px "Libre Franklin Variable", system-ui, sans-serif`;
       for (let i = 0; i < cols; i++) {
         const y = drops[i] * size;
-        ctx.fillStyle = Math.random() > 0.96 ? "#ede9e0" : PHASES[i % 4];
+        ctx.fillStyle = Math.random() > 0.96 ? "#efeae0" : PHASES[i % 4];
         ctx.fillText(RAIN[(Math.random() * RAIN.length) | 0], i * size, y);
         if (y > c.height && Math.random() > 0.97) drops[i] = 0;
         drops[i] += 1;

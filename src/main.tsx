@@ -1,7 +1,8 @@
 import { createRoot, hydrateRoot } from "react-dom/client";
-import "@fontsource-variable/geologica/shrp.css"; // weight + sharpness axes
+import "@fontsource-variable/libre-franklin/wght.css";
+import "@fontsource-variable/newsreader/opsz.css";
+import "@fontsource-variable/newsreader/opsz-italic.css";
 import "./styles.css";
-import "./concepts.css";
 import Portfolio from "./Portfolio";
 
 const root = document.getElementById("root")!;
