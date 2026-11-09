@@ -3,7 +3,7 @@ import gh from "./github.json";
 import { LINKS } from "./data";
 import { prefersReducedMotion, useInView } from "./hooks";
 
-/* A year of GitHub contributions, hung as a framed work: the weekly total drawn on top, one cell per day
+/* A year of GitHub contributions, drawn as the network's timetable: the weekly total drawn on top, one cell per day
    below. src/github.json is fetched from GitHub before every build and refreshed every hour by the
    deploy workflow (scripts/fetch-github.mjs), so the page never waits on a third-party API.
 
@@ -166,6 +166,7 @@ export default function GitHubYear() {
     <section id="github" className="sec gy-sec" aria-labelledby="github-title">
       <div className="wrap">
         <header className="sec-head">
+          <p className="eyebrow"><span className="eb-n" aria-hidden>06</span>Timetable</p>
           <h2 id="github-title">A year on GitHub</h2>
           <p className="sec-lede">
             <strong className="gy-total">{n(total)}</strong> contributions in the last twelve months
@@ -173,8 +174,7 @@ export default function GitHubYear() {
           </p>
         </header>
 
-        <figure className="work gy-work">
-        <div className="frame frame-wide">
+        <figure className="gy-card">
         <div ref={ref} className={`gy${run ? " run" : ""}`} style={{ ["--sweep" as string]: `${SWEEP_S}s` }}>
           <div className="gy-scroll" ref={scroller}>
             <div className="gy-canvas" style={{ ["--left" as string]: `${(LEFT / m.width) * 100}%` }}>
@@ -245,11 +245,9 @@ export default function GitHubYear() {
             <span>More</span>
           </div>
         </div>
-        </div>
-        <figcaption className="placard">
-          <p className="pl-title"><i>Daily practice</i></p>
-          <p className="pl-meta">GitHub contributions over the last twelve months</p>
-          <p className="pl-medium">One square per day, with the weekly total drawn above</p>
+        <figcaption className="gy-cap">
+          <p className="gy-cap-t">Daily practice</p>
+          <p>GitHub contributions over the last twelve months. One square per day, with the weekly total drawn above.</p>
         </figcaption>
         </figure>
 

@@ -6,7 +6,7 @@ import {
   canSplit, companyKind, contactItems, defaultOptions, effectiveMax, fileName, firstSentence, orderedSkills, pickProjects,
   sanitizeOptions, sectionsFor, shortUrl, type ContactItem, type DocType, type Options, type SectionKey,
 } from "./resumeModel";
-import "@fontsource-variable/instrument-sans";
+import "@fontsource-variable/instrument-sans/wdth.css";
 import "@fontsource-variable/martian-mono/wdth.css";
 import "./resume.css";
 

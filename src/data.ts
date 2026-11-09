@@ -58,8 +58,10 @@ export type Project = {
   live?: string;
   /** Repo is private: shown as a case study with no code link. */
   private?: boolean;
-  /** Which kind of work it is (sets its colour in the project index). */
+  /** Which kind of work it is: the line it sits on in the route map. */
   line?: Line;
+  /** Other kinds of work it also covers. A project with more than one line is an interchange on the map. */
+  also?: Line[];
 };
 
 export const featuredProjects: Project[] = [
@@ -75,6 +77,7 @@ export const featuredProjects: Project[] = [
   {
     name: "TradingSpark",
     line: "automation",
+    also: ["backend"],
     kind: "Algorithmic trading system",
     description:
       "Breeds thousands of trading-strategy variants with a genetic algorithm on NautilusTrader. Survivors are forward-tested on data they have never seen, and the graded winners go into a vault. From there it builds decorrelated portfolios and runs them 24/7, demo first, with real money only behind an explicit gate.",
@@ -84,6 +87,7 @@ export const featuredProjects: Project[] = [
   {
     name: "ShopTalk",
     line: "commerce",
+    also: ["automation", "backend"],
     kind: "Multi-tenant SaaS",
     description:
       "A multi-tenant storefront platform where each shop gets an AI assistant that helps customers find products by voice and chat.",
@@ -93,6 +97,7 @@ export const featuredProjects: Project[] = [
   {
     name: "Replixon",
     line: "automation",
+    also: ["backend"],
     kind: "AI social inbox",
     description:
       "An AI-assisted inbox that brings a business's social messaging channels into one place and helps answer customers faster.",
@@ -241,6 +246,8 @@ export const companies: Company[] = [
 
 export type Research = {
   title: string;
+  /** A few words, for the route map. */
+  short: string;
   venue: string;
   summary: string;
   tags: string[];
@@ -251,6 +258,7 @@ export type Research = {
 export const research: Research[] = [
   {
     title: "Smart energy monitoring for Bangladeshi homes",
+    short: "Energy thesis",
     venue: "Undergraduate thesis, DIU CSE",
     summary: "Low-cost IoT and machine learning to help households understand their electricity use and costs.",
     tags: ["IoT", "Machine learning", "Energy"],
@@ -258,33 +266,38 @@ export const research: Research[] = [
   },
   {
     title: "Single-meter energy insights for homes",
+    short: "Single-meter energy",
     venue: "IEEE conference paper, first author",
     summary: "Showing households where their electricity goes, using one low-cost meter and no extra sensors.",
     tags: ["IoT", "Energy"],
   },
   {
     title: "IoT monitoring for potato storage",
+    short: "Potato storage",
     venue: "IEEE conference paper, second author",
     summary: "Low-cost sensing to reduce post-harvest losses in stored potatoes.",
     tags: ["IoT", "Agritech"],
   },
   {
     title: "IoT monitoring for onion storage",
+    short: "Onion storage",
     venue: "Springer conference paper",
     summary: "Low-cost sensing to reduce post-harvest losses in stored onions.",
     tags: ["IoT", "Agritech"],
   },
   {
     title: "Device-free human presence sensing",
+    short: "Presence sensing",
     venue: "IEEE conference paper",
     summary: "Detecting whether people are in a room without cameras or wearables.",
     tags: ["IoT", "Sensing"],
   },
 ];
 
-/** The four kinds of work. Each has one colour across the site (the mains phases: blue, red, yellow, earth green). */
-export type Line = "backend" | "commerce" | "automation" | "iot";
+/** The four kinds of work. Each is a line on the route map and keeps one colour across the site. */
+export type Line = "backend" | "automation" | "commerce" | "iot";
 
+/** In map order, top to bottom. The position in this list is the line's number. */
 export const services: { key: Line; title: string; short: string; text: string }[] = [
   {
     key: "backend",
@@ -293,16 +306,16 @@ export const services: { key: Line; title: string; short: string; text: string }
     text: "REST and real-time APIs, databases and background jobs in Node.js, Laravel and FastAPI, built to run reliably in production.",
   },
   {
-    key: "commerce",
-    short: "E-commerce",
-    title: "E-commerce for Bangladesh",
-    text: "Online stores and admin panels with the payment and delivery options Bangladeshi customers expect.",
-  },
-  {
     key: "automation",
     short: "Automation and AI",
     title: "Automation and AI integrations",
     text: "Chatbots, n8n workflows and LLM features that answer customers, sync data between tools and remove manual work.",
+  },
+  {
+    key: "commerce",
+    short: "E-commerce",
+    title: "E-commerce for Bangladesh",
+    text: "Online stores and admin panels with the payment and delivery options Bangladeshi customers expect.",
   },
   {
     key: "iot",
@@ -311,6 +324,9 @@ export const services: { key: Line; title: string; short: string; text: string }
     text: "ESP32-based sensing and monitoring systems, from the device and firmware to the dashboard.",
   },
 ];
+
+/** A line's number (1 to 4), as printed on its badge. */
+export const lineNo = (l: Line) => services.findIndex((s) => s.key === l) + 1;
 
 export const skillGroups: { label: string; items: string[] }[] = [
   { label: "Languages", items: ["TypeScript", "JavaScript", "Python", "PHP", "Kotlin", "Java", "C#", "C", "C++"] },

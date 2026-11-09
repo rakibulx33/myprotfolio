@@ -177,7 +177,7 @@ function textCommand(raw: string): Result | null {
           <div className="pal-lines">
             <p>.secret  projects/  research/  services.txt  resume.pdf  profile.jpg</p>
             <p className="pal-dim">Hidden: matrix, hack, cha, sudo hire rakibul, and one for keyboard veterans.</p>
-            <p className="pal-dim">Every poster on the wall is drawn by code from its project. Switch load-shedding on and bring a torch.</p>
+            <p className="pal-dim">The route map is drawn by code, from the same data as the project cards. Switch load-shedding on for the night service.</p>
           </div>
         ) };
       }

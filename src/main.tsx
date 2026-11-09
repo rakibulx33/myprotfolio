@@ -1,7 +1,6 @@
 import { createRoot, hydrateRoot } from "react-dom/client";
-import "@fontsource-variable/libre-franklin/wght.css";
-import "@fontsource-variable/newsreader/opsz.css";
-import "@fontsource-variable/newsreader/opsz-italic.css";
+import "@fontsource-variable/instrument-sans/wdth.css";
+import "@fontsource-variable/martian-mono/wdth.css";
 import "./styles.css";
 import Portfolio from "./Portfolio";
 

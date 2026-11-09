@@ -1,8 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <defs><clipPath id="a"><circle cx="26" cy="32" r="14"/></clipPath></defs>
-  <rect width="64" height="64" rx="9" fill="#1c1a17"/>
-  <rect x="7" y="7" width="50" height="50" rx="2" fill="#f5f0e4"/>
-  <circle cx="26" cy="32" r="14" fill="#ff48b0"/>
-  <circle cx="38" cy="32" r="14" fill="#0078bf"/>
-  <circle cx="38" cy="32" r="14" fill="#002284" clip-path="url(#a)"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <rect width="32" height="32" rx="8" fill="#10141a"/>
+  <g stroke-width="3" stroke-linecap="round" fill="none">
+    <path d="M6 8.5h20" stroke="#4f8dff"/><path d="M6 14.2h20" stroke="#ffb62e"/>
+    <path d="M6 19.8h20" stroke="#ff5d6c"/><path d="M6 25.5h20" stroke="#2fd08c"/>
+  </g>
+  <rect x="12.6" y="4.6" width="6.8" height="22.8" rx="3.4" fill="#f5f3ee" stroke="#10141a" stroke-width="2.4"/>
 </svg>

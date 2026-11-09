@@ -1,29 +1,29 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import {
   HANDLE, LINKS, PORTRAIT, PROCESS, SOCIALS, companies, featuredProjects, moreProjects, research, services, skillGroups,
-  type Line, type Project, type Social,
+  type Project, type Social,
 } from "./data";
 import { HireDock, Matrix, ResumeLauncher, Toaster, useKonami, useNudge } from "./Extras";
-import { InkChip, INKS, Poster, RisoDefs, Torch } from "./Gallery";
+import gh from "./github.json";
 import GitHubYear from "./GitHubYear";
 import Hire from "./Hire";
 import { prefersReducedMotion, useClock, useInView } from "./hooks";
+import { LineBadge, Mark, NetworkMap, linesOf, slug } from "./Lines";
 import Palette from "./Palette";
 import { emit, unlock } from "./store";
 import { useTheme } from "./theme";
 
-/* "Exhibition": the portfolio hangs like a small gallery show. White walls, framed work with museum
-   labels, research papers in a display case. Load-shedding turns the gallery lights off. */
+/* "Lines": the portfolio is a small metro network. Each kind of work is a numbered, coloured line; each project is
+   a station; a project that spans several kinds of work is an interchange; every line ends at "your project".
+   Load-shedding (dark mode) is the night service: the network keeps running on backup lighting. */
 
 const NAV = [
-  { id: "work", label: "Work" },
-  { id: "research", label: "Research" },
-  { id: "github", label: "GitHub" },
-  { id: "contact", label: "Contact" },
-];
-const LINE_NAME = Object.fromEntries(services.map((s) => [s.key, s.short])) as Record<Line, string>;
-/** "A, B and C" */
-const list = (xs: string[]) => (xs.length < 2 ? xs.join("") : `${xs.slice(0, -1).join(", ")} and ${xs[xs.length - 1]}`);
+  { id: "work", label: "Work", line: "backend" },
+  { id: "research", label: "Research", line: "iot" },
+  { id: "github", label: "GitHub", line: "automation" },
+  { id: "contact", label: "Contact", line: "commerce" },
+] as const;
+const pad2 = (n: number) => String(n).padStart(2, "0");
 
 export default function Portfolio() {
   useKonami();
@@ -36,11 +36,11 @@ export default function Portfolio() {
   return (
     <>
       <a className="skip" href="#main">Skip to content</a>
-      <RisoDefs />
       <Header />
       <main id="main">
         <Hero />
-        <Services />
+        <Network />
+        <Lines />
         <Work />
         <Process />
         <Companies />
@@ -50,7 +50,6 @@ export default function Portfolio() {
         <Contact />
       </main>
       <Footer />
-      <Torch />
       <HireDock />
       <Toaster />
       <Matrix />
@@ -59,6 +58,11 @@ export default function Portfolio() {
       <Palette />
     </>
   );
+}
+
+/** A section's eyebrow: its stop number, then its name, like a platform sign. */
+function Stop({ n, label }: { n: number; label: string }) {
+  return <p className="eyebrow"><span className="eb-n" aria-hidden>{pad2(n)}</span>{label}</p>;
 }
 
 /* ---------------------------------------------------------------- header */
@@ -74,7 +78,7 @@ function LoadShedding() {
   const on = theme === "dark";
   return (
     <button type="button" role="switch" aria-checked={on} className="ls" onClick={toggle}
-      title={on ? "The power is out. Switch load-shedding off to turn the gallery lights back on." : "Switch load-shedding on for dark mode."}>
+      title={on ? "The power is out and the network is on backup lighting. Switch load-shedding off to restore it." : "Switch load-shedding on for dark mode."}>
       <span className="ls-track" aria-hidden><span className="ls-knob" /></span>
       <span className="ls-label">Load-shedding</span>
     </button>
@@ -100,10 +104,10 @@ function Header() {
   return (
     <header className={`hd${scrolled ? " scrolled" : ""}`}>
       <div className="wrap hd-row">
-        <a className="hd-name" href="#top">Rakibul Hasan</a>
+        <a className="hd-name" href="#top"><Mark /><span>Rakibul Hasan</span></a>
         <nav className="hd-nav" aria-label="Sections">
           {NAV.map((n) => (
-            <a key={n.id} href={`#${n.id}`} aria-current={active === n.id ? "location" : undefined}>{n.label}</a>
+            <a key={n.id} href={`#${n.id}`} className={`ln-${n.line}`} aria-current={active === n.id ? "location" : undefined}>{n.label}</a>
           ))}
         </nav>
         <div className="hd-tools">
@@ -120,7 +124,7 @@ function Header() {
   );
 }
 
-/* ---------------------------------------------------------------- hero: the entrance wall */
+/* ---------------------------------------------------------------- hero */
 
 function Hero() {
   const [theme] = useTheme();
@@ -129,8 +133,11 @@ function Hero() {
     <section id="top" className="hero" aria-labelledby="hero-title">
       <div className="wrap hero-grid">
         <div className="hero-main">
+          <ul className="hero-lines" aria-label="Four kinds of work">
+            {services.map((s) => <li key={s.key}><LineBadge line={s.key} /></li>)}
+          </ul>
           <h1 id="hero-title" className="hero-h1">
-            <span className="hero-name"><span className="vinyl">Rakibul</span> <span className="vinyl">Hasan</span></span>
+            <span className="hero-name"><span className="rise">Rakibul</span> <span className="rise">Hasan</span></span>
             <span className="hero-role">Backend and automation developer in Dhaka, Bangladesh</span>
           </h1>
           <p className="hero-lede">
@@ -143,17 +150,17 @@ function Hero() {
           </div>
           <p className="hero-open">
             <span className="open-dot" aria-hidden /> Taking new projects. It’s <span className="tnum">{clock}</span> in Dhaka
-            {theme === "dark" ? <>, and the power is out, so the gallery is running on backup lights.</> : "."}
+            {theme === "dark" ? <>, and the power is out, so the network is running on backup lighting.</> : "."}
           </p>
         </div>
 
-        <figure className="work hero-portrait">
-          <div className="frame">
-            <img src={PORTRAIT} alt="Rakibul Hasan in a grey waistcoat and red tie" width={720} height={960} decoding="async" fetchPriority="high" />
-          </div>
-          <figcaption className="placard">
-            <p className="pl-title">Rakibul Hasan <span lang="bn" className="bn">রাকিবুল হাসান</span></p>
-            <p className="pl-meta">Developer and IoT researcher, Dhaka</p>
+        <figure className="pass">
+          <img src={PORTRAIT} alt="Rakibul Hasan in a grey waistcoat and red tie" width={720} height={960} decoding="async" fetchPriority="high" />
+          <div className="pass-bars" aria-hidden><i className="b-backend" /><i className="b-automation" /><i className="b-commerce" /><i className="b-iot" /></div>
+          <figcaption>
+            <p className="pass-name">Rakibul Hasan <span lang="bn" className="bn">রাকিবুল হাসান</span></p>
+            <p className="pass-role">Developer and IoT researcher</p>
+            <p className="pass-code"><span>DHK</span> Dhaka · 23.81° N, 90.41° E</p>
           </figcaption>
         </figure>
       </div>
@@ -161,29 +168,63 @@ function Hero() {
   );
 }
 
-/* ---------------------------------------------------------------- what I build: the four inks */
+/* ---------------------------------------------------------------- the network map */
 
-function Services() {
+function Network() {
+  const facts = [
+    { k: "Projects built", v: String(featuredProjects.length + moreProjects.length) },
+    { k: "Freelancing since", v: "2022" },
+    { k: "Research projects", v: String(research.length) },
+    { k: "GitHub contributions, last year", v: (gh as { total: number }).total.toLocaleString("en-US") },
+  ];
+  return (
+    <section id="network" className="net" aria-labelledby="net-title">
+      <div className="wrap">
+        <div className="net-card">
+          <header className="net-head">
+            <div>
+              <h2 id="net-title" className="net-title">The network</h2>
+              <p className="net-sub">Four lines of work, and the projects on them. Where a project covers more than one, the lines meet.</p>
+            </div>
+            <p className="net-key" aria-hidden>Select a station to jump to it</p>
+          </header>
+          <div className="net-scroll"><NetworkMap /></div>
+          <p className="net-note">The map is the full picture on a wide screen. On a phone, the lines below carry the same stations.</p>
+        </div>
+        <dl className="facts">
+          {facts.map((f) => <div key={f.k}><dd>{f.v}</dd><dt>{f.k}</dt></div>)}
+        </dl>
+      </div>
+    </section>
+  );
+}
+
+/* ---------------------------------------------------------------- what I build: the four lines */
+
+function Lines() {
   const [ref, seen] = useInView<HTMLUListElement>();
   useEffect(() => { if (seen) unlock("services"); }, [seen]);
   return (
-    <section id="services" className="sec sec-alt" aria-labelledby="services-title">
+    <section id="services" className="sec" aria-labelledby="services-title">
       <div className="wrap">
         <header className="sec-head">
+          <Stop n={1} label="Lines" />
           <h2 id="services-title">What I build</h2>
-          <p className="sec-lede">Four kinds of work, each printed in its own ink. The posters in the next room use the same colours.</p>
+          <p className="sec-lede">Four kinds of work, each its own line. A project that mixes kinds is an interchange, where the lines meet.</p>
         </header>
-        <ul className="svc-list" ref={ref}>
+        <ul className="lines" ref={ref}>
           {services.map((s) => {
-            const works = featuredProjects.filter((p) => p.line === s.key).map((p) => p.name);
+            const works = featuredProjects.filter((p) => linesOf(p).includes(s.key));
             return (
-              <li key={s.key} className={`svc ph-${s.key}`}>
-                <InkChip line={s.key} />
+              <li key={s.key} className={`line-card ln-${s.key}`}>
+                <div className="lc-track" aria-hidden><i /><i /><i /></div>
+                <LineBadge line={s.key} full={false} />
                 <h3>{s.title}</h3>
                 <p>{s.text}</p>
-                <p className="svc-works">
-                  <span className="sr-only">Printed in {INKS[s.key].name.toLowerCase()}. </span>
-                  {works.length ? <>On the wall: {list(works)}</> : <>See the research papers below</>}
+                <p className="lc-stops">
+                  {works.length
+                    ? <>Stations: {works.map((p, i) => (<span key={p.name}>{i > 0 && (i === works.length - 1 ? " and " : ", ")}<a href={`#p-${slug(p.name)}`}>{p.name}</a></span>))}</>
+                    : <>Stations: <a href="#research">the research papers below</a></>}
                 </p>
               </li>
             );
@@ -194,7 +235,7 @@ function Services() {
   );
 }
 
-/* ---------------------------------------------------------------- work: the main room */
+/* ---------------------------------------------------------------- work: the stations */
 
 function ProjectLinks({ p }: { p: Project }) {
   if (!p.code && !p.live) return <p className="proj-links proj-private">Private repository, walkthrough on request</p>;
@@ -206,53 +247,51 @@ function ProjectLinks({ p }: { p: Project }) {
   );
 }
 
-/** A salon hang: frames of different sizes, dropped to different heights. `ratio` is the poster's height over its width. */
-const HANG = [
-  { span: 5, ratio: 1.25, drop: 0 },
-  { span: 4, ratio: 1, drop: 72 },
-  { span: 3, ratio: 4 / 3, drop: 24 },
-  { span: 3, ratio: 4 / 3, drop: 40 },
-  { span: 4, ratio: 1.25, drop: 0 },
-  { span: 5, ratio: 0.8, drop: 96 },
-];
-
 function Work() {
   return (
-    <section id="work" className="sec" aria-labelledby="work-title">
+    <section id="work" className="sec sec-alt" aria-labelledby="work-title">
       <div className="wrap">
         <header className="sec-head">
+          <Stop n={2} label="Stations" />
           <h2 id="work-title">Selected work</h2>
           <p className="sec-lede">
-            Production systems for clients and my own products. Each poster is drawn by code from its project, in the
-            ink of its kind of work. Private repositories are described without code, and I’m happy to walk you through
-            them on a call.
+            Production systems for clients and my own products, in the order they appear on the map. Private repositories
+            are described without code, and I’m happy to walk you through them on a call.
           </p>
         </header>
-        <ul className="hang">
+        <ol className="route">
           {featuredProjects.map((p, i) => {
-            const h = HANG[i % HANG.length];
+            const ls = linesOf(p);
+            const style = { "--c1": `var(--l-${ls[0]})`, "--c2": `var(--l-${ls[1] ?? ls[0]})`, "--c3": `var(--l-${ls[2] ?? ls[1] ?? ls[0]})`, "--n": ls.length } as CSSProperties;
             return (
-              <li key={p.name} className={`work ph-${p.line ?? "backend"}`} style={{ "--span": h.span, "--drop": `${h.drop}px` } as CSSProperties}>
-                <div className="frame"><Poster project={p} ratio={h.ratio} /></div>
-                <div className="placard">
-                  <h3 className="pl-title"><i>{p.name}</i></h3>
-                  <p className="pl-meta">{p.kind}{p.line && <span className="sr-only">. Kind of work: {LINE_NAME[p.line]}</span>}</p>
-                  <p className="pl-medium">{p.stack.join(", ")}</p>
-                  <p className="pl-desc">{p.description}</p>
+              <li key={p.name} id={`p-${slug(p.name)}`} className={`stn ${i % 2 ? "r" : "l"}${ls.length > 1 ? " multi" : ""}`} style={style}>
+                <span className="stn-node" aria-hidden />
+                <article className="stn-card">
+                  <span className="stn-bar" aria-hidden />
+                  <header className="stn-top">
+                    <p className="stn-code">Station {pad2(i + 1)}</p>
+                    <ul className="badges">{ls.map((l) => <li key={l}><LineBadge line={l} /></li>)}</ul>
+                  </header>
+                  <h3>{p.name}</h3>
+                  <p className="stn-kind">{p.kind}</p>
+                  <p className="stn-desc">{p.description}</p>
+                  <ul className="stack">{p.stack.map((s) => <li key={s}>{s}</li>)}</ul>
                   <ProjectLinks p={p} />
-                </div>
+                </article>
               </li>
             );
           })}
-        </ul>
+        </ol>
 
         <div className="more">
           <h3 className="more-h">Also built</h3>
-          <ul className="more-list">
+          <ul className="board">
             {moreProjects.map((p) => (
               <li key={p.name}>
-                <p className="more-name">{p.name}</p>
-                <p className="more-kind">{p.kind}</p>
+                <div className="bd-name">
+                  <p className="more-name">{p.name}</p>
+                  <p className="more-kind">{p.kind}</p>
+                </div>
                 <p className="more-desc">{p.description}</p>
                 <p className="more-stack">{p.stack.join(", ")}</p>
                 <ProjectLinks p={p} />
@@ -269,9 +308,10 @@ function Work() {
 
 function Process() {
   return (
-    <section id="process" className="sec sec-alt" aria-labelledby="process-title">
+    <section id="process" className="sec" aria-labelledby="process-title">
       <div className="wrap">
         <header className="sec-head">
+          <Stop n={3} label="Route" />
           <h2 id="process-title">How we’d work together</h2>
           <p className="sec-lede">From first message to launch, you always know what I’m building and what comes next.</p>
         </header>
@@ -302,20 +342,21 @@ function CompanyLogo({ name }: { name: string }) {
 
 function Companies() {
   return (
-    <section id="companies" className="sec" aria-labelledby="companies-title">
+    <section id="companies" className="sec sec-alt" aria-labelledby="companies-title">
       <div className="wrap">
         <header className="sec-head">
+          <Stop n={4} label="Depots" />
           <h2 id="companies-title">Companies</h2>
           <p className="sec-lede">Gikpik, BuildIoT Lab and BuildIoT BD are sister companies. Alongside freelance work, I build the technical side of each.</p>
         </header>
         <ul className="co-list">
           {companies.map((c) => (
-            <li key={c.name} className="co work">
-              <div className="frame frame-sm"><div className="co-logo"><CompanyLogo name={c.name} /></div></div>
-              <div className="placard">
-                <h3 className="pl-title">{c.url ? <a href={c.url} target="_blank" rel="noreferrer">{c.name}</a> : c.name}</h3>
-                <p className="pl-meta">{c.kind.split(" · ").pop()}</p>
-                <p className="pl-desc">{c.description}</p>
+            <li key={c.name} className="co">
+              <div className="co-logo"><CompanyLogo name={c.name} /></div>
+              <div className="co-body">
+                <h3>{c.url ? <a href={c.url} target="_blank" rel="noreferrer">{c.name}<span aria-hidden> ↗</span></a> : c.name}</h3>
+                <p className="co-kind">{c.kind.split(" · ").pop()}</p>
+                <p className="co-desc">{c.description}</p>
                 <p className="co-role">My part: {c.role.charAt(0).toLowerCase() + c.role.slice(1)}</p>
               </div>
             </li>
@@ -326,30 +367,30 @@ function Companies() {
   );
 }
 
-/* ---------------------------------------------------------------- research: the display case */
+/* ---------------------------------------------------------------- research: the IoT line */
 
 function Research() {
   const [ref, seen] = useInView<HTMLDivElement>();
   useEffect(() => { if (seen) unlock("scholar"); }, [seen]);
   return (
-    <section id="research" className="sec sec-alt" aria-labelledby="research-title">
+    <section id="research" className="sec" aria-labelledby="research-title">
       <div className="wrap" ref={ref}>
         <header className="sec-head">
+          <Stop n={5} label="IoT line" />
           <h2 id="research-title">Research</h2>
           <p className="sec-lede">Low-cost IoT for everyday problems in Bangladesh, written with classmates and faculty at Daffodil International University.</p>
         </header>
-        <div className="vitrine">
-          <ul className="papers">
-            {research.map((r, i) => (
-              <li key={r.title} className={`paper${i === 0 ? " lead" : ""}`}>
-                <p className="paper-tag">{r.status ? r.status.charAt(0).toUpperCase() + r.status.slice(1) : "In preparation"}</p>
-                <h3>{r.title}</h3>
-                <p className="paper-venue">{r.venue}</p>
-                <p className="paper-sum">{r.summary}</p>
-              </li>
-            ))}
-          </ul>
-        </div>
+        <ol className="papers ln-iot">
+          {research.map((r, i) => (
+            <li key={r.title} className={`paper${i === 0 ? " lead" : ""}`}>
+              <span className="paper-node" aria-hidden />
+              <p className="paper-tag">{r.status ? r.status.charAt(0).toUpperCase() + r.status.slice(1) : "In preparation"}</p>
+              <h3>{r.title}</h3>
+              <p className="paper-venue">{r.venue}</p>
+              <p className="paper-sum">{r.summary}</p>
+            </li>
+          ))}
+        </ol>
       </div>
     </section>
   );
@@ -359,9 +400,10 @@ function Research() {
 
 function Skills() {
   return (
-    <section id="skills" className="sec sec-alt" aria-labelledby="skills-title">
+    <section id="skills" className="sec" aria-labelledby="skills-title">
       <div className="wrap">
         <header className="sec-head">
+          <Stop n={7} label="Toolkit" />
           <h2 id="skills-title">Tools I use</h2>
           <p className="sec-lede">Chosen per project. Most of my production work is in TypeScript, Python and PHP.</p>
         </header>
@@ -369,7 +411,7 @@ function Skills() {
           {skillGroups.map((g) => (
             <div key={g.label}>
               <dt>{g.label}</dt>
-              <dd>{g.items.join(", ")}</dd>
+              <dd>{g.items.map((it) => <span key={it}>{it}</span>)}</dd>
             </div>
           ))}
         </dl>
@@ -378,7 +420,7 @@ function Skills() {
   );
 }
 
-/* ---------------------------------------------------------------- contact */
+/* ---------------------------------------------------------------- contact: the terminus */
 
 function CopyEmail() {
   const [done, setDone] = useState(false);
@@ -401,16 +443,20 @@ function Contact() {
   return (
     <section id="contact" className="sec contact" aria-labelledby="contact-title">
       <div className="wrap">
-        <div className="contact-main">
-          <h2 id="contact-title">Have a project in mind?</h2>
-          <p className="sec-lede">I take on freelance backend, automation and e-commerce work. The quickest start is a short brief: six questions, about 30 seconds.</p>
-          <div className="cta">
-            <button type="button" className="btn btn-ink" onClick={() => emit("hire")}>Start a project brief</button>
-            <button type="button" className="btn btn-line" onClick={() => emit("resume")}>Get my resume, CV or portfolio</button>
+        <div className="terminus">
+          <div className="tm-lines" aria-hidden><i className="b-backend" /><i className="b-automation" /><i className="b-commerce" /><i className="b-iot" /></div>
+          <div className="tm-body">
+            <p className="eyebrow eyebrow-inv"><span className="eb-n" aria-hidden>08</span>Terminus</p>
+            <h2 id="contact-title">Have a project in mind?</h2>
+            <p className="sec-lede">I take on freelance backend, automation and e-commerce work. The quickest start is a short brief: six questions, about 30 seconds.</p>
+            <div className="cta">
+              <button type="button" className="btn btn-inv" onClick={() => emit("hire")}>Start a project brief</button>
+              <button type="button" className="btn btn-inv-line" onClick={() => emit("resume")}>Get my resume, CV or portfolio</button>
+            </div>
+            <p className="mail">
+              Or email <a href={`mailto:${LINKS.email}`} onClick={() => unlock("client")}>{LINKS.email}</a> <CopyEmail />
+            </p>
           </div>
-          <p className="mail">
-            Or email <a href={`mailto:${LINKS.email}`} onClick={() => unlock("client")}>{LINKS.email}</a> <CopyEmail />
-          </p>
         </div>
         <h3 className="soc-h">Find me everywhere as @{HANDLE}</h3>
         <div className="soc">
@@ -439,8 +485,8 @@ function Footer() {
       <div className="wrap ft-row">
         <p suppressHydrationWarning>© {new Date().getFullYear()} Rakibul Hasan</p>
         <p className="ft-colophon">
-          Set in Libre Franklin and Newsreader. The posters are two-colour prints drawn by code: each ink is a kind of
-          work, and each picture is what the project does.
+          Set in Instrument Sans and Martian Mono. The route map is drawn by code: each line is a kind of work, and each
+          interchange is a project that covers more than one.
         </p>
         <p>
           Press <button type="button" className="btn-text" onClick={() => emit("palette")}><kbd>{mac ? "⌘K" : "Ctrl K"}</kbd></button> for commands.
@@ -449,3 +495,4 @@ function Footer() {
     </footer>
   );
 }
+

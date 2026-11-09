@@ -2,36 +2,30 @@
 
 Personal portfolio of **Rakibul Hasan**, backend & automation developer and CSE student at DIU, Dhaka.
 
-The design is called **Exhibition**: the portfolio hangs like a small gallery show. White walls, each featured
-project framed as a two-colour screen print with a museum label beside it, research papers laid out in a glass
-display case, and the GitHub year framed as a work called *Daily practice*.
+The design is called **Lines**: the portfolio is drawn as a small metro network. Each kind of work is a numbered,
+coloured line, each featured project is a station on its line, and a project that spans several kinds of work is an
+interchange. Research is the IoT line, and every line ends at the same terminus: your project (the contact panel).
+The hero map (`NetworkMap` in `src/Lines.tsx`) is built from the same data as the project cards, so they cannot
+disagree. Its tracks draw themselves once when scrolled into view; hover or focus a line or station to dim the rest.
 
-The posters (`src/Gallery.tsx`) are drawn by code from each project, so nothing is a stock image: the ink is the
-kind of work, and the picture is what the project does (candles for the trading system, speech bubbles for the
-shop assistant, a stack of pages for the tender builder, and so on). The two inks overprint with `multiply`, as
-they do on paper, and the second ink sits a hair out of register. Each poster prints itself the first time it
-scrolls into view: the first ink, then the second, sliding into register.
-
-| Ink | Kind of work |
+| Line | Kind of work |
 | --- | --- |
-| Blue | Backend systems and APIs |
-| Fluorescent pink | E-commerce for Bangladesh |
-| Orange | Automation and AI |
-| Teal | IoT prototypes |
+| 1, blue | Backend systems and APIs |
+| 2, amber | Automation and AI |
+| 3, red | E-commerce for Bangladesh |
+| 4, green | IoT prototypes and research |
 
-Light mode is "gallery lights on". The **Load-shedding** switch in the header is dark mode: the lights flicker out,
-the walls go dark and only the framed works stay lit, each under its own picture light. On a desktop the pointer
-becomes a torch. It follows the system setting until a visitor picks one.
+Which lines a project is on comes from `line` and `also` in `src/data.ts`; edit them to move a station.
 
-On arrival there is one moment: the name goes up on the wall like vinyl lettering and the portrait's light comes
-on. With reduced motion everything is simply there, and without JavaScript the page is complete.
+Light mode is the day timetable. The **Load-shedding** switch in the header is dark mode, the night service: the
+page flickers like a power cut and goes dark. It follows the system setting until a visitor picks one. Animations
+respect reduced motion, and without JavaScript the page is complete.
 
-Type is Libre Franklin for names, headings and labels and Newsreader for reading text.
+Type is Instrument Sans (its width axis gives the narrow signage headings) and Martian Mono for labels.
 
 **Live:** [rakibulx33.me](https://rakibulx33.me) · **GitHub:** [@rakibulx33](https://github.com/rakibulx33)
 
-The previous design, Signal (the circuit board, the hero energy model and the computer-science Lab), is kept on
-the `signal-theme` branch.
+Earlier designs are kept on branches: `exhibition-theme` (the gallery show) and `signal-theme` (the circuit board).
 
 ## Command palette
 
@@ -91,10 +85,9 @@ The visitor sees "Delivered" as soon as either one lands. If both fail, they can
 
 - **Vite** + **React 19** + **TypeScript** (static SPA, deploys to GitHub Pages)
 - Hand-written CSS with design tokens (`src/styles.css`), Tailwind v4 for the reset
-- **Libre Franklin** and **Newsreader** (variable fonts), self-hosted.
+- **Instrument Sans** and **Martian Mono** (variable fonts), self-hosted.
   The Bangla name uses a 4.5 KB subset of **Tiro Bangla** (`public/fonts/`, SIL OFL), made with
   `pyftsubset … --text="রাকিবুল হাসান" --layout-features='*' --flavor=woff2`
-- The resume builder keeps **Instrument Sans** and **Martian Mono** for its documents, loaded only with the builder
 - No animation libraries; the hero intro is pure CSS (plays before JavaScript), and every animation respects `prefers-reduced-motion`
 
 ## Structure
@@ -107,7 +100,7 @@ scripts/prerender.mjs — writes the rendered page into dist/index.html
 src/data.ts        — projects, research, skills and links (edit this to change content)
 src/github.json    — last year of GitHub contributions (written by scripts/fetch-github.mjs)
 src/Portfolio.tsx  — page layout and sections
-src/Gallery.tsx    — the posters drawn from each project, the ink swatches, and the torch
+src/Lines.tsx      — the route map, line badges and the site mark
 src/GitHubYear.tsx — the animated contribution year
 src/Palette.tsx    — command palette (Ctrl K) and the typed commands
 src/theme.ts       — light / load-shedding (dark) theme
