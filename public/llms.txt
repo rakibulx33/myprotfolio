@@ -20,10 +20,7 @@
 - [BuildIoT BD](https://buildiotbd.com): online store for electronics and IoT parts
 
 ## Research
-- Smart energy monitoring for Bangladeshi homes (undergraduate thesis, in progress)
-- Single-meter energy insights for homes (IEEE conference paper, in preparation)
-- IoT monitoring for potato and onion storage (conference papers)
-- Device-free human presence sensing (IEEE conference paper)
+- Focus areas: low-cost IoT sensing, applied machine learning, technology for Bangladesh
 
 ## Resume
 - Run `resume` in the website's terminal, or use "Get my resume", to download a resume, CV or project portfolio as a PDF
