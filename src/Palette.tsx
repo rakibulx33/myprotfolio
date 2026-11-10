@@ -17,7 +17,7 @@ export const SECTIONS = [
   { id: "work", label: "Selected work", keys: "work projects portfolio" },
   { id: "process", label: "How we'd work together", keys: "process steps brief plan build launch" },
   { id: "companies", label: "Companies", keys: "gikpik buildiot sister" },
-  { id: "research", label: "Research", keys: "papers thesis ieee" },
+  { id: "research", label: "Research", keys: "research iot machine learning" },
   { id: "github", label: "A year on GitHub", keys: "github contributions commits activity" },
   { id: "skills", label: "Tools I use", keys: "skills stack languages" },
   { id: "contact", label: "Contact", keys: "email socials hire" },
@@ -298,7 +298,7 @@ export default function Palette() {
       { id: "whoami", group: "Actions", label: "Who is Rakibul?", hint: "whoami", keys: "about who profile neofetch", run: () => { unlock("whoami"); return { out: <Whoami /> }; } },
       ...SECTIONS.map((s) => ({ id: `go-${s.id}`, group: "Go to" as Group, label: s.label, keys: `${s.id} ${s.keys}`, run: () => ({ close: true, then: () => scrollToId(s.id) }) })),
       ...ALL.map((p) => ({ id: `p-${slug(p.name)}`, group: "Projects" as Group, label: p.name, hint: p.kind, keys: p.stack.join(" "), run: () => ({ out: <ProjectOut p={p} /> }) })),
-      ...research.map((r) => ({ id: `r-${slug(r.title)}`, group: "Projects" as Group, label: r.title, hint: r.venue, keys: "research paper", run: () => ({ close: true, then: () => scrollToId("research") }) })),
+      ...research.map((r) => ({ id: `r-${slug(r.title)}`, group: "Projects" as Group, label: r.title, hint: "Research", keys: "research", run: () => ({ close: true, then: () => scrollToId("research") }) })),
       ...SOCIALS.map((s) => ({ id: `s-${s.name}`, group: "Profiles" as Group, label: s.name, hint: s.label, keys: s.group, run: () => ({ close: true, then: () => window.open(s.url, "_blank", "noopener") }) })),
     ];
   }, []);

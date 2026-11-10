@@ -162,9 +162,7 @@ export function DocView({ o, innerRef }: { o: Options; innerRef?: Ref<HTMLElemen
           <div className="d-item" key={r.title}>
             <div className="d-row">
               <h4>{r.title}</h4>
-              <span className="d-when">{r.status ?? "in preparation"}</span>
             </div>
-            <p className="d-sub">{r.venue}</p>
             {!compact && <p>{r.summary}</p>}
           </div>
         ))}

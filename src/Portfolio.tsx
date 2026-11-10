@@ -270,7 +270,6 @@ function Stats() {
   const stats = [
     { to: data.total, k: "contributions in a year" },
     { to: featuredProjects.length + moreProjects.length, k: "projects built" },
-    { to: research.length, k: "research projects" },
     ...(data.publicRepos != null ? [{ to: data.publicRepos, k: "public repositories" }] : []),
     { to: 2022, k: "freelancing since", year: true },
   ];
@@ -445,13 +444,12 @@ function Research() {
   const [ref, seen] = useInView<HTMLOListElement>();
   useEffect(() => { if (seen) unlock("scholar"); }, [seen]);
   return (
-    <Sec id="research" cmd="ls ./research" title="Research" ghost="research" lede="Low-cost IoT for everyday problems in Bangladesh, written with classmates and faculty at Daffodil International University.">
+    <Sec id="research" cmd="ls ./research" title="Research" ghost="research" lede="Early-stage ideas I am exploring alongside my degree. Details will be shared when they are ready.">
       <ol className="papers" ref={ref}>
         {research.map((r, i) => (
           <li key={r.title} className="card paper reveal" style={nth(i === 0 ? 0 : (i - 1) % 2)}>
-            <p className="paper-tag">[{r.status ?? "in preparation"}]</p>
+            <p className="paper-tag">[focus area]</p>
             <h3>{r.title}</h3>
-            <p className="paper-venue">{r.venue}</p>
             <p className="paper-sum">{r.summary}</p>
           </li>
         ))}

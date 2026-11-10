@@ -155,7 +155,7 @@ function run(raw: string, clear: () => void): ReactNode {
             ["services", "what I can build for you"],
             ["projects", "selected work (also: ls)"],
             ["open <name>", "links for a project"],
-            ["research", "papers and thesis"],
+            ["research", "areas of interest"],
             ["skills", "tools I use"],
             ["socials", "every profile, ranked"],
             ["contact", "how to reach me"],
@@ -275,7 +275,7 @@ function run(raw: string, clear: () => void): ReactNode {
       return (
         <div>
           {research.map((r) => (
-            <div key={r.title}><span className="c-gold">[{r.status ?? "in preparation"}]</span> {r.title}</div>
+            <div key={r.title}><span className="c-gold">[focus area]</span> {r.title}</div>
           ))}
           <Jump to="research" label="research" />
         </div>

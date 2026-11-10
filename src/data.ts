@@ -244,47 +244,16 @@ export const companies: Company[] = [
   },
 ];
 
+/** Research is shown at the idea level only: no titles, venues, co-authors or methods. */
 export type Research = {
   title: string;
-  venue: string;
   summary: string;
-  tags: string[];
-  /** Shown in brackets before the venue. */
-  status?: "in progress" | "in preparation";
 };
 
 export const research: Research[] = [
-  {
-    title: "Smart energy monitoring for Bangladeshi homes",
-    venue: "Undergraduate thesis, DIU CSE",
-    summary: "Low-cost IoT and machine learning to help households understand their electricity use and costs.",
-    tags: ["IoT", "Machine learning", "Energy"],
-    status: "in progress",
-  },
-  {
-    title: "Single-meter energy insights for homes",
-    venue: "IEEE conference paper, first author",
-    summary: "Showing households where their electricity goes, using one low-cost meter and no extra sensors.",
-    tags: ["IoT", "Energy"],
-  },
-  {
-    title: "IoT monitoring for potato storage",
-    venue: "IEEE conference paper, second author",
-    summary: "Low-cost sensing to reduce post-harvest losses in stored potatoes.",
-    tags: ["IoT", "Agritech"],
-  },
-  {
-    title: "IoT monitoring for onion storage",
-    venue: "Springer conference paper",
-    summary: "Low-cost sensing to reduce post-harvest losses in stored onions.",
-    tags: ["IoT", "Agritech"],
-  },
-  {
-    title: "Device-free human presence sensing",
-    venue: "IEEE conference paper",
-    summary: "Detecting whether people are in a room without cameras or wearables.",
-    tags: ["IoT", "Sensing"],
-  },
+  { title: "Low-cost IoT sensing", summary: "Practical monitoring built from affordable hardware." },
+  { title: "Applied machine learning", summary: "Turning raw device data into something people can act on." },
+  { title: "Technology for Bangladesh", summary: "Everyday problems close to home." },
 ];
 
 /** The four kinds of work. */
