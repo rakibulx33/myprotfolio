@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, type PointerEvent } from "react";
 import gh from "./github.json";
 import { LINKS } from "./data";
 import { prefersReducedMotion, useInView } from "./hooks";
+import { Words } from "./motion";
 
 /* A year of GitHub contributions: the weekly total drawn on top, one cell per day
    below. src/github.json is fetched from GitHub before every build and refreshed every hour by the
@@ -164,10 +165,11 @@ export default function GitHubYear() {
 
   return (
     <section id="github" className="sec gy-sec" aria-labelledby="github-title">
+      <span className="sec-ghost" data-drift="-0.22" aria-hidden>commits</span>
       <div className="wrap">
         <header className="sec-head reveal">
-          <p className="sec-cmd"><span aria-hidden>~$ </span>git log --graph</p>
-          <h2 id="github-title">A year on GitHub</h2>
+          <p className="sec-cmd"><span aria-hidden>~$ </span><span className="sec-typed">git log --graph</span></p>
+          <h2 id="github-title"><Words text="A year on GitHub" /></h2>
           <p className="sec-lede">
             <strong className="gy-total">{n(total)}</strong> contributions in the last twelve months
             {priv > 0 ? <>. {n(priv)} of them are in private client repositories, which GitHub counts without showing the code.</> : "."}

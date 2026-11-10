@@ -90,10 +90,10 @@ export function ResumeLauncher() {
 }
 
 /* ------------------------------------------------------------------ matrix easter egg */
-const PHASES = ["#ff9a3c", "#ff6b3d", "#f0436a", "#ffd08a"];
+const PHASES = ["#19e6d2", "#5b8cff", "#ff4d9d", "#ffd23f"];
 const RAIN = "অআইঈউএওকখগঘচছজঝটঠডঢণতথদধনপফবভমযরলশষসহড়য়০১২৩৪৫৬৭৮৯01<>/{}[]=+*#$";
 
-/** Digital rain in the ember colours, with Bangla letters mixed in. Any key or click exits. */
+/** Digital rain in the site colours, with Bangla letters mixed in. Any key or click exits. */
 export function Matrix() {
   const [on, setOn] = useState(false);
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -114,7 +114,7 @@ export function Matrix() {
       c.width = window.innerWidth * dpr; c.height = window.innerHeight * dpr;
       cols = Math.ceil(c.width / size);
       drops = Array.from({ length: cols }, () => Math.random() * -50);
-      ctx.fillStyle = "#0a0606"; ctx.fillRect(0, 0, c.width, c.height);
+      ctx.fillStyle = "#05060f"; ctx.fillRect(0, 0, c.width, c.height);
     };
     resize();
     let raf = 0;
@@ -123,12 +123,12 @@ export function Matrix() {
       raf = requestAnimationFrame(draw);
       if (t - last < 50) return;
       last = t;
-      ctx.fillStyle = "rgba(10, 6, 6, 0.17)";
+      ctx.fillStyle = "rgba(5, 6, 15, 0.17)";
       ctx.fillRect(0, 0, c.width, c.height);
       ctx.font = `600 ${size * 0.82}px "JetBrains Mono Variable", ui-monospace, monospace`;
       for (let i = 0; i < cols; i++) {
         const y = drops[i] * size;
-        ctx.fillStyle = Math.random() > 0.96 ? "#f9f4ee" : PHASES[i % 4];
+        ctx.fillStyle = Math.random() > 0.96 ? "#f2f4ff" : PHASES[i % 4];
         ctx.fillText(RAIN[(Math.random() * RAIN.length) | 0], i * size, y);
         if (y > c.height && Math.random() > 0.97) drops[i] = 0;
         drops[i] += 1;

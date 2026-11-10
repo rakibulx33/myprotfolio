@@ -2,6 +2,7 @@ import { useCallback, useEffect, useId, useMemo, useRef, useState, type Keyboard
 import { createPortal } from "react-dom";
 import { HANDLE, LINKS, PORTRAIT, PROFILE, SOCIALS, featuredProjects, moreProjects, research, type Project } from "./data";
 import { prefersReducedMotion } from "./hooks";
+import { goTo } from "./motion";
 import { ACHIEVEMENTS, TOTAL, emit, isUnlocked, unlock, unlockedCount, useAchievementCount, useRxEvent } from "./store";
 
 /* The command palette (Ctrl K or ⌘K): a search over every section, project, profile and action. The terminal in
@@ -26,7 +27,7 @@ export const SECTIONS = [
 export const scrollToId = (id: string) => {
   const el = document.getElementById(id);
   if (!el) return;
-  el.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "start" });
+  goTo(id);
   if (!el.hasAttribute("tabindex")) el.setAttribute("tabindex", "-1");
   el.focus({ preventScroll: true });
 };
@@ -358,7 +359,7 @@ export default function Palette() {
   const active = flat[hi];
 
   return createPortal(
-    <div className="pal-backdrop" onMouseDown={(e) => { if (e.target === e.currentTarget) close(); }}>
+    <div className="pal-backdrop" data-lenis-prevent onMouseDown={(e) => { if (e.target === e.currentTarget) close(); }}>
       <div className="pal" role="dialog" aria-modal="true" aria-label="Command palette">
         <div className="pal-in">
           <svg viewBox="0 0 24 24" aria-hidden><circle cx="11" cy="11" r="6.5" /><path d="M16 16l4.5 4.5" /></svg>

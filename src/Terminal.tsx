@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type KeyboardEvent, type ReactNode } from "react";
 import { HANDLE, LINKS, PORTRAIT, PROFILE, SOCIALS, featuredProjects, moreProjects, research, services, skillGroups } from "./data";
 import { prefersReducedMotion } from "./hooks";
+import { goTo } from "./motion";
 import { ACHIEVEMENTS, TOTAL, emit, isUnlocked, unlock, unlockedCount, useRxEvent } from "./store";
 
 /* The terminal in the hero. It boots, prints who I am, and then takes commands: every section, project and
@@ -14,7 +15,7 @@ const HOST = "dhaka";
 
 const PROMPT = (
   <span className="t-prompt">
-    <span className="c-acc">{USER}</span><span className="c-dim">@</span><span className="c-rose">{HOST}</span>
+    <span className="c-acc">{USER}</span><span className="c-dim">@</span><span className="c-hot">{HOST}</span>
     <span className="c-dim">:</span><span className="c-gold">~</span><span className="c-dim">$</span>
   </span>
 );
@@ -34,7 +35,7 @@ const used = new Set<string>(); // distinct commands this visit, for the "operat
 const T = { login: 80, mount: 200, backend: 310, automation: 420, iot: 530, decode: 650, prompt: 800, type: 840, who: 1260, hint: 1380, input: 1460 };
 const at = (ms: number) => ({ ["--d" as string]: `${ms}ms` }) as CSSProperties;
 
-const scrollTo = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth" });
+const scrollTo = goTo;
 const bare = (url: string) => url.replace(/^https:\/\/(www\.)?/, "");
 
 function Jump({ to, label }: { to: string; label: string }) {
@@ -59,7 +60,7 @@ function Neofetch() {
         <img src={PORTRAIT} alt={PROFILE.name} width={720} height={960} />
       </div>
       <div className="nf-info">
-        <div><span className="c-acc t-strong">{USER}</span><span className="c-dim">@</span><span className="c-rose t-strong">{HOST}</span></div>
+        <div><span className="c-acc t-strong">{USER}</span><span className="c-dim">@</span><span className="c-hot t-strong">{HOST}</span></div>
         <div className="c-dim" aria-hidden>-------------</div>
         {info.map(([k, v]) => (
           <div key={k}><span className="c-acc">{k}</span><span className="c-dim">: </span>{v}</div>
@@ -236,7 +237,7 @@ function run(raw: string, clear: () => void): ReactNode {
         unlock("egg");
         return (
           <div>
-            <div><span className="c-rose">./</span>  <span className="c-rose">../</span>  <span className="c-gold">.secret</span>  <span className="c-rose">projects/</span>  <span className="c-rose">research/</span>  services.txt  process.md  skills.json  resume.pdf  profile.jpg</div>
+            <div><span className="c-hot">./</span>  <span className="c-hot">../</span>  <span className="c-gold">.secret</span>  <span className="c-hot">projects/</span>  <span className="c-hot">research/</span>  services.txt  process.md  skills.json  resume.pdf  profile.jpg</div>
             <div className="c-dim">hidden: matrix, hack, cha, lights, sudo hire {USER} ... and one more for keyboard veterans.</div>
           </div>
         );
@@ -283,7 +284,7 @@ function run(raw: string, clear: () => void): ReactNode {
       return (
         <div>
           {skillGroups.map((g) => (
-            <div key={g.label} className="t-row"><span className="c-rose">{g.label}</span><span>{g.items.join(", ")}</span></div>
+            <div key={g.label} className="t-row"><span className="c-hot">{g.label}</span><span>{g.items.join(", ")}</span></div>
           ))}
         </div>
       );

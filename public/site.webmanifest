@@ -3,8 +3,8 @@
   "short_name": "rakibulx33",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0a0606",
-  "theme_color": "#0a0606",
+  "background_color": "#05060f",
+  "theme_color": "#05060f",
   "icons": [
     {
       "src": "/icon-192.png",

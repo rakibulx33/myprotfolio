@@ -23,7 +23,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const PHONE_RE = /^\+?[\d\s()-]{8,20}$/;
 type Phase = "ask" | "review" | "sending" | "sent" | "failed";
 
-/** A short burst of confetti in the ember colours, played when the brief is delivered. */
+/** A short burst of confetti in the site colours, played when the brief is delivered. */
 function burst(canvas: HTMLCanvasElement | null, from: HTMLElement | null) {
   if (!canvas || prefersReducedMotion()) return;
   const host = canvas.parentElement!.getBoundingClientRect();
@@ -34,7 +34,7 @@ function burst(canvas: HTMLCanvasElement | null, from: HTMLElement | null) {
   if (!ctx) return;
   const ox = ((origin ? origin.left + origin.width / 2 : host.left + host.width / 2) - host.left) * dpr;
   const oy = ((origin ? origin.top : host.top + host.height * 0.7) - host.top) * dpr;
-  const colors = ["#ff9a3c", "#ff6b3d", "#f0436a", "#ffd08a"];
+  const colors = ["#19e6d2", "#5b8cff", "#ff4d9d", "#ffd23f"];
   const parts = Array.from({ length: 70 }, () => {
     const a = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI * 1.1;
     const v = (4 + Math.random() * 7) * dpr;
@@ -231,7 +231,7 @@ export default function Hire() {
   const stepLabel = phase === "ask" ? `Question ${step + 1} of ${QUESTIONS.length}` : phase === "review" ? "Check your brief" : phase === "sending" ? "Sending" : phase === "sent" ? "Delivered" : "Not sent yet";
 
   return (
-    <div className={`dlg-backdrop${open ? " open" : ""}`} hidden={!open} onMouseDown={(e) => { if (e.target === e.currentTarget) close(); }}>
+    <div className={`dlg-backdrop${open ? " open" : ""}`} hidden={!open} data-lenis-prevent onMouseDown={(e) => { if (e.target === e.currentTarget) close(); }}>
       <div className="dlg hire" role="dialog" aria-modal="true" aria-labelledby="hire-title" ref={dialog} onKeyDown={onKeyDown}>
         <header className="dlg-head">
           <div>

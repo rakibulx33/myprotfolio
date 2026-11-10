@@ -2,23 +2,30 @@
 
 Personal portfolio of **Rakibul Hasan**, backend & automation developer and CSE student at DIU, Dhaka.
 
-The design is called **Ember Terminal**: a dark page lit by an ember-orange glow, with a working terminal in the
-hero. It blends two earlier themes, `portfolio-ember` (the look) and `portfolio-terminal` (the command line).
+The design is called **Midnight Neon**: a working terminal on a midnight page, lit by a live aurora in the colours
+Dhaka's rickshaw painters use on black (turquoise, hot pink and marigold, with a blue between them).
 
+- **The aurora** (`src/Aurora.tsx`) is one fragment shader on a fixed canvas. It drifts, bends toward the pointer and
+  dims below the hero so text stays readable. Without WebGL a still CSS gradient shows instead.
 - **The terminal** (`src/Terminal.tsx`) boots, prints who I am, and then takes commands. Every section, project and
   action on the page can be reached by typing. The boot log is static markup, so it is in the prerendered HTML.
+- **The portrait** has two orbiting rings, a turning "available for freelance" badge, leans toward the pointer and
+  tears for a moment on every command.
+- **Project covers** (`src/Covers.tsx`) are small animated line drawings of what each project does.
+- **Motion** (`src/motion.tsx`): smooth scrolling (Lenis, mouse and trackpad only), headings that rise word by word,
+  cards that light up and tilt under the pointer, magnetic buttons, a ring that trails the cursor, outlined words
+  that drift behind each section, and a process line that fills as you scroll.
 - **The top bar** is laid out like tmux windows, with the achievement count, search and the time in Dhaka.
-- **The portrait** has an ember halo, leans toward the pointer, and tears for a moment on every command.
-- **Each section** is introduced by the command that would print it (`~$ ls ./projects`).
 
-The site is dark only. Every animation respects reduced motion, and without JavaScript the page is complete.
+The site is dark only. With reduced motion every animation is off, and without JavaScript the page is complete.
 
 Type is Space Grotesk for headings, Inter for reading text and JetBrains Mono for anything a terminal would print.
-Colours are tokens at the top of `src/styles.css`: change `--ember` and `--rose` and the gradients and glows follow.
+Colours are tokens at the top of `src/styles.css`: change `--neon`, `--sky`, `--hot` and `--gold` and the gradients
+and glows follow (the aurora's four colours are set in its shader).
 
 **Live:** [rakibulx33.me](https://rakibulx33.me) · **GitHub:** [@rakibulx33](https://github.com/rakibulx33)
 
-Earlier designs are kept on branches: `lines-theme` (the metro map), `exhibition-theme` (the gallery show) and
+Earlier designs are kept on branches: `ember-theme` (the orange version of this design), `lines-theme` (the metro map), `exhibition-theme` (the gallery show) and
 `signal-theme` (the circuit board).
 
 ## Terminal and search
@@ -83,8 +90,8 @@ The visitor sees "Delivered" as soon as either one lands. If both fail, they can
 - Hand-written CSS with design tokens (`src/styles.css`), Tailwind v4 for the reset
 - **Space Grotesk**, **Inter** and **JetBrains Mono** (variable fonts), self-hosted
 - The resume builder keeps **Instrument Sans** and **Martian Mono** for its documents, loaded only with the builder
-- **lucide-react** for icons
-- No animation libraries; the boot sequence and the scroll reveals are pure CSS, and every animation respects `prefers-reduced-motion`
+- **lucide-react** for icons, **Lenis** for smooth scrolling
+- No animation framework: the effects are CSS plus a few small hooks, and every animation respects `prefers-reduced-motion`
 
 ## Structure
 
@@ -97,6 +104,9 @@ src/data.ts        — projects, research, skills and links (edit this to change
 src/github.json    — last year of GitHub contributions (written by scripts/fetch-github.mjs)
 src/Portfolio.tsx  — page layout and sections
 src/Terminal.tsx   — the terminal in the hero and its commands
+src/Aurora.tsx     — the WebGL aurora behind the page
+src/Covers.tsx     — the animated drawing on each featured project
+src/motion.tsx     — reveals, pointer effects, smooth scrolling, the cursor ring
 src/GitHubYear.tsx — the animated contribution year
 src/Palette.tsx    — search (Ctrl K)
 src/Resume.tsx     — resume / CV / portfolio builder (lazy-loaded); resumeModel.ts, resume.css

@@ -376,7 +376,7 @@ export default function ResumeBuilder({ onClose }: { onClose: () => void }) {
     <div className="rb-backdrop" ref={dialog} role="dialog" aria-modal="true" aria-labelledby={`${uid}-title`}>
       {/* A4, no browser margins: the document carries its own padding, which also keeps the browser's headers and footers off the PDF. */}
       <style>{"@page{size:A4;margin:0}"}</style>
-      <div className="rb">
+      <div className="rb" data-lenis-prevent>
         <header className="rb-bar">
           <h2 id={`${uid}-title`}>Resume builder</h2>
           <p className={`rb-pages${over ? " warn" : ""}`} role="status">

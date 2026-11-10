@@ -30,7 +30,7 @@ writeFileSync(resolve(dist, "index.html"), html);
 const sitemap = resolve(dist, "sitemap.xml");
 if (existsSync(sitemap)) writeFileSync(sitemap, readFileSync(sitemap, "utf8").replaceAll("__BUILD_DATE__", today));
 
-for (const check of ["<h1", "Selected work", "What I build", "Research", "A year on GitHub", "class=\"win term"]) {
+for (const check of ["<h1", "ls ./projects", "cat services.txt", "Research", "git log --graph", "class=\"win term"]) {
   if (!html.includes(check)) throw new Error(`prerender: expected "${check}" in the HTML`);
 }
 rmSync(resolve(root, "dist-ssr"), { recursive: true, force: true });
