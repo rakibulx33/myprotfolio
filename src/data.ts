@@ -58,9 +58,9 @@ export type Project = {
   live?: string;
   /** Repo is private: shown as a case study with no code link. */
   private?: boolean;
-  /** Which kind of work it is: the line it sits on in the route map. */
+  /** Which kind of work it is. Each service card lists the projects of its kind. */
   line?: Line;
-  /** Other kinds of work it also covers. A project with more than one line is an interchange on the map. */
+  /** Other kinds of work it also covers. */
   also?: Line[];
 };
 
@@ -246,8 +246,6 @@ export const companies: Company[] = [
 
 export type Research = {
   title: string;
-  /** A few words, for the route map. */
-  short: string;
   venue: string;
   summary: string;
   tags: string[];
@@ -258,7 +256,6 @@ export type Research = {
 export const research: Research[] = [
   {
     title: "Smart energy monitoring for Bangladeshi homes",
-    short: "Energy thesis",
     venue: "Undergraduate thesis, DIU CSE",
     summary: "Low-cost IoT and machine learning to help households understand their electricity use and costs.",
     tags: ["IoT", "Machine learning", "Energy"],
@@ -266,38 +263,33 @@ export const research: Research[] = [
   },
   {
     title: "Single-meter energy insights for homes",
-    short: "Single-meter energy",
     venue: "IEEE conference paper, first author",
     summary: "Showing households where their electricity goes, using one low-cost meter and no extra sensors.",
     tags: ["IoT", "Energy"],
   },
   {
     title: "IoT monitoring for potato storage",
-    short: "Potato storage",
     venue: "IEEE conference paper, second author",
     summary: "Low-cost sensing to reduce post-harvest losses in stored potatoes.",
     tags: ["IoT", "Agritech"],
   },
   {
     title: "IoT monitoring for onion storage",
-    short: "Onion storage",
     venue: "Springer conference paper",
     summary: "Low-cost sensing to reduce post-harvest losses in stored onions.",
     tags: ["IoT", "Agritech"],
   },
   {
     title: "Device-free human presence sensing",
-    short: "Presence sensing",
     venue: "IEEE conference paper",
     summary: "Detecting whether people are in a room without cameras or wearables.",
     tags: ["IoT", "Sensing"],
   },
 ];
 
-/** The four kinds of work. Each is a line on the route map and keeps one colour across the site. */
+/** The four kinds of work. */
 export type Line = "backend" | "automation" | "commerce" | "iot";
 
-/** In map order, top to bottom. The position in this list is the line's number. */
 export const services: { key: Line; title: string; short: string; text: string }[] = [
   {
     key: "backend",
@@ -324,9 +316,6 @@ export const services: { key: Line; title: string; short: string; text: string }
     text: "ESP32-based sensing and monitoring systems, from the device and firmware to the dashboard.",
   },
 ];
-
-/** A line's number (1 to 4), as printed on its badge. */
-export const lineNo = (l: Line) => services.findIndex((s) => s.key === l) + 1;
 
 export const skillGroups: { label: string; items: string[] }[] = [
   { label: "Languages", items: ["TypeScript", "JavaScript", "Python", "PHP", "Kotlin", "Java", "C#", "C", "C++"] },

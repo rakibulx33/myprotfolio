@@ -13,7 +13,7 @@ export function useInView<T extends Element>(margin = "0px 0px -15% 0px") {
   useEffect(() => {
     const el = ref.current;
     if (!el || seen) return;
-    if (prefersReducedMotion() || typeof IntersectionObserver === "undefined") { setSeen(true); return; }
+    if (typeof IntersectionObserver === "undefined") { setSeen(true); return; }
     const io = new IntersectionObserver(([e]) => {
       if (e.isIntersecting) { setSeen(true); io.disconnect(); }
     }, { rootMargin: margin });

@@ -2,37 +2,33 @@
 
 Personal portfolio of **Rakibul Hasan**, backend & automation developer and CSE student at DIU, Dhaka.
 
-The design is called **Lines**: the portfolio is drawn as a small metro network. Each kind of work is a numbered,
-coloured line, each featured project is a station on its line, and a project that spans several kinds of work is an
-interchange. Research is the IoT line, and every line ends at the same terminus: your project (the contact panel).
-The hero map (`NetworkMap` in `src/Lines.tsx`) is built from the same data as the project cards, so they cannot
-disagree. Its tracks draw themselves once when scrolled into view; hover or focus a line or station to dim the rest.
+The design is called **Ember Terminal**: a dark page lit by an ember-orange glow, with a working terminal in the
+hero. It blends two earlier themes, `portfolio-ember` (the look) and `portfolio-terminal` (the command line).
 
-| Line | Kind of work |
-| --- | --- |
-| 1, blue | Backend systems and APIs |
-| 2, amber | Automation and AI |
-| 3, red | E-commerce for Bangladesh |
-| 4, green | IoT prototypes and research |
+- **The terminal** (`src/Terminal.tsx`) boots, prints who I am, and then takes commands. Every section, project and
+  action on the page can be reached by typing. The boot log is static markup, so it is in the prerendered HTML.
+- **The top bar** is laid out like tmux windows, with the achievement count, search and the time in Dhaka.
+- **The portrait** has an ember halo, leans toward the pointer, and tears for a moment on every command.
+- **Each section** is introduced by the command that would print it (`~$ ls ./projects`).
 
-Which lines a project is on comes from `line` and `also` in `src/data.ts`; edit them to move a station.
+The site is dark only. Every animation respects reduced motion, and without JavaScript the page is complete.
 
-Light mode is the day timetable. The **Load-shedding** switch in the header is dark mode, the night service: the
-page flickers like a power cut and goes dark. It follows the system setting until a visitor picks one. Animations
-respect reduced motion, and without JavaScript the page is complete.
-
-Type is Instrument Sans (its width axis gives the narrow signage headings) and Martian Mono for labels.
+Type is Space Grotesk for headings, Inter for reading text and JetBrains Mono for anything a terminal would print.
+Colours are tokens at the top of `src/styles.css`: change `--ember` and `--rose` and the gradients and glows follow.
 
 **Live:** [rakibulx33.me](https://rakibulx33.me) · **GitHub:** [@rakibulx33](https://github.com/rakibulx33)
 
-Earlier designs are kept on branches: `exhibition-theme` (the gallery show) and `signal-theme` (the circuit board).
+Earlier designs are kept on branches: `lines-theme` (the metro map), `exhibition-theme` (the gallery show) and
+`signal-theme` (the circuit board).
 
-## Command palette
+## Terminal and search
 
-`Ctrl K`, `⌘K` or `/` opens the palette (`src/Palette.tsx`): every section, project, research paper, profile and
-action is searchable. The old terminal commands still work when typed in full: `hire`, `resume` / `cv`, `whoami`,
-`open <project>`, `cd <section>`, `socials`, `achievements`, `lights`, `date`, `help`. A few are hidden (start with
-`ls -a`), and visitors collect 8 achievements as they explore.
+Press `/` to type in the terminal: `hire`, `resume` / `cv`, `whoami`, `services`, `projects`, `open <project>`,
+`research`, `skills`, `socials`, `contact`, `achievements`, `cd <section>`, `date`, `clear`, `help`. `↑`/`↓` step
+through history and `Tab` completes. A few commands are hidden (start with `ls -a`), and visitors collect 8
+achievements as they explore.
+
+`Ctrl K` or `⌘K` opens search (`src/Palette.tsx`): every section, project, research paper and profile.
 
 ## GitHub contributions (live)
 
@@ -85,10 +81,10 @@ The visitor sees "Delivered" as soon as either one lands. If both fail, they can
 
 - **Vite** + **React 19** + **TypeScript** (static SPA, deploys to GitHub Pages)
 - Hand-written CSS with design tokens (`src/styles.css`), Tailwind v4 for the reset
-- **Instrument Sans** and **Martian Mono** (variable fonts), self-hosted.
-  The Bangla name uses a 4.5 KB subset of **Tiro Bangla** (`public/fonts/`, SIL OFL), made with
-  `pyftsubset … --text="রাকিবুল হাসান" --layout-features='*' --flavor=woff2`
-- No animation libraries; the hero intro is pure CSS (plays before JavaScript), and every animation respects `prefers-reduced-motion`
+- **Space Grotesk**, **Inter** and **JetBrains Mono** (variable fonts), self-hosted
+- The resume builder keeps **Instrument Sans** and **Martian Mono** for its documents, loaded only with the builder
+- **lucide-react** for icons
+- No animation libraries; the boot sequence and the scroll reveals are pure CSS, and every animation respects `prefers-reduced-motion`
 
 ## Structure
 
@@ -100,10 +96,9 @@ scripts/prerender.mjs — writes the rendered page into dist/index.html
 src/data.ts        — projects, research, skills and links (edit this to change content)
 src/github.json    — last year of GitHub contributions (written by scripts/fetch-github.mjs)
 src/Portfolio.tsx  — page layout and sections
-src/Lines.tsx      — the route map, line badges and the site mark
+src/Terminal.tsx   — the terminal in the hero and its commands
 src/GitHubYear.tsx — the animated contribution year
-src/Palette.tsx    — command palette (Ctrl K) and the typed commands
-src/theme.ts       — light / load-shedding (dark) theme
+src/Palette.tsx    — search (Ctrl K)
 src/Resume.tsx     — resume / CV / portfolio builder (lazy-loaded); resumeModel.ts, resume.css
 src/Hire.tsx       — the project-brief dialog
 src/Extras.tsx     — achievement toasts, floating brief button, matrix easter egg
@@ -111,7 +106,7 @@ src/store.ts       — achievements and page-wide events
 src/hooks.ts       — in-view and clock hooks
 src/styles.css     — tokens and styles
 scripts/fetch-github.mjs — fetches the contribution calendar before each build
-public/            — profile.jpg/.webp, og.jpg, icons, fonts, robots.txt, sitemap.xml, llms.txt, CNAME
+public/            — profile.jpg/.webp, og.jpg, icons, robots.txt, sitemap.xml, llms.txt, CNAME
 worker/            — Cloudflare Worker that forwards briefs to Telegram (deployed separately)
 ```
 

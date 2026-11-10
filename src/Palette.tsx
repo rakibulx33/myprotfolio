@@ -3,11 +3,9 @@ import { createPortal } from "react-dom";
 import { HANDLE, LINKS, PORTRAIT, PROFILE, SOCIALS, featuredProjects, moreProjects, research, type Project } from "./data";
 import { prefersReducedMotion } from "./hooks";
 import { ACHIEVEMENTS, TOTAL, emit, isUnlocked, unlock, unlockedCount, useAchievementCount, useRxEvent } from "./store";
-import { currentTheme, setTheme } from "./theme";
 
-/* The command palette (Ctrl K, ⌘K or "/"). It replaces the old terminal: every section, project, profile and
-   action is listed, and the old commands still work when typed in full (help, hire, whoami, ls -a, cat .secret,
-   open <project>, cd <section>, sudo hire rakibul, matrix, hack, cha ...). Some of them are hidden on purpose. */
+/* The command palette (Ctrl K or ⌘K): a search over every section, project, profile and action. The terminal in
+   the hero is where commands are typed ("/" focuses it); the same commands also work here when typed in full. */
 
 const ALL = [...featuredProjects, ...moreProjects];
 const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
@@ -125,7 +123,6 @@ const HELP: [string, string][] = [
   ["cd <section>", "jump to a section"],
   ["socials", "every profile I have"],
   ["achievements", "what you've unlocked"],
-  ["lights", "switch load-shedding (dark mode) on or off"],
   ["date", "the time in Dhaka"],
 ];
 
@@ -177,7 +174,6 @@ function textCommand(raw: string): Result | null {
           <div className="pal-lines">
             <p>.secret  projects/  research/  services.txt  resume.pdf  profile.jpg</p>
             <p className="pal-dim">Hidden: matrix, hack, cha, sudo hire rakibul, and one for keyboard veterans.</p>
-            <p className="pal-dim">The route map is drawn by code, from the same data as the project cards. Switch load-shedding on for the night service.</p>
           </div>
         ) };
       }
@@ -201,10 +197,6 @@ function textCommand(raw: string): Result | null {
     case "date":
     case "time":
       return { out: <p>{new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Dhaka", dateStyle: "full", timeStyle: "short" }).format(new Date())} in Dhaka.</p> };
-    case "lights":
-    case "theme":
-    case "load-shedding":
-      return { close: true, then: () => setTheme(currentTheme() === "dark" ? "light" : "dark") };
     case "matrix":
       return { close: true, then: () => emit("matrix") };
     case "hack":
@@ -270,17 +262,12 @@ export default function Palette() {
     if (restore) opener.current?.focus?.({ preventScroll: true });
   }, []);
 
-  // Ctrl K / ⌘K toggles it anywhere; "/" opens it when you're not typing in a field.
+  // Ctrl K / ⌘K toggles it anywhere ("/" belongs to the terminal).
   useEffect(() => {
     const onKey = (e: globalThis.KeyboardEvent) => {
-      const t = e.target as HTMLElement;
-      const typing = t?.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(t?.tagName);
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
         if (open) close(); else show();
-      } else if (e.key === "/" && !typing && !open) {
-        e.preventDefault();
-        show();
       }
     };
     window.addEventListener("keydown", onKey);
@@ -300,11 +287,9 @@ export default function Palette() {
   }, [open]);
 
   const items = useMemo<Item[]>(() => {
-    const dark = typeof document !== "undefined" && currentTheme() === "dark";
     return [
       { id: "hire", group: "Actions", label: "Start a project brief", hint: "Six questions, about 30 seconds", keys: "hire brief project contact", run: () => ({ close: true, then: () => emit("hire") }) },
       { id: "resume", group: "Actions", label: "Get my resume, CV or portfolio", hint: "As a PDF", keys: "resume cv pdf download portfolio", run: () => ({ close: true, then: () => emit("resume") }) },
-      { id: "lights", group: "Actions", label: dark ? "End load-shedding" : "Start load-shedding", hint: dark ? "Back to light mode" : "Dark mode", keys: "theme dark light mode lights load-shedding", run: () => ({ close: true, then: () => setTheme(dark ? "light" : "dark") }) },
       { id: "copy", group: "Actions", label: "Copy my email address", hint: LINKS.email, keys: "email mail copy", run: () => {
         navigator.clipboard?.writeText(LINKS.email).catch(() => {});
         return { out: <p className="pal-ok">Copied {LINKS.email}</p> };
@@ -315,8 +300,7 @@ export default function Palette() {
       ...research.map((r) => ({ id: `r-${slug(r.title)}`, group: "Projects" as Group, label: r.title, hint: r.venue, keys: "research paper", run: () => ({ close: true, then: () => scrollToId("research") }) })),
       ...SOCIALS.map((s) => ({ id: `s-${s.name}`, group: "Profiles" as Group, label: s.name, hint: s.label, keys: s.group, run: () => ({ close: true, then: () => window.open(s.url, "_blank", "noopener") }) })),
     ];
-    // Rebuilt each time the palette opens, so the load-shedding label is current.
-  }, [open]);
+  }, []);
 
   const query = q.trim().toLowerCase();
   const shown = useMemo(() => {

@@ -5,13 +5,13 @@ import { useEffect, useState } from "react";
    prerendered HTML and the first client render always match. */
 
 export const ACHIEVEMENTS = [
-  { id: "booted", title: "Lights on", hint: "load the page" },
-  { id: "whoami", title: "Met the developer", hint: "run whoami from the command palette" },
-  { id: "operator", title: "Operator", hint: "run three different commands (Ctrl K)" },
+  { id: "booted", title: "Booted the system", hint: "load the page" },
+  { id: "whoami", title: "Met the developer", hint: "run whoami in the terminal" },
+  { id: "operator", title: "Operator", hint: "run three different commands" },
   { id: "explorer", title: "Explorer", hint: "open one of my projects" },
   { id: "services", title: "Read the menu", hint: "see what I build" },
   { id: "scholar", title: "Scholar", hint: "read the research" },
-  { id: "egg", title: "Found a hidden command", hint: "type ls -a in the command palette" },
+  { id: "egg", title: "Found a hidden command", hint: "type ls -a in the terminal" },
   { id: "client", title: "Started a project", hint: "start a project brief" },
 ] as const;
 export type AchId = (typeof ACHIEVEMENTS)[number]["id"];
@@ -65,7 +65,7 @@ export function useAchievementCount() {
 }
 
 /* Page-wide events: the terminal, buttons and keyboard shortcuts talk through these. */
-type EventName = "hire" | "resume" | "palette" | "matrix" | "toast";
+type EventName = "hire" | "resume" | "palette" | "matrix" | "toast" | "run";
 export const emit = (name: EventName, detail?: unknown) => {
   if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent(`rx:${name}`, { detail }));
 };

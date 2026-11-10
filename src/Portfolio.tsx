@@ -1,46 +1,46 @@
-import { useEffect, useState, type CSSProperties } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { ArrowDown, ArrowUpRight, Bot, Cpu, Github, Linkedin, Lock, Mail, Search, Server, ShoppingCart, Star } from "lucide-react";
 import {
   HANDLE, LINKS, PORTRAIT, PROCESS, SOCIALS, companies, featuredProjects, moreProjects, research, services, skillGroups,
-  type Project, type Social,
+  type Line, type Project, type Social,
 } from "./data";
 import { HireDock, Matrix, ResumeLauncher, Toaster, useKonami, useNudge } from "./Extras";
 import gh from "./github.json";
 import GitHubYear from "./GitHubYear";
 import Hire from "./Hire";
-import { prefersReducedMotion, useClock, useInView } from "./hooks";
-import { LineBadge, Mark, NetworkMap, linesOf, slug } from "./Lines";
+import { prefersReducedMotion, useClock, useInView, useOnScreen } from "./hooks";
 import Palette from "./Palette";
-import { emit, unlock } from "./store";
-import { useTheme } from "./theme";
+import { TOTAL, emit, unlock, useAchievementCount } from "./store";
+import Terminal from "./Terminal";
 
-/* "Lines": the portfolio is a small metro network. Each kind of work is a numbered, coloured line; each project is
-   a station; a project that spans several kinds of work is an interchange; every line ends at "your project".
-   Load-shedding (dark mode) is the night service: the network keeps running on backup lighting. */
+/* "Ember Terminal": a dark page lit by an ember-orange glow, with a working terminal in the hero.
+   The top bar is laid out like tmux windows, each section is introduced by the command that would print it,
+   and the portrait leans toward the pointer. */
 
+/** The windows in the top bar. The number is its tmux index. */
 const NAV = [
-  { id: "work", label: "Work", line: "backend" },
-  { id: "research", label: "Research", line: "iot" },
-  { id: "github", label: "GitHub", line: "automation" },
-  { id: "contact", label: "Contact", line: "commerce" },
-] as const;
+  { id: "top", label: "home" },
+  { id: "services", label: "services" },
+  { id: "work", label: "projects" },
+  { id: "research", label: "research" },
+  { id: "github", label: "git.log" },
+  { id: "skills", label: "skills" },
+  { id: "contact", label: "ping" },
+];
+const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 const pad2 = (n: number) => String(n).padStart(2, "0");
 
 export default function Portfolio() {
   useKonami();
   useNudge();
-  useEffect(() => {
-    const id = window.setTimeout(() => unlock("booted"), prefersReducedMotion() ? 300 : 2400);
-    return () => window.clearTimeout(id);
-  }, []);
-
   return (
     <>
       <a className="skip" href="#main">Skip to content</a>
-      <Header />
+      <TopBar />
       <main id="main">
         <Hero />
-        <Network />
-        <Lines />
+        <Stats />
+        <Services />
         <Work />
         <Process />
         <Companies />
@@ -60,12 +60,23 @@ export default function Portfolio() {
   );
 }
 
-/** A section's eyebrow: its stop number, then its name, like a platform sign. */
-function Stop({ n, label }: { n: number; label: string }) {
-  return <p className="eyebrow"><span className="eb-n" aria-hidden>{pad2(n)}</span>{label}</p>;
+/** A section, introduced by the command that would print it. */
+function Sec({ id, cmd, title, lede, children }: { id: string; cmd: string; title: string; lede?: ReactNode; children: ReactNode }) {
+  return (
+    <section id={id} className="sec" aria-labelledby={`${id}-title`}>
+      <div className="wrap">
+        <header className="sec-head reveal">
+          <p className="sec-cmd"><span aria-hidden>~$ </span>{cmd}</p>
+          <h2 id={`${id}-title`}>{title}</h2>
+          {lede && <p className="sec-lede">{lede}</p>}
+        </header>
+        {children}
+      </div>
+    </section>
+  );
 }
 
-/* ---------------------------------------------------------------- header */
+/* ---------------------------------------------------------------- top bar (tmux) */
 
 function useIsMac() {
   const [mac, setMac] = useState(false);
@@ -73,234 +84,251 @@ function useIsMac() {
   return mac;
 }
 
-function LoadShedding() {
-  const [theme, toggle] = useTheme();
-  const on = theme === "dark";
-  return (
-    <button type="button" role="switch" aria-checked={on} className="ls" onClick={toggle}
-      title={on ? "The power is out and the network is on backup lighting. Switch load-shedding off to restore it." : "Switch load-shedding on for dark mode."}>
-      <span className="ls-track" aria-hidden><span className="ls-knob" /></span>
-      <span className="ls-label">Load-shedding</span>
-    </button>
-  );
-}
-
-function Header() {
+function TopBar() {
   const mac = useIsMac();
-  const [active, setActive] = useState("");
-  const [scrolled, setScrolled] = useState(false);
+  const clock = useClock("Asia/Dhaka");
+  const count = useAchievementCount();
+  const [active, setActive] = useState("top");
+  const bar = useRef<HTMLSpanElement>(null);
+  const list = useRef<HTMLOListElement>(null);
+
+  // On a phone the windows scroll sideways: keep the marked one in view.
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
-    onScroll();
+    const ol = list.current;
+    const on = ol?.querySelector<HTMLElement>("a.on");
+    if (ol && on) ol.scrollTo({ left: on.offsetLeft - ol.offsetLeft - 24, behavior: prefersReducedMotion() ? "auto" : "smooth" });
+  }, [active]);
+
+  useEffect(() => {
+    // Scroll progress, drawn as the ember line under the bar.
+    let raf = 0;
+    const paint = () => {
+      raf = 0;
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      bar.current?.style.setProperty("transform", `scaleX(${max > 0 ? Math.min(1, window.scrollY / max) : 0})`);
+    };
+    const onScroll = () => { if (!raf) raf = requestAnimationFrame(paint); };
+    paint();
     window.addEventListener("scroll", onScroll, { passive: true });
-    const els = NAV.map((n) => document.getElementById(n.id)).filter(Boolean) as HTMLElement[];
+    window.addEventListener("resize", onScroll);
+
+    // The window for the section on screen is marked. Sections without a window (process, companies) mark none.
+    const els = [...document.querySelectorAll<HTMLElement>("main > section[id]")];
     const io = new IntersectionObserver((entries) => {
-      entries.forEach((e) => { if (e.isIntersecting) setActive(e.target.id); });
+      entries.forEach((e) => { if (e.isIntersecting) setActive(NAV.some((n) => n.id === e.target.id) ? e.target.id : ""); });
     }, { rootMargin: "-40% 0px -55% 0px" });
     els.forEach((el) => io.observe(el));
-    return () => { window.removeEventListener("scroll", onScroll); io.disconnect(); };
+    return () => { cancelAnimationFrame(raf); window.removeEventListener("scroll", onScroll); window.removeEventListener("resize", onScroll); io.disconnect(); };
   }, []);
 
   return (
-    <header className={`hd${scrolled ? " scrolled" : ""}`}>
-      <div className="wrap hd-row">
-        <a className="hd-name" href="#top"><Mark /><span>Rakibul Hasan</span></a>
-        <nav className="hd-nav" aria-label="Sections">
-          {NAV.map((n) => (
-            <a key={n.id} href={`#${n.id}`} className={`ln-${n.line}`} aria-current={active === n.id ? "location" : undefined}>{n.label}</a>
+    <header className="tmux">
+      <a className="tmux-session" href="#top" aria-label="Rakibul Hasan, top of the page">[rakibul]</a>
+      <nav aria-label="Sections">
+        <ol ref={list}>
+          {NAV.map((n, i) => (
+            <li key={n.id}>
+              <a href={`#${n.id}`} className={active === n.id ? "on" : undefined} aria-current={active === n.id ? "location" : undefined}>
+                <span className="tmux-n" aria-hidden>{i}:</span>{n.label}{active === n.id && <span aria-hidden>*</span>}
+              </a>
+            </li>
           ))}
-        </nav>
-        <div className="hd-tools">
-          <button type="button" className="hd-search" onClick={() => emit("palette")} aria-keyshortcuts="Control+K Meta+K /" aria-label="Search and commands">
-            <svg viewBox="0 0 24 24" aria-hidden><circle cx="11" cy="11" r="6.5" /><path d="M16 16l4.5 4.5" /></svg>
-            <span className="hd-search-t" aria-hidden>Search</span>
-            <kbd aria-hidden>{mac ? "⌘K" : "Ctrl K"}</kbd>
-          </button>
-          <LoadShedding />
-          <button type="button" className="btn btn-ink hd-brief" onClick={() => emit("hire")}>Start a brief</button>
-        </div>
+        </ol>
+      </nav>
+      <div className="tmux-right">
+        <button type="button" className="tmux-btn" onClick={() => emit("run", "achievements")} aria-label={`${count} of ${TOTAL} achievements unlocked. Show them in the terminal.`}>
+          <Star size={12} aria-hidden /> {count}/{TOTAL}
+        </button>
+        <button type="button" className="tmux-btn tmux-search" onClick={() => emit("palette")} aria-keyshortcuts="Control+K Meta+K" aria-label="Search the site">
+          <Search size={12} aria-hidden /> <span aria-hidden>search</span> <kbd aria-hidden>{mac ? "⌘K" : "Ctrl K"}</kbd>
+        </button>
+        <span className="tmux-clock">Dhaka <span className="tnum">{clock}</span></span>
       </div>
+      <span className="tmux-progress" ref={bar} aria-hidden />
     </header>
   );
 }
 
 /* ---------------------------------------------------------------- hero */
 
-function Hero() {
-  const [theme] = useTheme();
-  const clock = useClock("Asia/Dhaka");
+/** The portrait: an ember halo behind it, a slow scan line across it, and a lean toward the pointer. */
+function Portrait({ glitch }: { glitch: number }) {
+  const [ref, live] = useOnScreen<HTMLDivElement>();
+  const [torn, setTorn] = useState(false);
+
+  // Lean toward the pointer (desktop only, and not with reduced motion). Written to CSS variables, so nothing re-renders.
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || !live || prefersReducedMotion() || !window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+    let raf = 0;
+    const onMove = (e: MouseEvent) => {
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = 0;
+        const r = el.getBoundingClientRect();
+        const clamp = (v: number) => Math.max(-0.5, Math.min(0.5, v));
+        el.style.setProperty("--tx", clamp((e.clientX - (r.left + r.width / 2)) / r.width).toFixed(3));
+        el.style.setProperty("--ty", clamp((e.clientY - (r.top + r.height / 2)) / r.height).toFixed(3));
+      });
+    };
+    window.addEventListener("mousemove", onMove);
+    return () => { cancelAnimationFrame(raf); window.removeEventListener("mousemove", onMove); };
+  }, [ref, live]);
+
+  // Every terminal command tears the picture for a moment.
+  useEffect(() => {
+    if (!glitch || prefersReducedMotion()) return;
+    setTorn(true);
+    const id = window.setTimeout(() => setTorn(false), 480);
+    return () => window.clearTimeout(id);
+  }, [glitch]);
+
   return (
-    <section id="top" className="hero" aria-labelledby="hero-title">
+    <div className={`pt${live ? " live" : ""}`} ref={ref}>
+      <span className="pt-halo" aria-hidden />
+      <span className="pt-orb pt-orb-a" aria-hidden />
+      <span className="pt-orb pt-orb-b" aria-hidden />
+      <figure className={`pt-card gl${torn ? " glitching" : ""}`} style={{ ["--img" as string]: `url(${PORTRAIT})` }}>
+        <img src={PORTRAIT} alt="Rakibul Hasan in a grey waistcoat and red tie" width={720} height={960} decoding="async" fetchPriority="high" />
+        <span className="pt-tint" aria-hidden />
+        <span className="pt-scan" aria-hidden />
+        <span className="pt-shine" aria-hidden />
+        <span className="pt-grid" aria-hidden />
+        <figcaption className="pt-tags">
+          <span>~/dhaka.bd</span>
+          <span><i aria-hidden /> taking projects</span>
+        </figcaption>
+      </figure>
+    </div>
+  );
+}
+
+function Hero() {
+  const [glitch, setGlitch] = useState(0);
+  const onCommand = useCallback(() => setGlitch((n) => n + 1), []);
+  return (
+    <section id="top" className="hero" aria-label="Introduction">
       <div className="wrap hero-grid">
         <div className="hero-main">
-          <ul className="hero-lines" aria-label="Four kinds of work">
-            {services.map((s) => <li key={s.key}><LineBadge line={s.key} /></li>)}
-          </ul>
-          <h1 id="hero-title" className="hero-h1">
-            <span className="hero-name"><span className="rise">Rakibul</span> <span className="rise">Hasan</span></span>
-            <span className="hero-role">Backend and automation developer in Dhaka, Bangladesh</span>
-          </h1>
-          <p className="hero-lede">
-            I build APIs, online stores, AI automations and ESP32 devices for businesses, and research low-cost IoT at
-            Daffodil International University. Freelancing since 2022.
-          </p>
+          <p className="hero-open"><span className="pulse" aria-hidden />Open to new projects</p>
+          <Terminal onCommand={onCommand} />
           <div className="hero-cta">
             <button type="button" className="btn btn-ink" onClick={() => emit("hire")}>Start a project brief</button>
             <button type="button" className="btn btn-line" onClick={() => emit("resume")}>Get my resume</button>
+            <ul className="hero-soc">
+              <li><a href={LINKS.github} target="_blank" rel="noreferrer me" aria-label="GitHub"><Github size={20} aria-hidden /></a></li>
+              <li><a href={LINKS.linkedin} target="_blank" rel="noreferrer me" aria-label="LinkedIn"><Linkedin size={20} aria-hidden /></a></li>
+              <li><a href={`mailto:${LINKS.email}`} aria-label="Email" onClick={() => unlock("client")}><Mail size={20} aria-hidden /></a></li>
+            </ul>
           </div>
-          <p className="hero-open">
-            <span className="open-dot" aria-hidden /> Taking new projects. It’s <span className="tnum">{clock}</span> in Dhaka
-            {theme === "dark" ? <>, and the power is out, so the network is running on backup lighting.</> : "."}
-          </p>
         </div>
-
-        <figure className="pass">
-          <img src={PORTRAIT} alt="Rakibul Hasan in a grey waistcoat and red tie" width={720} height={960} decoding="async" fetchPriority="high" />
-          <div className="pass-bars" aria-hidden><i className="b-backend" /><i className="b-automation" /><i className="b-commerce" /><i className="b-iot" /></div>
-          <figcaption>
-            <p className="pass-name">Rakibul Hasan <span lang="bn" className="bn">রাকিবুল হাসান</span></p>
-            <p className="pass-role">Developer and IoT researcher</p>
-            <p className="pass-code"><span>DHK</span> Dhaka · 23.81° N, 90.41° E</p>
-          </figcaption>
-        </figure>
+        <Portrait glitch={glitch} />
       </div>
+      <a className="hero-down" href="#services" aria-label="Scroll to what I build"><ArrowDown size={22} aria-hidden /></a>
     </section>
   );
 }
 
-/* ---------------------------------------------------------------- the network map */
+/* ---------------------------------------------------------------- numbers */
 
-function Network() {
-  const facts = [
-    { k: "Projects built", v: String(featuredProjects.length + moreProjects.length) },
-    { k: "Freelancing since", v: "2022" },
-    { k: "Research projects", v: String(research.length) },
-    { k: "GitHub contributions, last year", v: (gh as { total: number }).total.toLocaleString("en-US") },
+function Stats() {
+  const data = gh as { total: number; publicRepos: number | null };
+  const stats = [
+    { v: data.total.toLocaleString("en-US"), k: "contributions in a year" },
+    { v: String(featuredProjects.length + moreProjects.length), k: "projects built" },
+    { v: String(research.length), k: "research projects" },
+    ...(data.publicRepos != null ? [{ v: String(data.publicRepos), k: "public repositories" }] : []),
+    { v: "2022", k: "freelancing since" },
   ];
   return (
-    <section id="network" className="net" aria-labelledby="net-title">
-      <div className="wrap">
-        <div className="net-card">
-          <header className="net-head">
-            <div>
-              <h2 id="net-title" className="net-title">The network</h2>
-              <p className="net-sub">Four lines of work, and the projects on them. Where a project covers more than one, the lines meet.</p>
-            </div>
-            <p className="net-key" aria-hidden>Select a station to jump to it</p>
-          </header>
-          <div className="net-scroll"><NetworkMap /></div>
-          <p className="net-note">The map is the full picture on a wide screen. On a phone, the lines below carry the same stations.</p>
-        </div>
-        <dl className="facts">
-          {facts.map((f) => <div key={f.k}><dd>{f.v}</dd><dt>{f.k}</dt></div>)}
-        </dl>
-      </div>
+    <section className="stats" aria-label="In numbers">
+      <dl className="wrap stats-row" style={{ ["--n" as string]: stats.length }}>
+        {stats.map((s) => <div key={s.k}><dd>{s.v}</dd><dt>{s.k}</dt></div>)}
+      </dl>
     </section>
   );
 }
 
-/* ---------------------------------------------------------------- what I build: the four lines */
+/* ---------------------------------------------------------------- what I build */
 
-function Lines() {
+const SERVICE_ICON: Record<Line, typeof Server> = { backend: Server, automation: Bot, commerce: ShoppingCart, iot: Cpu };
+const kinds = (p: Project): Line[] => [...(p.line ? [p.line] : []), ...(p.also ?? [])];
+
+function Services() {
   const [ref, seen] = useInView<HTMLUListElement>();
   useEffect(() => { if (seen) unlock("services"); }, [seen]);
   return (
-    <section id="services" className="sec" aria-labelledby="services-title">
-      <div className="wrap">
-        <header className="sec-head">
-          <Stop n={1} label="Lines" />
-          <h2 id="services-title">What I build</h2>
-          <p className="sec-lede">Four kinds of work, each its own line. A project that mixes kinds is an interchange, where the lines meet.</p>
-        </header>
-        <ul className="lines" ref={ref}>
-          {services.map((s) => {
-            const works = featuredProjects.filter((p) => linesOf(p).includes(s.key));
-            return (
-              <li key={s.key} className={`line-card ln-${s.key}`}>
-                <div className="lc-track" aria-hidden><i /><i /><i /></div>
-                <LineBadge line={s.key} full={false} />
-                <h3>{s.title}</h3>
-                <p>{s.text}</p>
-                <p className="lc-stops">
-                  {works.length
-                    ? <>Stations: {works.map((p, i) => (<span key={p.name}>{i > 0 && (i === works.length - 1 ? " and " : ", ")}<a href={`#p-${slug(p.name)}`}>{p.name}</a></span>))}</>
-                    : <>Stations: <a href="#research">the research papers below</a></>}
-                </p>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
-    </section>
+    <Sec id="services" cmd="cat services.txt" title="What I build" lede="Four kinds of work. Most projects mix two or three of them.">
+      <ul className="svc" ref={ref}>
+        {services.map((s) => {
+          const Icon = SERVICE_ICON[s.key];
+          const works = featuredProjects.filter((p) => kinds(p).includes(s.key));
+          return (
+            <li key={s.key} className="card svc-card reveal">
+              <Icon className="card-icon" size={24} aria-hidden />
+              <h3>{s.title}</h3>
+              <p>{s.text}</p>
+              <p className="svc-used">
+                <span className="svc-used-k">used in</span>
+                {works.length
+                  ? works.map((p) => <a key={p.name} href={`#p-${slug(p.name)}`}>{slug(p.name)}/</a>)
+                  : <a href="#research">research/</a>}
+              </p>
+            </li>
+          );
+        })}
+      </ul>
+    </Sec>
   );
 }
 
-/* ---------------------------------------------------------------- work: the stations */
+/* ---------------------------------------------------------------- work */
 
-function ProjectLinks({ p }: { p: Project }) {
-  if (!p.code && !p.live) return <p className="proj-links proj-private">Private repository, walkthrough on request</p>;
+function ProjectLinks({ p, compact }: { p: Project; compact?: boolean }) {
+  if (!p.code && !p.live) return <p className="proj-links proj-private"><Lock size={13} aria-hidden /> {compact ? "Private repository" : "Private repository, walkthrough on request"}</p>;
   return (
     <p className="proj-links">
-      {p.live && <a href={p.live} target="_blank" rel="noreferrer" onClick={() => unlock("explorer")}>Live site<span className="sr-only"> for {p.name}</span></a>}
-      {p.code && <a href={p.code} target="_blank" rel="noreferrer" onClick={() => unlock("explorer")}>Source code<span className="sr-only"> for {p.name}</span></a>}
+      {p.live && <a href={p.live} target="_blank" rel="noreferrer" onClick={() => unlock("explorer")}>Live site<span className="sr-only"> for {p.name}</span><ArrowUpRight size={14} aria-hidden /></a>}
+      {p.code && <a href={p.code} target="_blank" rel="noreferrer" onClick={() => unlock("explorer")}>Source code<span className="sr-only"> for {p.name}</span><ArrowUpRight size={14} aria-hidden /></a>}
     </p>
   );
 }
 
 function Work() {
   return (
-    <section id="work" className="sec sec-alt" aria-labelledby="work-title">
-      <div className="wrap">
-        <header className="sec-head">
-          <Stop n={2} label="Stations" />
-          <h2 id="work-title">Selected work</h2>
-          <p className="sec-lede">
-            Production systems for clients and my own products, in the order they appear on the map. Private repositories
-            are described without code, and I’m happy to walk you through them on a call.
-          </p>
-        </header>
-        <ol className="route">
-          {featuredProjects.map((p, i) => {
-            const ls = linesOf(p);
-            const style = { "--c1": `var(--l-${ls[0]})`, "--c2": `var(--l-${ls[1] ?? ls[0]})`, "--c3": `var(--l-${ls[2] ?? ls[1] ?? ls[0]})`, "--n": ls.length } as CSSProperties;
-            return (
-              <li key={p.name} id={`p-${slug(p.name)}`} className={`stn ${i % 2 ? "r" : "l"}${ls.length > 1 ? " multi" : ""}`} style={style}>
-                <span className="stn-node" aria-hidden />
-                <article className="stn-card">
-                  <span className="stn-bar" aria-hidden />
-                  <header className="stn-top">
-                    <p className="stn-code">Station {pad2(i + 1)}</p>
-                    <ul className="badges">{ls.map((l) => <li key={l}><LineBadge line={l} /></li>)}</ul>
-                  </header>
-                  <h3>{p.name}</h3>
-                  <p className="stn-kind">{p.kind}</p>
-                  <p className="stn-desc">{p.description}</p>
-                  <ul className="stack">{p.stack.map((s) => <li key={s}>{s}</li>)}</ul>
-                  <ProjectLinks p={p} />
-                </article>
-              </li>
-            );
-          })}
-        </ol>
+    <Sec id="work" cmd="ls ./projects" title="Selected work"
+      lede="Production systems for clients and my own products. Private repositories are described without code, and I’m happy to walk you through them on a call.">
+      <ol className="proj-grid">
+        {featuredProjects.map((p, i) => (
+          <li key={p.name} id={`p-${slug(p.name)}`} className="card proj reveal">
+            <p className="proj-n" aria-hidden>/{pad2(i + 1)}</p>
+            <h3>{p.name}</h3>
+            <p className="proj-kind">{p.kind}</p>
+            <p className="proj-desc">{p.description}</p>
+            <ul className="stack">{p.stack.map((s) => <li key={s}>{s}</li>)}</ul>
+            <ProjectLinks p={p} />
+          </li>
+        ))}
+      </ol>
 
-        <div className="more">
-          <h3 className="more-h">Also built</h3>
-          <ul className="board">
-            {moreProjects.map((p) => (
-              <li key={p.name}>
-                <div className="bd-name">
-                  <p className="more-name">{p.name}</p>
-                  <p className="more-kind">{p.kind}</p>
-                </div>
-                <p className="more-desc">{p.description}</p>
-                <p className="more-stack">{p.stack.join(", ")}</p>
-                <ProjectLinks p={p} />
-              </li>
-            ))}
-          </ul>
-        </div>
+      <div className="more">
+        <p className="sec-cmd"><span aria-hidden>~$ </span>ls ./projects/more</p>
+        <h3 className="more-h">Also built</h3>
+        <ul className="ls">
+          {moreProjects.map((p) => (
+            <li key={p.name}>
+              <div className="ls-name">
+                <p className="ls-title">{p.name}</p>
+                <p className="ls-kind">{p.kind}</p>
+              </div>
+              <p className="ls-desc">{p.description}</p>
+              <p className="ls-stack">{p.stack.join(", ")}</p>
+              <ProjectLinks p={p} compact />
+            </li>
+          ))}
+        </ul>
       </div>
-    </section>
+    </Sec>
   );
 }
 
@@ -308,27 +336,20 @@ function Work() {
 
 function Process() {
   return (
-    <section id="process" className="sec" aria-labelledby="process-title">
-      <div className="wrap">
-        <header className="sec-head">
-          <Stop n={3} label="Route" />
-          <h2 id="process-title">How we’d work together</h2>
-          <p className="sec-lede">From first message to launch, you always know what I’m building and what comes next.</p>
-        </header>
-        <ol className="steps">
-          {PROCESS.map((s, i) => (
-            <li key={s.title} className="step">
-              <span className="step-n" aria-hidden>{i + 1}</span>
-              <h3>{s.title}</h3>
-              <p>{s.text}</p>
-            </li>
-          ))}
-        </ol>
-        <p className="steps-cta">
-          <button type="button" className="btn btn-ink" onClick={() => emit("hire")}>Start with a brief</button>
-        </p>
-      </div>
-    </section>
+    <Sec id="process" cmd="cat process.md" title="How we’d work together" lede="From first message to launch, you always know what I’m building and what comes next.">
+      <ol className="steps">
+        {PROCESS.map((s, i) => (
+          <li key={s.title} className="step reveal">
+            <span className="step-n" aria-hidden>{pad2(i + 1)}</span>
+            <h3>{s.title}</h3>
+            <p>{s.text}</p>
+          </li>
+        ))}
+      </ol>
+      <p className="steps-cta">
+        <button type="button" className="btn btn-ink" onClick={() => emit("hire")}>Start with a brief</button>
+      </p>
+    </Sec>
   );
 }
 
@@ -342,57 +363,40 @@ function CompanyLogo({ name }: { name: string }) {
 
 function Companies() {
   return (
-    <section id="companies" className="sec sec-alt" aria-labelledby="companies-title">
-      <div className="wrap">
-        <header className="sec-head">
-          <Stop n={4} label="Depots" />
-          <h2 id="companies-title">Companies</h2>
-          <p className="sec-lede">Gikpik, BuildIoT Lab and BuildIoT BD are sister companies. Alongside freelance work, I build the technical side of each.</p>
-        </header>
-        <ul className="co-list">
-          {companies.map((c) => (
-            <li key={c.name} className="co">
-              <div className="co-logo"><CompanyLogo name={c.name} /></div>
-              <div className="co-body">
-                <h3>{c.url ? <a href={c.url} target="_blank" rel="noreferrer">{c.name}<span aria-hidden> ↗</span></a> : c.name}</h3>
-                <p className="co-kind">{c.kind.split(" · ").pop()}</p>
-                <p className="co-desc">{c.description}</p>
-                <p className="co-role">My part: {c.role.charAt(0).toLowerCase() + c.role.slice(1)}</p>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </section>
+    <Sec id="companies" cmd="ls ~/companies" title="Companies" lede="Gikpik, BuildIoT Lab and BuildIoT BD are sister companies. Alongside freelance work, I build the technical side of each.">
+      <ul className="co-list">
+        {companies.map((c) => (
+          <li key={c.name} className="card co reveal">
+            <div className={`co-logo${c.logo?.plate ? " plate" : ""}`}><CompanyLogo name={c.name} /></div>
+            <h3>{c.url ? <a href={c.url} target="_blank" rel="noreferrer">{c.name}<ArrowUpRight size={18} aria-hidden /></a> : c.name}</h3>
+            <p className="co-kind">{c.kind.split(" · ").pop()}</p>
+            <p className="co-desc">{c.description}</p>
+            <p className="co-role"><span>my part</span>{c.role}</p>
+          </li>
+        ))}
+      </ul>
+    </Sec>
   );
 }
 
-/* ---------------------------------------------------------------- research: the IoT line */
+/* ---------------------------------------------------------------- research */
 
 function Research() {
-  const [ref, seen] = useInView<HTMLDivElement>();
+  const [ref, seen] = useInView<HTMLOListElement>();
   useEffect(() => { if (seen) unlock("scholar"); }, [seen]);
   return (
-    <section id="research" className="sec" aria-labelledby="research-title">
-      <div className="wrap" ref={ref}>
-        <header className="sec-head">
-          <Stop n={5} label="IoT line" />
-          <h2 id="research-title">Research</h2>
-          <p className="sec-lede">Low-cost IoT for everyday problems in Bangladesh, written with classmates and faculty at Daffodil International University.</p>
-        </header>
-        <ol className="papers ln-iot">
-          {research.map((r, i) => (
-            <li key={r.title} className={`paper${i === 0 ? " lead" : ""}`}>
-              <span className="paper-node" aria-hidden />
-              <p className="paper-tag">{r.status ? r.status.charAt(0).toUpperCase() + r.status.slice(1) : "In preparation"}</p>
-              <h3>{r.title}</h3>
-              <p className="paper-venue">{r.venue}</p>
-              <p className="paper-sum">{r.summary}</p>
-            </li>
-          ))}
-        </ol>
-      </div>
-    </section>
+    <Sec id="research" cmd="ls ./research" title="Research" lede="Low-cost IoT for everyday problems in Bangladesh, written with classmates and faculty at Daffodil International University.">
+      <ol className="papers" ref={ref}>
+        {research.map((r) => (
+          <li key={r.title} className="card paper reveal">
+            <p className="paper-tag">[{r.status ?? "in preparation"}]</p>
+            <h3>{r.title}</h3>
+            <p className="paper-venue">{r.venue}</p>
+            <p className="paper-sum">{r.summary}</p>
+          </li>
+        ))}
+      </ol>
+    </Sec>
   );
 }
 
@@ -400,27 +404,20 @@ function Research() {
 
 function Skills() {
   return (
-    <section id="skills" className="sec" aria-labelledby="skills-title">
-      <div className="wrap">
-        <header className="sec-head">
-          <Stop n={7} label="Toolkit" />
-          <h2 id="skills-title">Tools I use</h2>
-          <p className="sec-lede">Chosen per project. Most of my production work is in TypeScript, Python and PHP.</p>
-        </header>
-        <dl className="skills">
-          {skillGroups.map((g) => (
-            <div key={g.label}>
-              <dt>{g.label}</dt>
-              <dd>{g.items.map((it) => <span key={it}>{it}</span>)}</dd>
-            </div>
-          ))}
-        </dl>
-      </div>
-    </section>
+    <Sec id="skills" cmd="cat skills.json" title="Tools I use" lede="Chosen per project. Most of my production work is in TypeScript, Python and PHP.">
+      <dl className="skills">
+        {skillGroups.map((g) => (
+          <div key={g.label} className="card reveal">
+            <dt>{g.label}</dt>
+            <dd>{g.items.map((it) => <span key={it}>{it}</span>)}</dd>
+          </div>
+        ))}
+      </dl>
+    </Sec>
   );
 }
 
-/* ---------------------------------------------------------------- contact: the terminus */
+/* ---------------------------------------------------------------- contact */
 
 function CopyEmail() {
   const [done, setDone] = useState(false);
@@ -432,47 +429,40 @@ function CopyEmail() {
 }
 
 const SOCIAL_GROUPS: { group: Social["group"]; label: string }[] = [
-  { group: "Hire", label: "Work with me" },
-  { group: "Message", label: "Message" },
-  { group: "Social", label: "Social" },
-  { group: "Skills", label: "Practice and data" },
-  { group: "Personal", label: "Personal" },
+  { group: "Hire", label: "work with me" },
+  { group: "Message", label: "message" },
+  { group: "Social", label: "social" },
+  { group: "Skills", label: "practice and data" },
+  { group: "Personal", label: "personal" },
 ];
 
 function Contact() {
   return (
-    <section id="contact" className="sec contact" aria-labelledby="contact-title">
-      <div className="wrap">
-        <div className="terminus">
-          <div className="tm-lines" aria-hidden><i className="b-backend" /><i className="b-automation" /><i className="b-commerce" /><i className="b-iot" /></div>
-          <div className="tm-body">
-            <p className="eyebrow eyebrow-inv"><span className="eb-n" aria-hidden>08</span>Terminus</p>
-            <h2 id="contact-title">Have a project in mind?</h2>
-            <p className="sec-lede">I take on freelance backend, automation and e-commerce work. The quickest start is a short brief: six questions, about 30 seconds.</p>
-            <div className="cta">
-              <button type="button" className="btn btn-inv" onClick={() => emit("hire")}>Start a project brief</button>
-              <button type="button" className="btn btn-inv-line" onClick={() => emit("resume")}>Get my resume, CV or portfolio</button>
-            </div>
-            <p className="mail">
-              Or email <a href={`mailto:${LINKS.email}`} onClick={() => unlock("client")}>{LINKS.email}</a> <CopyEmail />
-            </p>
-          </div>
-        </div>
-        <h3 className="soc-h">Find me everywhere as @{HANDLE}</h3>
-        <div className="soc">
-          {SOCIAL_GROUPS.map((g) => (
-            <div key={g.group} className="soc-g">
-              <p className="soc-gl">{g.label}</p>
-              <ul>
-                {SOCIALS.filter((s) => s.group === g.group).map((s) => (
-                  <li key={s.name}><a href={s.url} target="_blank" rel="noreferrer me">{s.name}</a></li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
+    <Sec id="contact" cmd="ping rakibul" title="Have a project in mind?"
+      lede="I take on freelance backend, automation and e-commerce work. The quickest start is a short brief: six questions, about 30 seconds.">
+      <div className="cta">
+        <button type="button" className="btn btn-ink" onClick={() => emit("hire")}>Start a project brief</button>
+        <button type="button" className="btn btn-line" onClick={() => emit("resume")}>Get my resume, CV or portfolio</button>
       </div>
-    </section>
+      <p className="mail">
+        <span className="mail-k">or email</span>
+        <a className="mail-big" href={`mailto:${LINKS.email}`} onClick={() => unlock("client")}>{LINKS.email}</a>
+        <CopyEmail />
+      </p>
+      <h3 className="soc-h">Find me everywhere as @{HANDLE}</h3>
+      <div className="soc">
+        {SOCIAL_GROUPS.map((g) => (
+          <div key={g.group} className="soc-g">
+            <p className="soc-gl"># {g.label}</p>
+            <ul>
+              {SOCIALS.filter((s) => s.group === g.group).map((s) => (
+                <li key={s.name}><a href={s.url} target="_blank" rel="noreferrer me">{s.name}</a></li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </Sec>
   );
 }
 
@@ -484,15 +474,11 @@ function Footer() {
     <footer className="ft">
       <div className="wrap ft-row">
         <p suppressHydrationWarning>© {new Date().getFullYear()} Rakibul Hasan</p>
-        <p className="ft-colophon">
-          Set in Instrument Sans and Martian Mono. The route map is drawn by code: each line is a kind of work, and each
-          interchange is a project that covers more than one.
-        </p>
         <p>
-          Press <button type="button" className="btn-text" onClick={() => emit("palette")}><kbd>{mac ? "⌘K" : "Ctrl K"}</kbd></button> for commands.
+          Press <kbd>/</kbd> for the terminal, <button type="button" className="btn-text" onClick={() => emit("palette")}><kbd>{mac ? "⌘K" : "Ctrl K"}</kbd></button> to search.
         </p>
+        <p><a href="#top">Back to top</a></p>
       </div>
     </footer>
   );
 }
-

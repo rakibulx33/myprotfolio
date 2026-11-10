@@ -16,9 +16,9 @@ let html = readFileSync(resolve(dist, "index.html"), "utf8");
 if (!html.includes('<div id="root"></div>')) throw new Error("prerender: root placeholder not found");
 html = html.replace('<div id="root"></div>', `<div id="root">${appHtml}</div>`);
 
-// Preload the display font so the hero name renders in Instrument Sans on first paint.
+// Preload the display font so the hero name renders in Space Grotesk on first paint.
 const assets = readdirSync(resolve(dist, "assets"));
-const heroFont = assets.find((f) => /^instrument-sans-latin-wdth-normal-.*\.woff2$/.test(f));
+const heroFont = assets.find((f) => /^space-grotesk-latin-wght-normal-.*\.woff2$/.test(f));
 if (heroFont) {
   html = html.replace("</title>", `</title>\n    <link rel="preload" href="/assets/${heroFont}" as="font" type="font/woff2" crossorigin />`);
 }
@@ -30,7 +30,7 @@ writeFileSync(resolve(dist, "index.html"), html);
 const sitemap = resolve(dist, "sitemap.xml");
 if (existsSync(sitemap)) writeFileSync(sitemap, readFileSync(sitemap, "utf8").replaceAll("__BUILD_DATE__", today));
 
-for (const check of ["<h1", "Selected work", "What I build", "Research", "A year on GitHub", "class=\"netmap"]) {
+for (const check of ["<h1", "Selected work", "What I build", "Research", "A year on GitHub", "class=\"win term"]) {
   if (!html.includes(check)) throw new Error(`prerender: expected "${check}" in the HTML`);
 }
 rmSync(resolve(root, "dist-ssr"), { recursive: true, force: true });
