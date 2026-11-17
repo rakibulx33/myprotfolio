@@ -6,17 +6,20 @@
 - Backend systems and APIs (Node.js, Laravel, FastAPI)
 - E-commerce for Bangladesh: online stores and admin panels with local payment and delivery options
 - Automation and AI integrations: chatbots, n8n workflows, LLM features
-- IoT prototypes with ESP32
+- IoT prototypes and voice robots with ESP32 / ESP32-S3
 
 ## Selected public work
+- [Mira Robo](https://github.com/rakibulx33/mira-robo): voice desk robot with an ESP32-S3 body, a FastAPI server for speech, AI and actions, and a web dashboard (Robotics Olympiad 2026)
 - [TradingSpark](https://github.com/rakibulx33/tradingspark): genetic strategy breeding and forward-tested trading on NautilusTrader (Python)
 - [Tender Package Builder](https://rakibulx33.github.io/devfest-241-15-223/): in-browser PDF package builder, solo build for AI DevFest 2026 (React, pdf-lib)
 - [Smart Escape](https://rakibulx33.github.io/AI-DEV-FEST-2026-VIBE-CODING-MOCK/): evacuation route simulator (JavaScript, SVG)
 - [DIU Job Hub](https://github.com/rakibulx33/diujobhub): university job platform with AI job matching (Next.js, MySQL)
+- [BuildIoT Lab website](https://buildiotlabs.com): company site with lab notes and engineering calculators (Next.js, MDX)
+- [Gikpik website](https://rakibulx33.github.io/gikpik/): bilingual company landing page (HTML, GSAP)
 
 ## Sister companies
-- [Gikpik](https://rakibulx33.github.io/gikpik/): software and automation studio
-- [BuildIoT Lab](https://buildiotlabs.com): IoT and embedded engineering
+- [Gikpik](https://rakibulx33.github.io/gikpik/): software and business automation studio (websites, mobile apps, automation, e-commerce, custom software)
+- [BuildIoT Lab](https://buildiotlabs.com): IoT and embedded product engineering (hardware, PCB, firmware, IoT software), delivered remotely
 - [BuildIoT BD](https://buildiotbd.com): online store for electronics and IoT parts
 
 ## Research

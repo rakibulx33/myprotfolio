@@ -104,8 +104,30 @@ function Docs() {
   );
 }
 
+/** Mira Robo: the desk robot's face on its screen, its voice going out, and a Wi-Fi link to the laptop that does the thinking. */
+function Robot() {
+  return (
+    <>
+      <g className="s1 bob" style={i(0)}>
+        <rect x="58" y="44" width="104" height="80" rx="18" />
+        <rect className="sd" x="72" y="58" width="76" height="44" rx="6" />
+        <rect className="blink f1" style={i(0)} x="88" y="70" width="14" height="18" rx="5" />
+        <rect className="blink f1" style={i(0)} x="118" y="70" width="14" height="18" rx="5" />
+        <path d="M110 44V30" /><circle className="beat f2" cx="110" cy="26" r="5" />
+        {[0, 1, 2].map((k) => <circle key={k} className="sd" cx={86 + k * 24} cy="114" r="4" />)}
+      </g>
+      <path className="sd" d="M74 124l-10 30h92l-10-30" /><path className="sd" d="M50 156h120" />
+      {Array.from({ length: 7 }, (_, k) => <rect key={k} className="bar f3" style={i(k)} x={182 + k * 8} y={78 + (k % 3) * 8} width="4" height={44 - (k % 3) * 16} rx="2" />)}
+      <path className="flow s2" d="M244 100H282" />
+      <g className="s2"><rect x="286" y="62" width="78" height="52" rx="6" /><path d="M274 124h102l-8 10h-86z" /></g>
+      {[0, 1, 2].map((k) => <path key={k} className="msg s3" style={i(k)} d={`M298 ${78 + k * 12}h${[50, 36, 44][k]}`} />)}
+      {[14, 24, 34].map((r, k) => <path key={r} className="blink s2" style={i(k)} d={`M${263 - r * .7} ${84 - r * .7}a${r} ${r} 0 0 1 ${r * 1.4} 0`} />)}
+    </>
+  );
+}
+
 const ART: Record<string, () => ReactNode> = {
-  "BuildIoT BD": Store, TradingSpark: Trade, ShopTalk: Talk, Replixon: Inbox, InstaMiner: Mobile, "Tender Package Builder": Docs,
+  "BuildIoT BD": Store, "Mira Robo": Robot, TradingSpark: Trade, ShopTalk: Talk, Replixon: Inbox, InstaMiner: Mobile, "Tender Package Builder": Docs,
 };
 
 /** The cover for a project, or nothing if it has no drawing yet. */

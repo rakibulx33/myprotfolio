@@ -75,6 +75,16 @@ export const featuredProjects: Project[] = [
     private: true,
   },
   {
+    name: "Mira Robo",
+    line: "iot",
+    also: ["automation", "backend"],
+    kind: "Voice desk robot · Robotics Olympiad 2026",
+    description:
+      "A desk robot you talk to. Press TALK or say “Mira” and it answers out loud: messages and calls between people, timers with a countdown on its face, weather, calendar, email and Telegram, laptop control and sourced research. The ESP32-S3 robot stays thin; a laptop server does the listening, thinking and speaking, and a web dashboard runs it all.",
+    stack: ["ESP32-S3", "C++", "FastAPI", "Whisper", "Piper", "Ollama", "React"],
+    code: `${GH}/mira-robo`,
+  },
+  {
     name: "TradingSpark",
     line: "automation",
     also: ["backend"],
@@ -113,19 +123,40 @@ export const featuredProjects: Project[] = [
     stack: ["Kotlin", "Python", "Next.js"],
     private: true,
   },
-  {
-    name: "Tender Package Builder",
-    line: "automation",
-    kind: "Solo build for AI DevFest 2026",
-    description:
-      "Takes a tender's requirements.json and a set of PDFs and produces one checked, correctly ordered PDF package, with a cover page and a page footer on every page. Everything runs in the browser, in English and Bangla, and no file is ever uploaded.",
-    stack: ["React", "Vite", "pdf-lib", "GitHub Actions"],
-    code: `${GH}/devfest-241-15-223`,
-    live: "https://rakibulx33.github.io/devfest-241-15-223/",
-  },
 ];
 
 export const moreProjects: Project[] = [
+  {
+    name: "Tender Package Builder",
+    kind: "Solo build for AI DevFest 2026",
+    description: "Turns a tender's requirements and a set of PDFs into one checked, correctly ordered package with a cover page and page footers. Runs in the browser, in English and Bangla; no file is uploaded.",
+    stack: ["React", "Vite", "pdf-lib"],
+    code: `${GH}/devfest-241-15-223`,
+    live: "https://rakibulx33.github.io/devfest-241-15-223/",
+  },
+  {
+    name: "snitchd",
+    kind: "Team lead · OS lab project",
+    description: "An automated process watchdog for Linux. Reads /proc for processes, memory and CPU, and sends reports and alerts over Telegram and email. I led the five-person team and built the core engine, alerts and integration.",
+    stack: ["Linux", "/proc", "Telegram Bot API", "SMTP"],
+    private: true,
+  },
+  {
+    name: "BuildIoT Lab website",
+    kind: "Company website",
+    description: "The site for an IoT and embedded engineering lab, designed as a lab bench seen from above: services, reference designs, lab notes, and working calculators for battery life, voltage dividers and MQTT data.",
+    stack: ["Next.js 16", "React 19", "Tailwind CSS", "MDX", "Vitest"],
+    code: `${GH}/buildiot-labs`,
+    live: "https://buildiotlabs.com",
+  },
+  {
+    name: "Gikpik website",
+    kind: "Company landing page",
+    description: "Bilingual (English and Bangla) landing page for a software and automation studio, with a particle logo that assembles and reacts to the pointer, scroll-driven motion and a project-brief form.",
+    stack: ["HTML", "CSS", "JavaScript", "GSAP", "Lenis"],
+    code: `${GH}/gikpik`,
+    live: "https://rakibulx33.github.io/gikpik/",
+  },
   {
     name: "Smart Escape",
     kind: "Evacuation route simulator",
@@ -222,7 +253,7 @@ export const companies: Company[] = [
   {
     name: "Gikpik",
     kind: "Sister company · software and automation",
-    description: "A software company building web, mobile and automation products for businesses, with a focus on professional delivery.",
+    description: "A software and business automation studio: websites, mobile apps, automation and AI workflows, e-commerce systems and custom software, with maintenance after launch, for businesses in Bangladesh and abroad.",
     role: "Backend, automation and full-stack development",
     url: "https://rakibulx33.github.io/gikpik/",
     logo: { src: "/companies/gikpik.svg" },
@@ -237,7 +268,7 @@ export const companies: Company[] = [
   {
     name: "BuildIoT Lab",
     kind: "Sister company · IoT and embedded engineering",
-    description: "Hardware design, custom PCBs, firmware and connected software, delivered remotely.",
+    description: "IoT and embedded product engineering, from circuit to cloud: hardware R&D, custom PCB design, ESP32 and STM32 firmware, and IoT dashboards and apps, delivered remotely.",
     role: "Technical side: website and IoT builds",
     url: "https://buildiotlabs.com",
     logo: { src: "/companies/buildiot-lab.png", plate: true },
@@ -287,12 +318,14 @@ export const services: { key: Line; title: string; short: string; text: string }
 ];
 
 export const skillGroups: { label: string; items: string[] }[] = [
-  { label: "Languages", items: ["TypeScript", "JavaScript", "Python", "PHP", "Kotlin", "Java", "C#", "C", "C++"] },
-  { label: "Backend", items: ["Node.js", "Express", "FastAPI", "Laravel", "Next.js", "REST", "WebSockets"] },
-  { label: "Frontend & Mobile", items: ["React", "Tailwind CSS", "Livewire", "Filament", "React Three Fiber", "Jetpack Compose"] },
+  { label: "Languages", items: ["TypeScript", "JavaScript", "Python", "PHP", "Kotlin", "Java", "C#", "C", "C++", "Bash"] },
+  { label: "Backend", items: ["Node.js", "Express", "FastAPI", "Laravel", "Next.js App Router", "REST", "WebSockets"] },
+  { label: "Frontend & Mobile", items: ["React", "Tailwind CSS", "MDX", "Livewire", "Filament", "React Three Fiber", "Jetpack Compose"] },
   { label: "Data", items: ["PostgreSQL", "MySQL / MariaDB", "MongoDB", "Supabase", "Redis", "SQLite"] },
-  { label: "AI & Automation", items: ["Groq", "Gemini", "Ollama", "n8n", "Selenium", "LLM evals"] },
-  { label: "DevOps & IoT", items: ["Docker", "Linux", "GitHub Actions", "Cloudflare Tunnel", "ESP32", "LoRa"] },
+  { label: "AI & Voice", items: ["Groq", "Gemini", "Ollama", "Local LLMs", "Whisper", "Piper TTS", "LLM evals"] },
+  { label: "Automation", items: ["n8n", "Telegram bots", "Selenium", "Webhooks"] },
+  { label: "Linux & DevOps", items: ["Linux", "/proc", "systemd", "Process monitoring", "Docker", "GitHub Actions", "Cloudflare Tunnel", "Vitest"] },
+  { label: "Embedded & IoT", items: ["ESP32 / ESP32-S3", "PlatformIO", "Arduino", "I2S audio", "OLED displays", "Firmware", "LoRa"] },
 ];
 
 /**
