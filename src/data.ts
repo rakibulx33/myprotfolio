@@ -82,7 +82,7 @@ export const featuredProjects: Project[] = [
     description:
       "A desk robot you talk to. Press TALK or say “Mira” and it answers out loud: messages and calls between people, timers with a countdown on its face, weather, calendar, email and Telegram, laptop control and sourced research. The ESP32-S3 robot stays thin; a laptop server does the listening, thinking and speaking, and a web dashboard runs it all.",
     stack: ["ESP32-S3", "C++", "FastAPI", "Whisper", "Piper", "Ollama", "React"],
-    code: `${GH}/mira-robo`,
+    code: `${GH}/Mira-Robo`,
   },
   {
     name: "TradingSpark",

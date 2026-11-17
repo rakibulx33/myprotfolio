@@ -9,7 +9,7 @@
 - IoT prototypes and voice robots with ESP32 / ESP32-S3
 
 ## Selected public work
-- [Mira Robo](https://github.com/rakibulx33/mira-robo): voice desk robot with an ESP32-S3 body, a FastAPI server for speech, AI and actions, and a web dashboard (Robotics Olympiad 2026)
+- [Mira Robo](https://github.com/rakibulx33/Mira-Robo): voice desk robot with an ESP32-S3 body, a FastAPI server for speech, AI and actions, and a web dashboard (Robotics Olympiad 2026)
 - [TradingSpark](https://github.com/rakibulx33/tradingspark): genetic strategy breeding and forward-tested trading on NautilusTrader (Python)
 - [Tender Package Builder](https://rakibulx33.github.io/devfest-241-15-223/): in-browser PDF package builder, solo build for AI DevFest 2026 (React, pdf-lib)
 - [Smart Escape](https://rakibulx33.github.io/AI-DEV-FEST-2026-VIBE-CODING-MOCK/): evacuation route simulator (JavaScript, SVG)
